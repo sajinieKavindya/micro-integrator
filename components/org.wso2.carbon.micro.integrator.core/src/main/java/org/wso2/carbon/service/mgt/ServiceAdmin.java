@@ -78,11 +78,7 @@ import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.PolicyReference;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.application.deployer.AppDeployerUtils;
-import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.util.ParameterUtil;
-import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.micro.integrator.core.internal.CarbonCoreDataHolder;
 import org.wso2.carbon.service.mgt.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -91,6 +87,10 @@ import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.ServerException;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
+import org.wso2.carbon.application.deployer.CarbonApplication;
+import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.core.util.ParameterUtil;
+import org.wso2.carbon.core.util.SystemFilter;
 
 @SuppressWarnings("unused")
 public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
@@ -253,7 +253,9 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         for (Map.Entry<String, AxisService> entry : axisServices.entrySet()) {
             AxisService axisService = entry.getValue();
             // Filtering the admin services
-            if (SystemFilter.isAdminService(axisService) || SystemFilter.isHiddenService(axisService)) {
+            if (org.wso2.carbon.core.util.SystemFilter
+                    .isAdminService(axisService) || org.wso2.carbon.core.util.SystemFilter
+                    .isHiddenService(axisService)) {
                 continue;  // No advancement of currentIndex
             }
             String serviceType = "axis2";
@@ -378,7 +380,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         for (Iterator<AxisServiceGroup> serviceGroups = getAxisConfig().getServiceGroups();
              serviceGroups.hasNext(); ) {
             AxisServiceGroup serviceGroup = serviceGroups.next();
-            if (!SystemFilter.isFilteredOutService(serviceGroup)) {
+            if (!org.wso2.carbon.core.util.SystemFilter.isFilteredOutService(serviceGroup)) {
                 if (!serviceGroup.getServices().hasNext() ||
                     serviceGroup.getServices().next().isClientSide()) {
                     continue; // No advancement of currentIndex
@@ -406,7 +408,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         Map<String, AxisService> services = getAxisConfig().getServices();
         Set<String> faultServices = (getAxisConfig().getFaultyServices()).keySet();
         for (AxisService service : services.values()) {
-            if (!SystemFilter.isFilteredOutService((AxisServiceGroup) service.getParent()) &&
+            if (!org.wso2.carbon.core.util.SystemFilter.isFilteredOutService((AxisServiceGroup) service.getParent()) &&
                 !service. isClientSide() && service.isActive() &&
                 !faultServices.contains(service.getName())) {
                 activeList.add(service.getName());
@@ -429,7 +431,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         int inactiveServices = 0;
         Map<String, AxisService> services = getAxisConfig().getServices();
         for (AxisService service : services.values()) {
-            if (!SystemFilter.isFilteredOutService((AxisServiceGroup) service.getParent()) &&
+            if (!org.wso2.carbon.core.util.SystemFilter.isFilteredOutService((AxisServiceGroup) service.getParent()) &&
                 !service.isActive()) {
                 inactiveServices++;
             }
@@ -581,7 +583,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
     public void deleteAllNonAdminServiceGroups() throws AxisFault {
         for (Iterator<AxisServiceGroup> iter = getAxisConfig().getServiceGroups(); iter.hasNext(); ) {
             AxisServiceGroup asGroup = iter.next();
-            if (!SystemFilter.isFilteredOutService(asGroup)) {
+            if (!org.wso2.carbon.core.util.SystemFilter.isFilteredOutService(asGroup)) {
                 deleteServiceGroup(asGroup.getServiceGroupName());
             }
         }
@@ -855,15 +857,15 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
             log.debug("Setting the MTOM status to " + flag + " for service " + serviceName);
         }
 
-        Parameter parameter = ParameterUtil.createParameter(Constants.Configuration.ENABLE_MTOM,
-                                                            flag.trim());
+        Parameter parameter = org.wso2.carbon.core.util.ParameterUtil.createParameter(Constants.Configuration.ENABLE_MTOM,
+                                                                                      flag.trim());
         service.addParameter(parameter);
 
         for (Iterator<AxisOperation> iterator1 = service.getOperations(); iterator1.hasNext(); ) {
             AxisOperation axisOperation = iterator1.next();
             axisOperation.
-                    addParameter(ParameterUtil.createParameter(Constants.Configuration.ENABLE_MTOM,
-                                                               (String) parameter.getValue()));
+                    addParameter(org.wso2.carbon.core.util.ParameterUtil.createParameter(Constants.Configuration.ENABLE_MTOM,
+                                                                                         (String) parameter.getValue()));
         }
     }
 
@@ -1021,7 +1023,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
             throw new AxisFault(msg, e);
         }
 
-        Parameter parameter = ParameterUtil.createParameter(paramEle);
+        Parameter parameter = org.wso2.carbon.core.util.ParameterUtil.createParameter(paramEle);
         if (axisService.getParameter(parameter.getName()) != null) {
             if (!axisService.getParameter(parameter.getName()).isLocked()) {
                 axisService.addParameter(parameter);
@@ -1040,7 +1042,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                                 serviceName);
         }
 
-        Parameter parameter = ParameterUtil.createParameter(parameterName, null);
+        Parameter parameter = org.wso2.carbon.core.util.ParameterUtil.createParameter(parameterName, null);
         axisService.removeParameter(parameter);
     }
 
@@ -1056,7 +1058,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                     params.add(paramEle.toString());
                 } else if (param.getParameterType() == Parameter.TEXT_PARAMETER) {
                     Parameter paramElement = ParameterUtil.createParameter(param.getName().trim(),
-                            (String) param.getValue(), param.isLocked());
+                                                                           (String) param.getValue(), param.isLocked());
                     params.add(paramElement.getParameterElement().toString());
                 }
             }
@@ -1231,14 +1233,14 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         return PolicyUtil.getPolicyAsOMElement(messagePolicy).toString();
     }
 
-    public PolicyMetaData[] getPolicies(String serviceName) throws AxisFault {
+    public org.wso2.carbon.service.mgt.PolicyMetaData[] getPolicies(String serviceName) throws AxisFault {
         AxisService axisService = getAxisService(serviceName);
 
         if (axisService == null) {
             throw new AxisFault("invalid service name");
         }
 
-        ArrayList<PolicyMetaData> policyDataArray = new ArrayList<PolicyMetaData>();
+        ArrayList<org.wso2.carbon.service.mgt.PolicyMetaData> policyDataArray = new ArrayList<org.wso2.carbon.service.mgt.PolicyMetaData>();
 
         PolicySubject servicePolicySubject = axisService.getPolicySubject();
         List<PolicyComponent> policyList;
@@ -1247,7 +1249,8 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         policyList = new ArrayList<PolicyComponent>(servicePolicySubject.getAttachedPolicyComponents());
 
         if (!policyList.isEmpty()) {
-            PolicyMetaData policyData = new PolicyMetaData();
+            org.wso2.carbon.service.mgt.PolicyMetaData
+                    policyData = new org.wso2.carbon.service.mgt.PolicyMetaData();
             policyData.setWrapper("Policies that are applicable for " + axisService.getName()
                                   + " service");
             policyData.setPolycies(PolicyUtil.processPolicyElements(policyList.iterator(),
@@ -1261,7 +1264,8 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                                                                 .getAttachedPolicyComponents());
 
             if (!policyList.isEmpty()) {
-                PolicyMetaData policyData = new PolicyMetaData();
+                org.wso2.carbon.service.mgt.PolicyMetaData
+                        policyData = new org.wso2.carbon.service.mgt.PolicyMetaData();
                 policyData.setWrapper("Policies that are applicable for " + axisEndpoint.getName()
                                       + " endpoint");
                 policyData.setPolycies(PolicyUtil.processPolicyElements(policyList.iterator(),
@@ -1684,7 +1688,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
      * @param serviceGroupName name of the service group needs to be downloaded
      * @return the corresponding data handler and the name of the service archive / file that's downloaded
      */
-    public ServiceDownloadData downloadServiceArchive(String serviceGroupName) {
+    public org.wso2.carbon.service.mgt.ServiceDownloadData downloadServiceArchive(String serviceGroupName) {
         AxisConfiguration axisConfig = getAxisConfig();
         AxisServiceGroup asGroup = axisConfig.getServiceGroup(serviceGroupName);
         String fileName = null;
@@ -1701,7 +1705,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
             FileDataSource datasource = new FileDataSource(file);
             handler = new DataHandler(datasource);
 
-            ServiceDownloadData data = new ServiceDownloadData();
+            org.wso2.carbon.service.mgt.ServiceDownloadData data = new ServiceDownloadData();
             data.setFileName(file.getName());
             data.setServiceFileData(handler);
             return data;
@@ -1722,7 +1726,8 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                     if (axis2ServiceAppPath != null) {
                         String tenantId = AppDeployerUtils.getTenantIdString();
                         // Check whether there is an application in the system from the given name
-                        ArrayList<CarbonApplication> appList = CarbonCoreDataHolder.getInstance().getApplicationManager().getCarbonApps(tenantId);
+                        ArrayList<org.wso2.carbon.application.deployer.CarbonApplication> appList = CarbonCoreDataHolder
+                                .getInstance().getApplicationManager().getCarbonApps(tenantId);
                         for (CarbonApplication application : appList) {
                             Path cappPath = Paths.get(application.getExtractedPath());
                             if (axis2ServiceAppPath.startsWith(cappPath)) {

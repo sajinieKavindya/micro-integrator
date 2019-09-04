@@ -23,21 +23,20 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisModule;
-import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisServiceGroup;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.util.ParameterUtil;
-import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.service.mgt.util.ServiceArchiveCreator;
 import org.wso2.carbon.service.mgt.util.Utils;
 import org.wso2.carbon.utils.DataPaginator;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.ServerException;
+import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.core.util.ParameterUtil;
+import org.wso2.carbon.core.util.SystemFilter;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
@@ -68,16 +67,16 @@ public class ServiceGroupAdmin extends AbstractAdmin {
      * @return The service group metadata
      * @throws org.apache.axis2.AxisFault If an error occurs while retrieving service groups
      */
-    public ServiceGroupMetaDataWrapper listServiceGroups(String serviceTypeFilter,
-                                                         String serviceGroupSearchString,
-                                                         int pageNumber) throws AxisFault {
+    public org.wso2.carbon.service.mgt.ServiceGroupMetaDataWrapper listServiceGroups(String serviceTypeFilter,
+                                                                                     String serviceGroupSearchString,
+                                                                                     int pageNumber) throws AxisFault {
         if (serviceTypeFilter == null) {
             serviceTypeFilter = "ALL";
         }
         if (pageNumber < 0 || pageNumber == Integer.MAX_VALUE) {
             pageNumber = 0;
         }
-        List<ServiceGroupMetaData> sgList = new ArrayList<ServiceGroupMetaData>();
+        List<org.wso2.carbon.service.mgt.ServiceGroupMetaData> sgList = new ArrayList<org.wso2.carbon.service.mgt.ServiceGroupMetaData>();
         TreeSet<String> serviceTypes = new TreeSet<String>();
         serviceTypes.add("axis2");
 
@@ -161,7 +160,8 @@ public class ServiceGroupAdmin extends AbstractAdmin {
                 }
             }
 
-            ServiceGroupMetaData sgMetaData = new ServiceGroupMetaData();
+            org.wso2.carbon.service.mgt.ServiceGroupMetaData
+                    sgMetaData = new org.wso2.carbon.service.mgt.ServiceGroupMetaData();
 
             List<ServiceMetaData> services = new ArrayList<ServiceMetaData>();
             for (Iterator serviceIter = serviceGroup.getServices(); serviceIter.hasNext(); ) {
@@ -181,11 +181,11 @@ public class ServiceGroupAdmin extends AbstractAdmin {
                 service.setWsdlURLs(Utils.getWsdlInformation(serviceName, axisConfiguration));
                 service.setTryitURL(Utils.getTryitURL(serviceName, getConfigContext()));
                 service.setActive(axisService.isActive());
-                Parameter parameter = axisService.getParameter(ServiceAdmin.DISABLE_TRY_IT_PARAM);
+                Parameter parameter = axisService.getParameter(org.wso2.carbon.service.mgt.ServiceAdmin.DISABLE_TRY_IT_PARAM);
                 if (parameter != null && Boolean.TRUE.toString().equalsIgnoreCase((String) parameter.getValue())) {
                     service.setDisableTryit(true);
                 }
-                parameter = axisService.getParameter(ServiceAdmin.DISABLE_DELETION_PARAM);
+                parameter = axisService.getParameter(org.wso2.carbon.service.mgt.ServiceAdmin.DISABLE_DELETION_PARAM);
                 if (parameter != null && Boolean.TRUE.toString().equalsIgnoreCase((String) parameter.getValue())) {
                     sgMetaData.setDisableDeletion(true);
                 }
@@ -206,13 +206,13 @@ public class ServiceGroupAdmin extends AbstractAdmin {
             sgList.add(sgMetaData);
         }
 
-        ServiceGroupMetaDataWrapper wrapper;
+        org.wso2.carbon.service.mgt.ServiceGroupMetaDataWrapper wrapper;
         wrapper = new ServiceGroupMetaDataWrapper();
         wrapper.setNumberOfCorrectServiceGroups(sgList.size());
         wrapper.setNumberOfFaultyServiceGroups(getAxisConfig().getFaultyServices().size());
         wrapper.setServiceTypes(serviceTypes.toArray(new String[serviceTypes.size()]));
         try {
-            wrapper.setNumberOfActiveServices(new ServiceAdmin(getAxisConfig()).
+            wrapper.setNumberOfActiveServices(new org.wso2.carbon.service.mgt.ServiceAdmin(getAxisConfig()).
                     getNumberOfActiveServices());
         } catch (Exception e) {
             throw new AxisFault("Cannot get active services from ServiceAdmin", e);
@@ -229,8 +229,9 @@ public class ServiceGroupAdmin extends AbstractAdmin {
      * @return ServiceGroupMetaData
      * @throws AxisFault
      */
-    public ServiceGroupMetaData listServiceGroup(String serviceGroupName) throws Exception {
-        ServiceGroupMetaData sgmd = new ServiceGroupMetaData();
+    public org.wso2.carbon.service.mgt.ServiceGroupMetaData listServiceGroup(String serviceGroupName) throws Exception {
+        org.wso2.carbon.service.mgt.ServiceGroupMetaData
+                sgmd = new org.wso2.carbon.service.mgt.ServiceGroupMetaData();
         Collection engagedModules;
         String[] engagedModuleNames = null;
         AxisServiceGroup serviceGroup;
@@ -326,7 +327,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
 
         }
         if (!found) {
-            Parameter parameter = ParameterUtil.createParameter(
+            Parameter parameter = org.wso2.carbon.core.util.ParameterUtil.createParameter(
                     Constants.Configuration.ENABLE_MTOM, flag.trim());
             serviceGroup.addParameter(parameter);
         }
@@ -341,7 +342,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
      * @param params
      * @throws ServerException
      */
-    public void updateServiceGroupParamters(String serviceGroupName, ParameterMetaData[] params)
+    public void updateServiceGroupParamters(String serviceGroupName, org.wso2.carbon.service.mgt.ParameterMetaData[] params)
             throws ServerException {
 
         AxisServiceGroup serviceGroup = null;
@@ -350,7 +351,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
             serviceGroup = getAxisConfig().getServiceGroup(serviceGroupName);
             Parameter parameter;
 
-            for (ParameterMetaData paramMetaData : params) {
+            for (org.wso2.carbon.service.mgt.ParameterMetaData paramMetaData : params) {
                 parameter = serviceGroup.getParameter(paramMetaData.getName());
                 if (parameter == null) {
                     parameter = new Parameter(paramMetaData.getName(), null);
@@ -377,7 +378,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
      * @throws ServerException
      */
     public void updateServiceGroupParameter(String serviceGroupName,
-                                            ParameterMetaData paramMetaData)
+                                            org.wso2.carbon.service.mgt.ParameterMetaData paramMetaData)
             throws ServerException {
 
         AxisServiceGroup serviceGroup = null;
@@ -446,7 +447,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
      * @return
      * @throws ServerException
      */
-    public ParameterMetaData getServiceGroupParameter(String serviceGroupName, String paramName)
+    public org.wso2.carbon.service.mgt.ParameterMetaData getServiceGroupParameter(String serviceGroupName, String paramName)
             throws ServerException {
 
         AxisServiceGroup serviceGroup = null;
@@ -459,7 +460,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
                 return null;
             }
 
-            ParameterMetaData paramMetaData = new ParameterMetaData();
+            org.wso2.carbon.service.mgt.ParameterMetaData paramMetaData = new ParameterMetaData();
             paramMetaData.setName(parameter.getName());
             paramMetaData.setType(parameter.getParameterType());
             if (parameter.getParameterType() == Parameter.OM_PARAMETER) {
@@ -511,7 +512,7 @@ public class ServiceGroupAdmin extends AbstractAdmin {
             throw new AxisFault(msg, e);
         }
 
-        Parameter parameter = ParameterUtil.createParameter(param);
+        Parameter parameter = org.wso2.carbon.core.util.ParameterUtil.createParameter(param);
         if (axisServiceGroup.getParameter(parameter.getName()) != null) {
             if (!axisServiceGroup.getParameter(parameter.getName()).isLocked()) {
                 axisServiceGroup.addParameter(parameter);

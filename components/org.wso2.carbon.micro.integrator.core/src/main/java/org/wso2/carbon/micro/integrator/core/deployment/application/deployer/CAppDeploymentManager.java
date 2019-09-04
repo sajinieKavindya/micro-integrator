@@ -31,7 +31,6 @@ import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.application.deployer.config.ApplicationConfiguration;
 import org.wso2.carbon.application.deployer.config.Artifact;
 import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
-import org.wso2.carbon.micro.integrator.core.deployment.synapse.deployer.SynapseAppDeployer;
 import org.wso2.carbon.utils.FileManipulator;
 
 import java.io.File;

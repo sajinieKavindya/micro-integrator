@@ -22,11 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.transports.HttpGetRequestProcessor;
 import org.wso2.carbon.utils.component.xml.Component;
 import org.wso2.carbon.utils.component.xml.ComponentConfigFactory;
 import org.wso2.carbon.utils.component.xml.ComponentConstants;
 import org.wso2.carbon.utils.component.xml.config.HTTPGetRequestProcessorConfig;
+import org.wso2.carbon.core.transports.HttpGetRequestProcessor;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -69,17 +69,17 @@ public class Utils {
                     getRequestProcessorClass = Class.forName(getRequestProcessorConfig.
                             getClassName());
                 }
-                HttpGetRequestProcessor getRequestProcessor =
-                        (HttpGetRequestProcessor) getRequestProcessorClass.newInstance();
+                org.wso2.carbon.core.transports.HttpGetRequestProcessor getRequestProcessor =
+                        (org.wso2.carbon.core.transports.HttpGetRequestProcessor) getRequestProcessorClass.newInstance();
                 String item = getRequestProcessorConfig.getItem();
                 Dictionary<String,String> propsMap = new Hashtable<String,String>(2);
                 propsMap.put(ComponentConstants.ELE_ITEM, item);
                 propsMap.put(CarbonConstants.HTTP_GET_REQUEST_PROCESSOR_SERVICE,
-                        HttpGetRequestProcessor.class.getName());
+                        org.wso2.carbon.core.transports.HttpGetRequestProcessor.class.getName());
 
                 //Registering the HttpGetRequestProcessor implementation in the OSGi registry
                 bundleContext.registerService(HttpGetRequestProcessor.class.getName(),
-                        getRequestProcessor, propsMap);
+                                              getRequestProcessor, propsMap);
             }
         }
     }

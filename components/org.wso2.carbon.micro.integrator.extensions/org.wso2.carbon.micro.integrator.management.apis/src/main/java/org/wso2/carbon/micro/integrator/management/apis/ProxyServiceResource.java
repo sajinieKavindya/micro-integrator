@@ -90,7 +90,8 @@ public class ProxyServiceResource extends APIResource {
             JSONObject proxyObject = new JSONObject();
 
             try {
-                ServiceMetaData data = new ServiceAdmin().getServiceData(proxyService.getName());
+                org.wso2.carbon.service.mgt.ServiceMetaData
+                        data = new org.wso2.carbon.service.mgt.ServiceAdmin().getServiceData(proxyService.getName());
 
                 proxyObject.put(Constants.NAME, proxyService.getName());
 

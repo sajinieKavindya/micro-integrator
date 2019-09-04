@@ -42,7 +42,7 @@ public abstract class AbstractTransportService implements TransportService {
 
     protected String transportName;
 
-    private static final Log log = LogFactory.getLog(org.wso2.carbon.core.transports.AbstractTransportService.class);
+    private static final Log log = LogFactory.getLog(AbstractTransportService.class);
 
     public AbstractTransportService(String transportName) {
         if (log.isDebugEnabled()) {

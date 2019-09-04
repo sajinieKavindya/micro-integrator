@@ -71,7 +71,7 @@ public class FileServiceSampleTestCase extends DSSIntegrationTest {
 
     @Test(groups = { "wso2.dss" }, dependsOnMethods = "testServiceDeployment")
     public void testGetProducts() throws DataServiceFault, RemoteException, MalformedURLException,
-            org.wso2.carbon.dataservices.samples.file_service.DataServiceFault {
+                                         DataServiceFault {
 
         String fileName = "transform.xslt";
 

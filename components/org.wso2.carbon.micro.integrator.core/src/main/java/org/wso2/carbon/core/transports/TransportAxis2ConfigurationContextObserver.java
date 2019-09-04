@@ -31,7 +31,7 @@ import java.net.URL;
 public class TransportAxis2ConfigurationContextObserver extends
         AbstractAxis2ConfigurationContextObserver {
 
-    private static final Log log = LogFactory.getLog(org.wso2.carbon.core.transports.TransportAxis2ConfigurationContextObserver.class);
+    private static final Log log = LogFactory.getLog(TransportAxis2ConfigurationContextObserver.class);
     private String transport;
     private URL configFileURL;
 

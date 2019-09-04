@@ -44,8 +44,8 @@
             <artifactId>org.wso2.carbon.feature.mgt.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.data</groupId>
-            <artifactId>org.wso2.carbon.dataservices.core</artifactId>
+            <groupId>org.wso2.ei</groupId>
+            <artifactId>org.wso2.carbon.micro.integrator.dataservices.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>

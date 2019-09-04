@@ -31,12 +31,12 @@ import org.jaxen.SimpleNamespaceContext;
 import org.jaxen.XPath;
 import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.micro.integrator.core.internal.CarbonCoreDataHolder;
+import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.core.CarbonThreadFactory;
 import org.wso2.carbon.core.transports.metering.MeteredServletRequest;
 import org.wso2.carbon.core.transports.metering.MeteredServletResponse;
 import org.wso2.carbon.core.transports.metering.RequestDataPersister;
-import org.wso2.carbon.micro.integrator.core.internal.CarbonCoreDataHolder;
-import org.wso2.carbon.utils.ServerConstants;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -165,7 +165,7 @@ public class CarbonServlet extends AxisServlet {
                                             String item) throws Exception {
         OverflowBlob temporaryData = new OverflowBlob(256, 4048, "_servlet", ".dat");
         try {
-            CarbonHttpRequest carbonHttpRequest = new CarbonHttpRequest(
+            org.wso2.carbon.core.transports.CarbonHttpRequest carbonHttpRequest = new CarbonHttpRequest(
                     "GET", request.getRequestURI(), request.getRequestURL().toString());
 
             Enumeration names = request.getParameterNames();
@@ -226,8 +226,10 @@ public class CarbonServlet extends AxisServlet {
     	// Here we are using MeteredServletRequest and MeteredServletResponse to meter
     	// the request and response.
         if(isMeteringEnabled){
-            final MeteredServletRequest wrappedRequest = new MeteredServletRequest(request);
-            final MeteredServletResponse wrappedResponse = new MeteredServletResponse(response);
+            final org.wso2.carbon.core.transports.metering.MeteredServletRequest
+                    wrappedRequest = new org.wso2.carbon.core.transports.metering.MeteredServletRequest(request);
+            final org.wso2.carbon.core.transports.metering.MeteredServletResponse
+                    wrappedResponse = new org.wso2.carbon.core.transports.metering.MeteredServletResponse(response);
             super.doPost(wrappedRequest, wrappedResponse);
             // Call the callback to persist the wrapped request and wrapped response data
             requestDataPersister.addRequestResponse(wrappedRequest, wrappedResponse);
@@ -239,8 +241,8 @@ public class CarbonServlet extends AxisServlet {
     private class RequestDataPersisterTask implements Runnable {
         private volatile List<RequestResponse> list = new CopyOnWriteArrayList<RequestResponse>();
 
-        public void addRequestResponse(MeteredServletRequest wrappedRequest,
-                                       MeteredServletResponse wrappedResponse){
+        public void addRequestResponse(org.wso2.carbon.core.transports.metering.MeteredServletRequest wrappedRequest,
+                                       org.wso2.carbon.core.transports.metering.MeteredServletResponse wrappedResponse){
             list.add(new RequestResponse(wrappedRequest, wrappedResponse));
         }
 
@@ -264,30 +266,30 @@ public class CarbonServlet extends AxisServlet {
     }
 
     private static class RequestResponse {
-        private MeteredServletRequest wrappedRequest;
-        private MeteredServletResponse wrappedResponse;
+        private org.wso2.carbon.core.transports.metering.MeteredServletRequest wrappedRequest;
+        private org.wso2.carbon.core.transports.metering.MeteredServletResponse wrappedResponse;
 
-        private RequestResponse(MeteredServletRequest wrappedRequest,
-                                MeteredServletResponse wrappedResponse) {
+        private RequestResponse(org.wso2.carbon.core.transports.metering.MeteredServletRequest wrappedRequest,
+                                org.wso2.carbon.core.transports.metering.MeteredServletResponse wrappedResponse) {
             this.wrappedRequest = wrappedRequest;
             this.wrappedResponse = wrappedResponse;
         }
 
-        public MeteredServletRequest getWrappedRequest() {
+        public org.wso2.carbon.core.transports.metering.MeteredServletRequest getWrappedRequest() {
             return wrappedRequest;
         }
 
-        public MeteredServletResponse getWrappedResponse() {
+        public org.wso2.carbon.core.transports.metering.MeteredServletResponse getWrappedResponse() {
             return wrappedResponse;
         }
     }
 
     protected void persistRequestData(MeteredServletRequest wrappedRequest,
                                       MeteredServletResponse wrappedResponse) {
-        RequestDataPersister requestDataPersister = null;
+        org.wso2.carbon.core.transports.metering.RequestDataPersister requestDataPersister = null;
         ServiceTracker meteringDataPersistTracker =
                 new ServiceTracker(CarbonCoreDataHolder.getInstance().getBundleContext(),
-                                   RequestDataPersister.class.getName(),
+                                   org.wso2.carbon.core.transports.metering.RequestDataPersister.class.getName(),
                                    null);
         meteringDataPersistTracker.open();
         try {

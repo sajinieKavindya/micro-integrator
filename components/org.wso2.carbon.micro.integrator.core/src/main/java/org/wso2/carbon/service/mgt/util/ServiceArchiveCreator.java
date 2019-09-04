@@ -51,13 +51,13 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyReference;
 import org.apache.neethi.PolicyRegistry;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.util.SystemFilter;
-import org.wso2.carbon.service.mgt.PolicyUtil;
 import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.ServerConstants;
+import org.wso2.carbon.core.util.SystemFilter;
+import org.wso2.carbon.service.mgt.PolicyUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -553,7 +553,7 @@ public final class ServiceArchiveCreator {
         for (Object obj : policyList) {
             if (obj instanceof Policy) {
                 Policy policy = (Policy) obj;
-                parent.addChild((PolicyUtil.getPolicyAsOMElement(policy)));
+                parent.addChild((org.wso2.carbon.service.mgt.PolicyUtil.getPolicyAsOMElement(policy)));
             } else if (obj instanceof PolicyReference) {
                 PolicyReference policyReference = (PolicyReference) obj;
                 Policy policy = policyRegistry.lookup(policyReference.getURI());

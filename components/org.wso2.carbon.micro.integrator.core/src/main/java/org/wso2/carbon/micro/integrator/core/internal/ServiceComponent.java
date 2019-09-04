@@ -56,6 +56,19 @@ import org.wso2.carbon.application.deployer.service.ApplicationManagerService;
 import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.encryption.KeyStoreBasedExternalCryptoProvider;
+import org.wso2.carbon.core.encryption.SymmetricEncryption;
+import org.wso2.carbon.crypto.api.CryptoService;
+import org.wso2.carbon.crypto.api.ExternalCryptoProvider;
+import org.wso2.carbon.utils.Axis2ConfigItemHolder;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.NetworkUtils;
+import org.wso2.carbon.utils.ServerConstants;
+import org.wso2.carbon.utils.ServerException;
+import org.wso2.carbon.utils.deployment.Axis2ServiceRegistry;
+import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.core.CarbonAxisConfigurator;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
 import org.wso2.carbon.core.CarbonThreadCleanup;
@@ -73,15 +86,6 @@ import org.wso2.carbon.core.transports.CarbonServlet;
 import org.wso2.carbon.core.util.HouseKeepingTask;
 import org.wso2.carbon.core.util.ParameterUtil;
 import org.wso2.carbon.core.util.Utils;
-import org.wso2.carbon.utils.Axis2ConfigItemHolder;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.utils.NetworkUtils;
-import org.wso2.carbon.utils.ServerConstants;
-import org.wso2.carbon.utils.ServerException;
-import org.wso2.carbon.utils.deployment.Axis2ServiceRegistry;
-import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.InputStream;
@@ -112,6 +116,8 @@ import static org.apache.axis2.transport.TransportListener.HOST_ADDRESS;
  * @scr.reference name="application.manager"
  * interface="org.wso2.carbon.application.deployer.service.ApplicationManagerService"
  * cardinality="0..1" policy="dynamic" bind="setAppManager" unbind="unsetAppManager"
+ * @scr.reference name="carbonCryptoService" interface="org.wso2.carbon.crypto.api.CryptoService"
+ * cardinality="0..1" policy="dynamic"  bind="setCarbonCryptoService" unbind="unsetCarbonCryptoService"
  **/
 public class ServiceComponent {
 
@@ -120,7 +126,7 @@ public class ServiceComponent {
     private final Map<String, String> pendingItemMap = new ConcurrentHashMap<String, String>();
 
     private static BundleContext bundleContext;
-    private PreAxis2ConfigItemListener configItemListener;
+    private org.wso2.carbon.core.init.PreAxis2ConfigItemListener configItemListener;
     private Timer timer = new Timer();
 
     private static final String CLIENT_REPOSITORY_LOCATION = "Axis2Config.ClientRepositoryLocation";
@@ -130,7 +136,8 @@ public class ServiceComponent {
     private static final String BUNDLE_CONTEXT_ROOT = "bundleContext-root";
     private static final String HOST_NAME = "host-name";
 
-    private GenericArtifactUnloader genericArtifactUnloader = new GenericArtifactUnloader();
+    private org.wso2.carbon.core.multitenancy.GenericArtifactUnloader
+            genericArtifactUnloader = new GenericArtifactUnloader();
     private static final ScheduledExecutorService artifactsCleanupExec =
             Executors.newScheduledThreadPool(1, new CarbonThreadFactory(new ThreadGroup("ArtifactCleanupThread")));
     protected String serverName;
@@ -167,7 +174,14 @@ public class ServiceComponent {
         try {
             // for new caching, every thread should has its own populated CC. During the deployment time we assume super tenant
             ctxt.getBundleContext().registerService(ServerStartupObserver.class.getName(),
-                    new DeploymentServerStartupObserver(), null) ;
+                                                    new DeploymentServerStartupObserver(), null) ;
+
+            SymmetricEncryption encryption = SymmetricEncryption.getInstance();
+            encryption.generateSymmetricKey();
+
+            // Register the external crypto provider which is based on Carbon keystore management service.
+            ctxt.getBundleContext().registerService(ExternalCryptoProvider.class,
+                                                    new KeyStoreBasedExternalCryptoProvider(), null);
             bundleContext = ctxt.getBundleContext();
             ApplicationManager applicationManager = ApplicationManager.getInstance();
             applicationManager.init(); // this will allow application manager to register deployment handlers
@@ -301,7 +315,7 @@ public class ServiceComponent {
 
             String carbonContextRoot = serverConfig.getFirstProperty("WebContextRoot");
 
-            CarbonAxisConfigurator carbonAxisConfigurator = new CarbonAxisConfigurator();
+            org.wso2.carbon.core.CarbonAxisConfigurator carbonAxisConfigurator = new CarbonAxisConfigurator();
             carbonAxisConfigurator.setAxis2ConfigItemHolder(configItemHolder);
             carbonAxisConfigurator.setBundleContext(bundleContext);
             carbonAxisConfigurator.setCarbonContextRoot(carbonContextRoot);
@@ -472,7 +486,7 @@ public class ServiceComponent {
         }
         try {
             try {
-                ServerStatus.setServerShuttingDown();
+                org.wso2.carbon.core.ServerStatus.setServerShuttingDown();
             } catch (AxisFault e) {
                 String msg = "Cannot set server to shutdown mode";
                 log.error(msg, e);
@@ -584,7 +598,7 @@ public class ServiceComponent {
         for (String clazzName : initializers) {
             try {
                 Class clazz = bundleContext.getBundle().loadClass(clazzName);
-                ServerInitializer intializer = (ServerInitializer) clazz.newInstance();
+                org.wso2.carbon.core.ServerInitializer intializer = (ServerInitializer) clazz.newInstance();
                 if (log.isDebugEnabled()) {
                     log.debug("Using ServerInitializer " + intializer.getClass().getName());
                 }
@@ -624,7 +638,7 @@ public class ServiceComponent {
     private void registerCarbonServlet(HttpService httpService, HttpContext defaultHttpContext)
             throws ServletException, NamespaceException, InvalidSyntaxException {
         if (!"false".equals(serverConfig.getFirstProperty("RequireCarbonServlet"))) {
-            CarbonServlet carbonServlet = new CarbonServlet(serverConfigContext);
+            org.wso2.carbon.core.transports.CarbonServlet carbonServlet = new CarbonServlet(serverConfigContext);
             String servicePath = "/services";
             String path = serverConfigContext.getServicePath();
             if (path != null) {
@@ -640,7 +654,7 @@ public class ServiceComponent {
             } else {
                 httpService.registerServlet(servicePath, carbonServlet, null, defaultHttpContext);
             }
-            HTTPGetProcessorListener getProcessorListener =
+            org.wso2.carbon.core.internal.HTTPGetProcessorListener getProcessorListener =
                     new HTTPGetProcessorListener(carbonServlet, bundleContext);
             // Check whether there are any services that expose HTTPGetRequestProcessors
             ServiceReference[] getRequestProcessors =
@@ -723,6 +737,14 @@ public class ServiceComponent {
 
     protected void unsetAppManager(ApplicationManagerService applicationManager) {
         this.applicationManager = null;
+    }
+
+    protected void setCarbonCryptoService(CryptoService cryptoService){
+        CarbonCoreDataHolder.getInstance().setCryptoService(cryptoService);
+    }
+
+    protected void unsetCarbonCryptoService(CryptoService cryptoService){
+        CarbonCoreDataHolder.getInstance().setCryptoService(null);
     }
 
 }

@@ -41,6 +41,15 @@
     </licenses>
 
     <modules>
+        <module>org.wso2.carbon.micro.integrator.ndatasource.common</module>
+        <module>org.wso2.carbon.micro.integrator.ndatasource.core</module>
+        <module>org.wso2.carbon.micro.integrator.ndatasource.rdbms</module>
+        <module>org.wso2.carbon.micro.integrator.dataservices.capp.deployer</module>
+        <module>org.wso2.carbon.micro.integrator.dataservices.sql.driver</module>
+        <module>org.wso2.carbon.micro.integrator.dataservices.core</module>
+        <module>org.wso2.carbon.micro.integrator.dataservices.odata.endpoint</module>
+        <module>org.wso2.carbon.micro.integrator.dataservices.odata</module>
+        <module>org.wso2.carbon.micro.integrator.ndatasource.capp.deployer</module>
         <module>org.wso2.carbon.micro.integrator.core</module>
         <module>org.wso2.carbon.micro.integrator.server</module>
         <module>org.wso2.carbon.micro.integrator.security</module>

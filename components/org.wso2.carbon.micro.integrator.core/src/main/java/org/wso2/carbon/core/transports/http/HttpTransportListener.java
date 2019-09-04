@@ -29,7 +29,7 @@ import org.wso2.carbon.utils.transport.AbstractTransportListener;
  *
  */
 public class HttpTransportListener extends AbstractTransportListener {
-    private Log log = LogFactory.getLog(org.wso2.carbon.core.transports.http.HttpTransportListener.class);
+    private Log log = LogFactory.getLog(HttpTransportListener.class);
 
     public void init(ConfigurationContext configContext,
                      TransportInDescription transportIn) throws AxisFault {

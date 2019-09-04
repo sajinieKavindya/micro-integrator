@@ -17,7 +17,7 @@ package org.wso2.carbon.core;
 
 /**
  * This class is used as a listener for getting notifications when the server startup happens.
- * @deprecated  use {@link org.wso2.carbon.core.ServerStartupObserver} instead.
+ * @deprecated  use {@link ServerStartupObserver} instead.
  */
 public interface ServerStartupHandler {
 

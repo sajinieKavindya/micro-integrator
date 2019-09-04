@@ -23,9 +23,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HTTP;
 import org.apache.ws.commons.schema.XmlSchema;
 import org.wso2.carbon.core.transports.CarbonHttpRequest;
-import org.wso2.carbon.core.transports.CarbonHttpResponse;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
+import org.wso2.carbon.core.transports.CarbonHttpResponse;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -52,7 +52,7 @@ public final class XsdUtil {
             axisService = GhostDeployerUtils.deployActualService(configCtx
                     .getAxisConfiguration(), axisService);
         }
-        if (!RequestProcessorUtil.canExposeServiceMetadata(axisService)) {
+        if (!org.wso2.carbon.core.transports.util.RequestProcessorUtil.canExposeServiceMetadata(axisService)) {
             response.setError(HttpStatus.SC_FORBIDDEN,
                               "Access to service metadata for service: " + serviceName +
                               " has been forbidden");
@@ -262,7 +262,7 @@ public final class XsdUtil {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         schema.write(baos);
         RequestProcessorUtil.writeDocument(baos, outputStream, "annotated-xsd.xsl", contextRoot,
-                isXSDAnnotated(request));
+                                           isXSDAnnotated(request));
     }
 
 

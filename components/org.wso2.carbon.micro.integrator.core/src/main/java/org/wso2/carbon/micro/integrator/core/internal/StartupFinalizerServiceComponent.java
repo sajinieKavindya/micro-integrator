@@ -31,11 +31,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.ServerStatus;
 import org.wso2.carbon.micro.integrator.core.deployment.DeploymentService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.core.ServerStatus;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

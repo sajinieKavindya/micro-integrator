@@ -29,11 +29,11 @@ import java.util.Locale;
  * Here getOutputStream method is overloaded and returning a custom OutputStream which count
  * the number of bytes transferred. The getWrittenSize() method returns the size of the response
  * in bytes after the response is processed and written to the response object. 
- * @see MeteringOutputStream
+ * @see org.wso2.carbon.core.transports.metering.MeteringOutputStream
  */
 public class MeteredServletResponse implements HttpServletResponse {
 	HttpServletResponse wrappedHttpServletResponse;
-	MeteringOutputStream wrappedOutputStream;
+	org.wso2.carbon.core.transports.metering.MeteringOutputStream wrappedOutputStream;
 
 	public MeteredServletResponse(HttpServletResponse wrappedHttpServletResponse) {
 		this.wrappedHttpServletResponse = wrappedHttpServletResponse;

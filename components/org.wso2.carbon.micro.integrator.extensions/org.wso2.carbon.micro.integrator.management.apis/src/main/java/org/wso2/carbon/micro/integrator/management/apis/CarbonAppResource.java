@@ -27,14 +27,13 @@ import org.wso2.carbon.application.deployer.AppDeployerUtils;
 import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.application.deployer.config.Artifact;
 import org.wso2.carbon.inbound.endpoint.internal.http.api.APIResource;
+import org.wso2.carbon.micro.integrator.core.deployment.application.deployer.CAppDeploymentManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static org.wso2.carbon.micro.integrator.core.deployment.application.deployer.CAppDeploymentManager.getCarbonApps;
 
 public class CarbonAppResource extends APIResource {
 
@@ -76,7 +75,7 @@ public class CarbonAppResource extends APIResource {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         ArrayList<CarbonApplication> appList
-                = getCarbonApps(String.valueOf(AppDeployerUtils.getTenantId()));
+                = CAppDeploymentManager.getCarbonApps(String.valueOf(AppDeployerUtils.getTenantId()));
 
         JSONObject jsonBody = Utils.createJSONList(appList.size());
 
@@ -109,7 +108,7 @@ public class CarbonAppResource extends APIResource {
     private JSONObject getCarbonAppByName(String carbonAppName) {
 
         ArrayList<CarbonApplication> appList
-                = getCarbonApps(String.valueOf(AppDeployerUtils.getTenantId()));
+                = CAppDeploymentManager.getCarbonApps(String.valueOf(AppDeployerUtils.getTenantId()));
 
         for (CarbonApplication app: appList) {
             if (app.getAppName().equals(carbonAppName)) {

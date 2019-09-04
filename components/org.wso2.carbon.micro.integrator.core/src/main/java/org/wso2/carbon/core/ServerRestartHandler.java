@@ -19,7 +19,7 @@ package org.wso2.carbon.core;
  * Any specific things that need to be done before the server is restarted should be handled by an
  * implementation of this interface
  *
- * @see org.wso2.carbon.core.ServerShutdownHandler
+ * @see ServerShutdownHandler
  */
 public interface ServerRestartHandler {
 

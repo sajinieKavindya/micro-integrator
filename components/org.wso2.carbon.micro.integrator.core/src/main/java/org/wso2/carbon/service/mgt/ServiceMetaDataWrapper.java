@@ -24,7 +24,7 @@ import java.util.List;
  * This is a data object which contains a page of services, and service metadata.
  */
 public class ServiceMetaDataWrapper implements Pageable {
-    private ServiceMetaData[] services;
+    private org.wso2.carbon.service.mgt.ServiceMetaData[] services;
     private int numberOfActiveServices;
     private int numberOfCorrectServiceGroups;
     private int numberOfFaultyServiceGroups;
@@ -34,7 +34,7 @@ public class ServiceMetaDataWrapper implements Pageable {
     public ServiceMetaDataWrapper() {
     }
 
-    public ServiceMetaData[] getServices() {
+    public org.wso2.carbon.service.mgt.ServiceMetaData[] getServices() {
         return CarbonUtils.arrayCopyOf(services);
     }
 
@@ -42,7 +42,7 @@ public class ServiceMetaDataWrapper implements Pageable {
         return numberOfPages;
     }
 
-    public void setServices(ServiceMetaData[] services) {
+    public void setServices(org.wso2.carbon.service.mgt.ServiceMetaData[] services) {
         this.services = CarbonUtils.arrayCopyOf(services);
     }
 

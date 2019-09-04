@@ -224,14 +224,6 @@
                                 </featureArtifactDef>
 
 
-                                <!-- Data Services Features -->
-                                <featureArtifactDef>
-                                    org.wso2.carbon.data:org.wso2.carbon.dataservices.server.feature:${carbon.data.version}
-                                </featureArtifactDef>
-                                <featureArtifactDef>
-                                    org.wso2.carbon.data:org.wso2.carbon.dataservices.task.server.feature:${carbon.data.version}
-                                </featureArtifactDef>
-
                                 <featureArtifactDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.integrator.server.feature:${carbon.mediation.version}
                                 </featureArtifactDef>
@@ -477,15 +469,6 @@
                                     <version>${cipher.tool.version}</version>
                                 </feature>
 
-                                <feature>
-                                    <id>org.wso2.carbon.dataservices.server.feature.group</id>
-                                    <version>${carbon.data.version}</version>
-                                </feature>
-
-                                <feature>
-                                    <id>org.wso2.carbon.dataservices.task.server.feature.group</id>
-                                    <version>${carbon.data.version}</version>
-                                </feature>
 
                                 <feature>
                                     <id>org.wso2.carbon.integrator.server.feature.group</id>

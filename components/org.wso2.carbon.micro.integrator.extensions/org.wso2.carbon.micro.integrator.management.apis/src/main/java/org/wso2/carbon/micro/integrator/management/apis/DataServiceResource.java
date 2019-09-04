@@ -30,9 +30,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.dataservices.common.DBConstants;
-import org.wso2.carbon.dataservices.core.DBUtils;
-import org.wso2.carbon.dataservices.core.description.query.Query;
-import org.wso2.carbon.dataservices.core.engine.DataService;
+import org.wso2.carbon.micro.integrator.dataservices.core.DBUtils;
+import org.wso2.carbon.micro.integrator.dataservices.core.description.query.Query;
+import org.wso2.carbon.micro.integrator.dataservices.core.engine.DataService;
 import org.wso2.carbon.inbound.endpoint.internal.http.api.APIResource;
 import org.wso2.carbon.micro.integrator.management.apis.models.dataServices.DataServiceInfo;
 import org.wso2.carbon.micro.integrator.management.apis.models.dataServices.DataServiceSummary;
@@ -90,7 +90,7 @@ public class DataServiceResource extends APIResource {
 
         for (String dataServiceName : dataServicesNames) {
             DataService dataService = getDataServiceByName(msgCtx, dataServiceName);
-            ServiceMetaData serviceMetaData = getServiceMetaData(dataService);
+            org.wso2.carbon.service.mgt.ServiceMetaData serviceMetaData = getServiceMetaData(dataService);
 
             // initiate summary model
             DataServiceSummary summary = null;
@@ -117,7 +117,7 @@ public class DataServiceResource extends APIResource {
         if (dataService == null) {
             axis2MessageContext.setProperty(Constants.HTTP_STATUS_CODE, Constants.NOT_FOUND);
         } else {
-            ServiceMetaData serviceMetaData = getServiceMetaData(dataService);
+            org.wso2.carbon.service.mgt.ServiceMetaData serviceMetaData = getServiceMetaData(dataService);
             DataServiceInfo dataServiceInfo = null;
 
             if (serviceMetaData != null) {
@@ -127,7 +127,7 @@ public class DataServiceResource extends APIResource {
                 Map<String, Query> queries = dataService.getQueries();
                 for (Map.Entry<String, Query> stringQuery : queries.entrySet()) {
                     QuerySummary querySummary = new QuerySummary(stringQuery.getKey(),
-                            stringQuery.getValue().getNamespace());
+                                                                 stringQuery.getValue().getNamespace());
                     dataServiceInfo.addQuery(querySummary);
                 }
             }

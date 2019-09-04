@@ -27,12 +27,14 @@ import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.application.deployer.handler.DefaultAppDeployer;
 import org.wso2.carbon.application.deployer.synapse.FileRegistryResourceDeployer;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.dataservices.core.DBDeployer;
+import org.wso2.carbon.micro.integrator.dataservices.core.DBDeployer;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.micro.integrator.core.deployment.application.deployer.CAppDeploymentManager;
 import org.wso2.carbon.micro.integrator.core.deployment.artifact.deployer.ArtifactDeploymentManager;
 import org.wso2.carbon.micro.integrator.core.deployment.internal.DeploymentServiceImpl;
 import org.wso2.carbon.micro.integrator.core.deployment.synapse.deployer.SynapseAppDeployer;
+import org.wso2.carbon.micro.integrator.dataservices.capp.deployer.DataServiceCappDeployer;
+import org.wso2.carbon.micro.integrator.ndatasource.capp.deployer.DataSourceCappDeployer;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -199,6 +201,9 @@ public class AppDeployerServiceComponent {
         // Register application deployment handlers
         cAppDeploymentManager.registerDeploymentHandler(new FileRegistryResourceDeployer(
                 synapseEnvironmentService.getSynapseEnvironment().getSynapseConfiguration().getRegistry()));
+//        cAppDeploymentManager.registerDeploymentHandler(new DataServiceCappDeployer());
+
+        cAppDeploymentManager.registerDeploymentHandler(new DataSourceCappDeployer());
         cAppDeploymentManager.registerDeploymentHandler(new SynapseAppDeployer());
         cAppDeploymentManager.registerDeploymentHandler(new DefaultAppDeployer());
 

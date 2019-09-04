@@ -211,17 +211,43 @@
 <!--                                <bundleDef>
                                     org.wso2.carbon:org.wso2.carbon.core.bootup.validator:${carbon.kernel.version}
                                 </bundleDef>-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.ndatasource.common:${carbon.kernel.version}
-                                </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.ndatasource.core:${carbon.kernel.version}
-                                </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.ndatasource.rdbms:${carbon.kernel.version}
-                                </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.user.api:${carbon.kernel.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.framework.exporter:${carbon.kernel.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.addressing:${carbon.kernel.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.ndatasource.common:${product.mi.version}</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.ndatasource.core:${product.mi.version}</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.ndatasource.rdbms:${product.mi.version}</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.ndatasource.capp.deployer:${product.mi.version}</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.dataservices.core:${product.mi.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.commons-text:commons-text:${commons-text.orbit.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:${commons-lang3.orbit.version}
+                                </bundleDef>
+                                <bundleDef>com.google.gdata.wso2:gdata-core:${gdata-core.orbit.version}</bundleDef>
+                                <bundleDef>com.google.gdata.wso2:gdata-spreadsheet:${gdata-spreadsheet.orbit.version}</bundleDef>
+                                <bundleDef>com.hp.hpl.jena.wso2:arq</bundleDef>
+                                <bundleDef>com.datastax.cassandra:cassandra-driver-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.poi:poi</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.poi:poi-ooxml</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.commons:commons-collections4</bundleDef>
+                                <bundleDef>io.dropwizard.metrics:metrics-core</bundleDef>
+                                <bundleDef>io.netty:netty-handler</bundleDef>
+                                <bundleDef>io.netty:netty-buffer</bundleDef>
+                                <bundleDef>io.netty:netty-transport</bundleDef>
+                                <bundleDef>io.netty:netty-codec</bundleDef>
+                                <bundleDef>io.netty:netty-common</bundleDef>
+                                <bundleDef>org.mongodb:mongo-java-driver</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.jongo.wso2:jongo</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.webharvest:webharvest-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.google.api-client:google-api-client</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.google.oauth-client:google-oauth-client</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.google.http-client:google-http-client</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.olingo:odata-server</bundleDef>
+                                <bundleDef>org.wso2.carbon.data:org.wso2.carbon.dataservices.common:${dataservices.version}</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.dataservices.sql.driver:${product.mi.version}</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.dataservices.odata.endpoint:${product.mi.version}</bundleDef>
                                 <!--Management API-->
                                 <bundleDef>org.wso2.ei:org.wso2.carbon.micro.integrator.management.apis:${product.mi.version}</bundleDef>
                                 <!--Inbound Endpoints-->

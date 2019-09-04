@@ -22,6 +22,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.application.deployer.service.ApplicationManagerService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.crypto.api.CryptoService;
 
 /**
  * This singleton data holder contains all the data required by the Carbon core OSGi bundle
@@ -40,6 +41,7 @@ public class CarbonCoreDataHolder {
     private  HttpService httpService;
     private  ConfigurationContext mainServerConfigContext;
     private ServerConfigurationService serverConfigurationService;
+    private CryptoService cryptoService;
 
 
     public  static CarbonCoreDataHolder getInstance() {
@@ -97,4 +99,13 @@ public class CarbonCoreDataHolder {
         this.applicationManager = applicationManager;
     }
 
+    public void setCryptoService(CryptoService cryptoService) {
+
+        this.cryptoService = cryptoService;
+    }
+
+    public CryptoService getCryptoService() {
+
+        return cryptoService;
+    }
 }

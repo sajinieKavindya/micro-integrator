@@ -23,10 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.RegistryResources.SecurityManagement;
-import org.wso2.carbon.core.encryption.SymmetricEncryption;
 
 import org.wso2.carbon.micro.integrator.core.internal.CarbonCoreDataHolder;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.core.encryption.SymmetricEncryption;
 
 import javax.crypto.Cipher;
 import java.nio.charset.Charset;
@@ -118,13 +118,14 @@ public class CryptoUtil {
      * @param returnSelfContainedCipherText Create self-contained cipher text if true, return simple encrypted
      *                                      ciphertext otherwise.
      * @return The cipher text bytes
-     * @throws CryptoException On error during encryption
+     * @throws org.wso2.carbon.core.util.CryptoException On error during encryption
      */
     public byte[] encrypt(byte[] plainTextBytes, String cipherTransformation, boolean returnSelfContainedCipherText)
-            throws CryptoException {
+            throws org.wso2.carbon.core.util.CryptoException {
 
         byte[] encryptedKey;
-        SymmetricEncryption encryption = SymmetricEncryption.getInstance();
+        org.wso2.carbon.core.encryption.SymmetricEncryption
+                encryption = org.wso2.carbon.core.encryption.SymmetricEncryption.getInstance();
 
         try {
             if (Boolean.valueOf(encryption.getSymmetricKeyEncryptEnabled())) {
@@ -133,7 +134,7 @@ public class CryptoUtil {
                 Cipher keyStoreCipher;
                 KeyStore keyStore;
                 Certificate[] certs;
-                KeyStoreManager keyMan = KeyStoreManager.getInstance(
+                org.wso2.carbon.core.util.KeyStoreManager keyMan = org.wso2.carbon.core.util.KeyStoreManager.getInstance(
                         MultitenantConstants.SUPER_TENANT_ID,
                         this.getServerConfigService());
                 if (keyMan.getInternalKeyStore() != null) {
@@ -172,7 +173,7 @@ public class CryptoUtil {
                 }
             }
         } catch (Exception e) {
-            throw new CryptoException("Error during encryption", e);
+            throw new org.wso2.carbon.core.util.CryptoException("Error during encryption", e);
         }
         return encryptedKey;
     }
@@ -182,9 +183,9 @@ public class CryptoUtil {
      *
      * @param plainTextBytes The plaintext bytes to be encrypted
      * @return The cipher text bytes (self-contained ciphertext)
-     * @throws CryptoException On error during encryption
+     * @throws org.wso2.carbon.core.util.CryptoException On error during encryption
      */
-    public byte[] encrypt(byte[] plainTextBytes) throws CryptoException {
+    public byte[] encrypt(byte[] plainTextBytes) throws org.wso2.carbon.core.util.CryptoException {
         //encrypt with transformation configured in carbon.properties as self contained ciphertext
         return encrypt(plainTextBytes, System.getProperty(CIPHER_TRANSFORMATION_SYSTEM_PROPERTY), true);
     }
@@ -198,10 +199,10 @@ public class CryptoUtil {
      * @param returnSelfContainedCipherText Create self-contained cipher text if true, return simple encrypted
      *                                      ciphertext otherwise.
      * @return The base64 encoded cipher text
-     * @throws CryptoException On error during encryption
+     * @throws org.wso2.carbon.core.util.CryptoException On error during encryption
      */
     public String encryptAndBase64Encode(byte[] plainText, String transformation, boolean returnSelfContainedCipherText)
-            throws CryptoException {
+            throws org.wso2.carbon.core.util.CryptoException {
         return Base64.encode(encrypt(plainText, transformation, returnSelfContainedCipherText));
     }
 
@@ -211,10 +212,10 @@ public class CryptoUtil {
      * @param plainText The plaintext value to be encrypted and base64
      *                  encoded
      * @return The base64 encoded cipher text
-     * @throws CryptoException On error during encryption
+     * @throws org.wso2.carbon.core.util.CryptoException On error during encryption
      */
     public String encryptAndBase64Encode(byte[] plainText) throws
-            CryptoException {
+                                                           org.wso2.carbon.core.util.CryptoException {
         return Base64.encode(encrypt(plainText));
     }
 
@@ -223,12 +224,13 @@ public class CryptoUtil {
      *
      * @param cipherTextBytes The cipher text to be decrypted
      * @return Decrypted bytes
-     * @throws CryptoException On an error during decryption
+     * @throws org.wso2.carbon.core.util.CryptoException On an error during decryption
      */
-    public byte[] decrypt(byte[] cipherTextBytes) throws CryptoException {
+    public byte[] decrypt(byte[] cipherTextBytes) throws org.wso2.carbon.core.util.CryptoException {
 
         byte[] decryptedValue;
-        SymmetricEncryption encryption = SymmetricEncryption.getInstance();
+        org.wso2.carbon.core.encryption.SymmetricEncryption
+                encryption = org.wso2.carbon.core.encryption.SymmetricEncryption.getInstance();
 
         try {
             if (Boolean.valueOf(encryption.getSymmetricKeyEncryptEnabled())) {
@@ -237,7 +239,7 @@ public class CryptoUtil {
                 Cipher keyStoreCipher;
                 KeyStore keyStore;
                 PrivateKey privateKey;
-                KeyStoreManager keyMan = KeyStoreManager.getInstance(
+                org.wso2.carbon.core.util.KeyStoreManager keyMan = org.wso2.carbon.core.util.KeyStoreManager.getInstance(
                         MultitenantConstants.SUPER_TENANT_ID,
                         this.getServerConfigService(),
                         this.getRegistryService());
@@ -283,7 +285,7 @@ public class CryptoUtil {
                 }
             }
         } catch (Exception e) {
-            throw new CryptoException("errorDuringDecryption", e);
+            throw new org.wso2.carbon.core.util.CryptoException("errorDuringDecryption", e);
         }
         return decryptedValue;
     }
@@ -299,12 +301,13 @@ public class CryptoUtil {
      * @param cipherTransformation The transformation that need to decrypt. If it is null, RSA is used as default.
      *                             NOTE: If symmetric encryption enabled, cipherTransformation parameter will be ignored
      * @return Decrypted bytes
-     * @throws CryptoException On an error during decryption
+     * @throws org.wso2.carbon.core.util.CryptoException On an error during decryption
      */
-    public byte[] decrypt(byte[] cipherTextBytes, String cipherTransformation) throws CryptoException {
+    public byte[] decrypt(byte[] cipherTextBytes, String cipherTransformation) throws
+                                                                               org.wso2.carbon.core.util.CryptoException {
         byte[] decryptedValue;
 
-        SymmetricEncryption encryption = SymmetricEncryption.getInstance();
+        org.wso2.carbon.core.encryption.SymmetricEncryption encryption = SymmetricEncryption.getInstance();
         try {
             if (Boolean.valueOf(encryption.getSymmetricKeyEncryptEnabled())) {
                 decryptedValue = encryption.decryptWithSymmetricKey(cipherTextBytes);
@@ -312,7 +315,7 @@ public class CryptoUtil {
                 Cipher keyStoreCipher;
                 KeyStore keyStore;
                 PrivateKey privateKey;
-                KeyStoreManager keyMan = KeyStoreManager.getInstance(
+                org.wso2.carbon.core.util.KeyStoreManager keyMan = KeyStoreManager.getInstance(
                         MultitenantConstants.SUPER_TENANT_ID,
                         this.getServerConfigService(),
                         this.getRegistryService());
@@ -341,7 +344,7 @@ public class CryptoUtil {
                 }
             }
         } catch (Exception e) {
-            throw new CryptoException("errorDuringDecryption", e);
+            throw new org.wso2.carbon.core.util.CryptoException("errorDuringDecryption", e);
         }
         return decryptedValue;
     }
@@ -351,10 +354,10 @@ public class CryptoUtil {
      *
      * @param base64CipherText Base64 encoded cipher text
      * @return Base64 decoded, decrypted bytes
-     * @throws CryptoException On an error during decryption
+     * @throws org.wso2.carbon.core.util.CryptoException On an error during decryption
      */
     public byte[] base64DecodeAndDecrypt(String base64CipherText) throws
-            CryptoException {
+                                                                  org.wso2.carbon.core.util.CryptoException {
         return decrypt(Base64.decode(base64CipherText));
     }
 
@@ -367,10 +370,10 @@ public class CryptoUtil {
      * @param base64CipherText Base64 encoded cipher text
      * @param transformation The transformation used for encryption
      * @return Base64 decoded, decrypted bytes
-     * @throws CryptoException On an error during decryption
+     * @throws org.wso2.carbon.core.util.CryptoException On an error during decryption
      */
     public byte[] base64DecodeAndDecrypt(String base64CipherText, String transformation) throws
-            CryptoException {
+                                                                                         org.wso2.carbon.core.util.CryptoException {
         return decrypt(Base64.decode(base64CipherText), transformation);
     }
 
@@ -391,7 +394,7 @@ public class CryptoUtil {
      * @return true if provided cipher is self-contained cipher text
      */
     public boolean base64DecodeAndIsSelfContainedCipherText(String base64CipherText) throws
-            CryptoException {
+                                                                                     CryptoException {
         return isSelfContainedCipherText(Base64.decode(base64CipherText));
     }
 
