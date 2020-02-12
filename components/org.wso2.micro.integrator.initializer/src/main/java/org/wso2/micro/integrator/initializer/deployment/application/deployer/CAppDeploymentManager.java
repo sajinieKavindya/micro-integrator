@@ -32,6 +32,7 @@ import org.wso2.micro.application.deployer.config.ApplicationConfiguration;
 import org.wso2.micro.application.deployer.config.Artifact;
 import org.wso2.micro.application.deployer.handler.AppDeploymentHandler;
 import org.wso2.micro.core.util.CarbonException;
+import org.wso2.micro.core.util.FileManipulator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,100 +59,140 @@ public class CAppDeploymentManager {
     private AxisConfiguration axisConfiguration;
     private List<AppDeploymentHandler> appDeploymentHandlers;
     private static Map<String, ArrayList<CarbonApplication>> tenantcAppMap;
+    private Map<String, HashMap<String, Exception>> tenantfaultycAppMap;
 
-    public CAppDeploymentManager(AxisConfiguration axisConfiguration) {
-        this.axisConfiguration = axisConfiguration;
+    private static CAppDeploymentManager instance = new CAppDeploymentManager();
+
+    private CAppDeploymentManager() {
         this.appDeploymentHandlers = new ArrayList<AppDeploymentHandler>();
         tenantcAppMap = new ConcurrentHashMap<String, ArrayList<CarbonApplication>>();
     }
 
-    public void deploy() throws CarbonException {
+    public void init(AxisConfiguration axisConfiguration) {
+        this.axisConfiguration = axisConfiguration;
+    }
+
+    public static CAppDeploymentManager getInstance() {
+        return instance;
+    }
+
+    public void deploy(String artifactPath, AxisConfiguration axisConfig) throws CarbonException {
 
         String cAppSrcDir = axisConfiguration.getRepository().getPath() + AppDeployerConstants.CARBON_APPS;
         File cAppDir = new File(cAppSrcDir);
 
-        if (cAppDir.isDirectory()) {
-            File[] fileList = cAppDir.listFiles();
-            if (fileList != null && fileList.length > 0) {
-                for (File file : fileList) {
-                    if (!isCAppArchiveFile(file.getName())) {
-                        log.warn("Only .car files are processed. Hence " + file.getName() + " will be ignored");
-                        continue;
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Carbon Application detected : " + file.getName());
-                    }
+        String archPathToProcess = AppDeployerUtils.formatPath(artifactPath);
+        String cAppName = archPathToProcess.substring(archPathToProcess.lastIndexOf('/') + 1);
 
-                    String cAppName = file.getName();
-                    String targetCAppPath = cAppDir + File.separator + cAppName;
+        if (!isCAppArchiveFile(cAppName)) {
+            log.warn("Only .car files are processed. Hence " + cAppName + " will be ignored");
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Carbon Application detected : " + cAppName);
+        }
 
-                    try {
-                        // Extract to temporary location
-                        String tempExtractedDirPath = AppDeployerUtils.extractCarbonApp(targetCAppPath);
+        String targetCAppPath = cAppDir + File.separator + cAppName;
 
-                        // Build the app configuration by providing the artifacts.xml path
-                        ApplicationConfiguration appConfig = new ApplicationConfiguration(tempExtractedDirPath +
-                                ApplicationConfiguration.ARTIFACTS_XML);
+        try {
+            // Extract to temporary location
+            String tempExtractedDirPath = AppDeployerUtils.extractCarbonApp(targetCAppPath);
 
-                        // If we don't have features (artifacts) for this server, ignore
-                        if (appConfig.getApplicationArtifact().getDependencies().size() == 0) {
-                            log.warn("No artifacts found to be deployed in this server. " +
-                                    "Ignoring Carbon Application : " + cAppName);
-                            return;
-                        }
+            // Build the app configuration by providing the artifacts.xml path
+            ApplicationConfiguration appConfig = new ApplicationConfiguration(tempExtractedDirPath +
+                    ApplicationConfiguration.ARTIFACTS_XML);
 
-                        CarbonApplication currentApp = new CarbonApplication();
-                        currentApp.setAppFilePath(targetCAppPath);
-                        currentApp.setExtractedPath(tempExtractedDirPath);
-                        currentApp.setAppConfig(appConfig);
+            // If we don't have features (artifacts) for this server, ignore
+            if (appConfig.getApplicationArtifact().getDependencies().size() == 0) {
+                log.warn("No artifacts found to be deployed in this server. " +
+                        "Ignoring Carbon Application : " + cAppName);
+                return;
+            }
 
-                        // Set App Name
-                        String appName = appConfig.getAppName();
-                        if (appName == null) {
-                            log.warn("No application name found in Carbon Application : " + cAppName + ". Using " +
-                                    "the file name as the application name");
-                            appName = cAppName.substring(0, cAppName.lastIndexOf('.'));
-                        }
-                        currentApp.setAppName(appName);
+            CarbonApplication currentApp = new CarbonApplication();
+            currentApp.setAppFilePath(targetCAppPath);
+            currentApp.setExtractedPath(tempExtractedDirPath);
+            currentApp.setAppConfig(appConfig);
 
-                        // Set App Version
-                        String appVersion = appConfig.getAppVersion();
-                        if (appVersion != null && !("").equals(appVersion)) {
-                            currentApp.setAppVersion(appVersion);
-                        }
+            // Set App Name
+            String appName = appConfig.getAppName();
+            if (appName == null) {
+                log.warn("No application name found in Carbon Application : " + cAppName + ". Using " +
+                        "the file name as the application name");
+                appName = cAppName.substring(0, cAppName.lastIndexOf('.'));
+            }
+            // to support multiple capp versions, we check app name with version
+            if (appExists(appConfig.getAppNameWithVersion(), axisConfig)) {
+                String msg = "Carbon Application : " + appConfig.getAppNameWithVersion() + " already exists. Two applications " +
+                        "can't have the same Id. Deployment aborted.";
+                log.error(msg);
+                throw new CarbonException(msg);
+            }
+            currentApp.setAppName(appName);
 
-                        // deploy sub artifacts of this cApp
-                        this.searchArtifacts(currentApp.getExtractedPath(), currentApp);
+            // Set App Version
+            String appVersion = appConfig.getAppVersion();
+            if (appVersion != null && !("").equals(appVersion)) {
+                currentApp.setAppVersion(appVersion);
+            }
 
-                        if (isArtifactReadyToDeploy(currentApp.getAppConfig().getApplicationArtifact())) {
-                            // Now ready to deploy
-                            // send the CarbonApplication instance through the handler chain
-                            for (AppDeploymentHandler appDeploymentHandler : appDeploymentHandlers) {
-                                appDeploymentHandler.deployArtifacts(currentApp, axisConfiguration);
-                            }
-                        } else {
-                            log.error("Some dependencies were not satisfied in cApp:" +
-                                    currentApp.getAppNameWithVersion() +
-                                    "Check whether all dependent artifacts are included in cApp file: " +
-                                    targetCAppPath);
+            // deploy sub artifacts of this cApp
+            this.searchArtifacts(currentApp.getExtractedPath(), currentApp);
 
-                            deleteExtractedCApp(currentApp.getExtractedPath());
-                            return;
-                        }
+            if (isArtifactReadyToDeploy(currentApp.getAppConfig().getApplicationArtifact())) {
+                // Now ready to deploy
+                // send the CarbonApplication instance through the handler chain
+                for (AppDeploymentHandler appDeploymentHandler : appDeploymentHandlers) {
+                    appDeploymentHandler.deployArtifacts(currentApp, axisConfiguration);
+                }
+            } else {
+                log.error("Some dependencies were not satisfied in cApp:" +
+                        currentApp.getAppNameWithVersion() +
+                        "Check whether all dependent artifacts are included in cApp file: " +
+                        targetCAppPath);
 
-                        // Deployment Completed
-                        currentApp.setDeploymentCompleted(true);
-                        this.addCarbonApp(String.valueOf(AppDeployerUtils.getTenantId()), currentApp);
-                        log.info("Successfully Deployed Carbon Application : " + currentApp.getAppNameWithVersion() +
-                                AppDeployerUtils.getTenantIdLogString(AppDeployerUtils.getTenantId()));
+                deleteExtractedCApp(currentApp.getExtractedPath());
+                return;
+            }
 
-                    } catch (DeploymentException e) {
-                        log.error("Error occurred while deploying the Carbon application: " + targetCAppPath , e);
-                    }
+            // Deployment Completed
+            currentApp.setDeploymentCompleted(true);
+            this.addCarbonApp(String.valueOf(AppDeployerUtils.getTenantId()), currentApp);
+            log.info("Successfully Deployed Carbon Application : " + currentApp.getAppNameWithVersion() +
+                    AppDeployerUtils.getTenantIdLogString(AppDeployerUtils.getTenantId()));
+
+        } catch (DeploymentException e) {
+            log.error("Error occurred while deploying the Carbon application: " + targetCAppPath , e);
+        }
+    }
+
+    /**
+     * Check whether there is an already existing Carbon application with the given name.
+     * Use app name with version to support multiple capp versions
+     *
+     * @param newAppNameWithVersion - name of the new app
+     * @param axisConfig - AxisConfiguration instance
+     * @return - true if exits
+     */
+    private boolean appExists(String newAppNameWithVersion, AxisConfiguration axisConfig) {
+        String tenantId = AppDeployerUtils.getTenantIdString();
+        CarbonApplication appToRemove = null;
+        for (CarbonApplication carbonApp : getCarbonApps(tenantId)) {
+            if (newAppNameWithVersion.equals(carbonApp.getAppNameWithVersion())) {
+                if (carbonApp.isDeploymentCompleted()) {
+                    return true;
+                } else {
+                    appToRemove = carbonApp;
+                    break;
                 }
             }
         }
+        if (appToRemove != null) {
+            undeployCarbonApp(appToRemove, axisConfig);
+        }
+        return false;
     }
+
 
     /**
      * Deletes a directory given it's path.
@@ -376,5 +418,77 @@ public class CAppDeploymentManager {
         throw new CarbonException(msg, e);
     }
 
+    /**
+     * Undeploy the provided carbon App by sending it through the registered undeployment handler
+     * chain..
+     * @param carbonApp - CarbonApplication instance
+     * @param axisConfig - AxisConfiguration of the current tenant
+     */
+    public void undeployCarbonApp(CarbonApplication carbonApp,
+                                  AxisConfiguration axisConfig) {
+        log.info("Undeploying Carbon Application : " + carbonApp.getAppNameWithVersion() + "...");
+        // Call the undeployer handler chain
+        try {
+            for (AppDeploymentHandler handler : appDeploymentHandlers) {
+                handler.undeployArtifacts(carbonApp, axisConfig);
+            }
+            // Remove the app from tenant cApp list
+            removeCarbonApp(AppDeployerUtils.getTenantIdString(), carbonApp);
+
+            // Remove the app from registry
+            // removing the extracted CApp form tmp/carbonapps/
+            FileManipulator.deleteDir(carbonApp.getExtractedPath());
+            log.info("Successfully Undeployed Carbon Application : " + carbonApp.getAppNameWithVersion()
+                             + AppDeployerUtils.getTenantIdLogString(AppDeployerUtils.getTenantId()));
+        } catch (Exception e) {
+            log.error("Error occured while trying unDeply  : " + carbonApp.getAppNameWithVersion());
+        }
+
+    }
+
+    /**
+     * Remove a cApp for a particular tenant
+     *
+     * @param tenantId - tenant id of the cApp
+     * @param carbonApp - CarbonApplication instance
+     */
+    public void removeCarbonApp(String tenantId, CarbonApplication carbonApp) {
+        ArrayList<CarbonApplication> cApps = tenantcAppMap.get(tenantId);
+        synchronized (cApps) {
+            if (cApps != null && cApps.contains(carbonApp)) {
+                cApps.remove(carbonApp);
+            }
+        }
+    }
+
+    /**
+     *  Get the list of faulty CarbonApplications for the give tenant id. If the list is null,
+     *  return an empty Arraylist
+     *
+     * @param tenantId - tenant id to find faulty cApps
+     * @return - list of tenant faulty cApps
+     */
+    public HashMap<String, Exception> getFaultyCarbonApps(String tenantId) {
+        HashMap<String, Exception> cApps = tenantfaultycAppMap.get(tenantId);
+        if (cApps == null) {
+            cApps = new HashMap<String, Exception>();
+        }
+        return cApps;
+    }
+
+    /**
+     * Remove a faulty cApp for a particular tenant
+     *
+     * @param tenantId
+     * @param appFilePath
+     */
+    public void removeFaultyCarbonApp(String tenantId, String appFilePath) {
+        HashMap<String, Exception> faultycApps = tenantfaultycAppMap.get(tenantId);
+        synchronized (faultycApps) {
+            if (faultycApps != null) {
+                faultycApps.remove(appFilePath);
+            }
+        }
+    }
 
 }
