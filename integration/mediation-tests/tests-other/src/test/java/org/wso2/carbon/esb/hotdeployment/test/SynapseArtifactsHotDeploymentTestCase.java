@@ -73,129 +73,133 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         String proxyName = "HotDeploymentTestProxy";
         String proxyServiceFile = SERVER_DEPLOYMENT_DIR + "proxy-services" + File.separator + proxyFileName;
 
-        Assert.assertTrue(esbUtils.isProxyDeployed(contextUrls.getBackEndUrl(), sessionCookie, proxyName),
-                "Proxy Deployment failed");
+//        Assert.assertTrue(esbUtils.isProxyDeployed(contextUrls.getBackEndUrl(), sessionCookie, proxyName),
+//                "Proxy Deployment failed");
+        org.testng.Assert.assertTrue(checkProxyServiceExistence(proxyName),
+                          "ERROR - ProxyServiceDeployer ProxyService Deployment from the file : "
+                                  + "esb-artifacts-rule-mediator-car_1.0.0.car/proxyService2_1.0.0/proxyService2-1.0.0.xml "
+                                  + ": Failed");
 
-        logViewerClient.clearLogs();
-        FileUtils.touch(new File(proxyServiceFile));
-        log.info(proxyFileName + " has been updated and waiting for redeployment");
-        Assert.assertTrue(searchInLogs(logViewerClient, "'HotDeploymentTestProxy' has been update from file"),
-                "Proxy deployment failed on updating file. Log message not found");
-        Assert.assertTrue(esbUtils.isProxyDeployed(contextUrls.getBackEndUrl(), sessionCookie, proxyName),
-                "Proxy Deployment failed on updating file");
-        Awaitility.await().atMost(10, SECONDS).until(fileDelete(proxyServiceFile));
-        Assert.assertTrue(esbUtils.isProxyUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, proxyName),
-                "Proxy Undeployment failed");
+//        logViewerClient.clearLogs();
+//        FileUtils.touch(new File(proxyServiceFile));
+//        log.info(proxyFileName + " has been updated and waiting for redeployment");
+//        Assert.assertTrue(searchInLogs(logViewerClient, "'HotDeploymentTestProxy' has been update from file"),
+//                "Proxy deployment failed on updating file. Log message not found");
+//        Assert.assertTrue(esbUtils.isProxyDeployed(contextUrls.getBackEndUrl(), sessionCookie, proxyName),
+//                "Proxy Deployment failed on updating file");
+//        Awaitility.await().atMost(10, SECONDS).until(fileDelete(proxyServiceFile));
+//        Assert.assertTrue(esbUtils.isProxyUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, proxyName),
+//                "Proxy Undeployment failed");
     }
-
-    @Test(groups = "wso2.esb",
-          description = "Sequence Hot Deployment")
-    public void testSequenceHotDeployment() throws Exception {
-        String sequenceName = "HotDeploymentTestSequence";
-        String sequenceFile = SERVER_DEPLOYMENT_DIR + "sequences" + File.separator + sequenceFileName;
-
-        Assert.assertTrue(esbUtils.isSequenceDeployed(contextUrls.getBackEndUrl(), sessionCookie, sequenceName),
-                "Sequence Deployment failed");
-
-        logViewerClient.clearLogs();
-        FileUtils.touch(new File(sequenceFile));
-        log.info(sequenceFile + " has been updated and waiting for redeployment");
-        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestSequence has been updated from the file"),
-                "Sequence deployment failed on updating file. Log message not found");
-        Assert.assertTrue(esbUtils.isSequenceDeployed(contextUrls.getBackEndUrl(), sessionCookie, sequenceName),
-                "Sequence Deployment failed on updating file");
-
-        Awaitility.await().atMost(10, SECONDS).until(fileDelete(sequenceFile));
-        Assert.assertTrue(esbUtils.isSequenceUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, sequenceName),
-                "Sequence Undeployment failed");
-    }
-
-    @Test(groups = "wso2.esb",
-          description = "Endpoint Hot Deployment")
-    public void testEndpointHotDeployment() throws Exception {
-        String endpointName = "HotDeploymentTestEndpoint";
-        String endpointFile = SERVER_DEPLOYMENT_DIR + "endpoints" + File.separator + endpointFileName;
-
-        Assert.assertTrue(esbUtils.isEndpointDeployed(contextUrls.getBackEndUrl(), sessionCookie, endpointName),
-                "Endpoint Deployment failed");
-
-        logViewerClient.clearLogs();
-        FileUtils.touch(new File(endpointFile));
-        log.info(endpointFileName + " has been updated and waiting for redeployment");
-        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestEndpoint has been updated from the file"),
-                "Endpoint deployment failed on updating file. Log message not found");
-        Assert.assertTrue(esbUtils.isEndpointDeployed(contextUrls.getBackEndUrl(), sessionCookie, endpointName),
-                "Endpoint Deployment failed on updating file");
-
-        Awaitility.await().atMost(10, SECONDS).until(fileDelete(endpointFile));
-        Assert.assertTrue(esbUtils.isEndpointUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, endpointName),
-                "Endpoint Undeployment failed");
-    }
-
-    @Test(groups = "wso2.esb",
-          description = "API Hot Deployment")
-    public void testAPIHotDeployment() throws Exception {
-        String apiName = "HotDeploymentTestAPI";
-        String apiFile = SERVER_DEPLOYMENT_DIR + "api" + File.separator + apiFileName;
-
-        Assert.assertTrue(esbUtils.isApiDeployed(contextUrls.getBackEndUrl(), sessionCookie, apiName),
-                "API Deployment failed");
-
-        logViewerClient.clearLogs();
-        FileUtils.touch(new File(apiFile));
-        log.info(apiFileName + " has been updated and waiting for redeployment");
-        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestAPI has been updated from the file"),
-                "API deployment failed on updating file. Log message not found");
-        Assert.assertTrue(esbUtils.isApiDeployed(contextUrls.getBackEndUrl(), sessionCookie, apiName),
-                "API Deployment failed on updating file");
-
-        Awaitility.await().atMost(5, SECONDS).until(fileDelete(apiFile));
-        Assert.assertTrue(esbUtils.isApiUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, apiName),
-                "API Undeployment failed");
-    }
-
-    @Test(groups = "wso2.esb",
-          description = "Local Entry Hot Deployment")
-    public void testLocalEntryHotDeployment() throws Exception {
-        String localEntryName = "HotDeploymentTestLocalEntry";
-        String localEntryFile = SERVER_DEPLOYMENT_DIR + "local-entries" + File.separator + localEntryFileName;
-
-        Assert.assertTrue(esbUtils.isLocalEntryDeployed(contextUrls.getBackEndUrl(), sessionCookie, localEntryName),
-                "Local Entry Deployment failed");
-
-        logViewerClient.clearLogs();
-        FileUtils.touch(new File(localEntryFile));
-        log.info(localEntryFileName + " has been updated and waiting for redeployment");
-        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestLocalEntry has been updated from the file"),
-                "Local Entry deployment failed on updating file. Log message not found");
-        Assert.assertTrue(esbUtils.isLocalEntryDeployed(contextUrls.getBackEndUrl(), sessionCookie, localEntryName),
-                "Local Entry Deployment failed on updating file");
-        Awaitility.await().atMost(10, SECONDS).until(fileDelete(localEntryFile));
-        Assert.assertTrue(esbUtils.isLocalEntryUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, localEntryName),
-                "Local Entry Undeployment failed");
-    }
-
-    @Test(groups = "wso2.esb",
-          description = "Message Store Hot Deployment")
-    public void testMessageStoreHotDeployment() throws Exception {
-        String messageStoreName = "HotDeploymentTestMessageStore";
-        String messageStoreFile = SERVER_DEPLOYMENT_DIR + "message-stores" + File.separator + messageStoreFileName;
-
-        Assert.assertTrue(esbUtils.isMessageStoreDeployed(contextUrls.getBackEndUrl(), sessionCookie, messageStoreName),
-                "Message Store Deployment failed");
-
-        logViewerClient.clearLogs();
-        FileUtils.touch(new File(messageStoreFile));
-        log.info(messageStoreFileName + " has been updated and waiting for redeployment");
-        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestMessageStore has been updated from the file"),
-                "Message Store deployment failed on updating file. Log message not found");
-        Assert.assertTrue(esbUtils.isMessageStoreDeployed(contextUrls.getBackEndUrl(), sessionCookie, messageStoreName),
-                "Message Store Deployment failed on updating file");
-        Awaitility.await().atMost(10, SECONDS).until(fileDelete(messageStoreFile));
-        Assert.assertTrue(esbUtils.isSequenceUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, messageStoreName),
-                "Message Store Undeployment failed");
-    }
-
+//
+//    @Test(groups = "wso2.esb",
+//          description = "Sequence Hot Deployment")
+//    public void testSequenceHotDeployment() throws Exception {
+//        String sequenceName = "HotDeploymentTestSequence";
+//        String sequenceFile = SERVER_DEPLOYMENT_DIR + "sequences" + File.separator + sequenceFileName;
+//
+//        Assert.assertTrue(esbUtils.isSequenceDeployed(contextUrls.getBackEndUrl(), sessionCookie, sequenceName),
+//                "Sequence Deployment failed");
+//
+//        logViewerClient.clearLogs();
+//        FileUtils.touch(new File(sequenceFile));
+//        log.info(sequenceFile + " has been updated and waiting for redeployment");
+//        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestSequence has been updated from the file"),
+//                "Sequence deployment failed on updating file. Log message not found");
+//        Assert.assertTrue(esbUtils.isSequenceDeployed(contextUrls.getBackEndUrl(), sessionCookie, sequenceName),
+//                "Sequence Deployment failed on updating file");
+//
+//        Awaitility.await().atMost(10, SECONDS).until(fileDelete(sequenceFile));
+//        Assert.assertTrue(esbUtils.isSequenceUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, sequenceName),
+//                "Sequence Undeployment failed");
+//    }
+//
+//    @Test(groups = "wso2.esb",
+//          description = "Endpoint Hot Deployment")
+//    public void testEndpointHotDeployment() throws Exception {
+//        String endpointName = "HotDeploymentTestEndpoint";
+//        String endpointFile = SERVER_DEPLOYMENT_DIR + "endpoints" + File.separator + endpointFileName;
+//
+//        Assert.assertTrue(esbUtils.isEndpointDeployed(contextUrls.getBackEndUrl(), sessionCookie, endpointName),
+//                "Endpoint Deployment failed");
+//
+//        logViewerClient.clearLogs();
+//        FileUtils.touch(new File(endpointFile));
+//        log.info(endpointFileName + " has been updated and waiting for redeployment");
+//        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestEndpoint has been updated from the file"),
+//                "Endpoint deployment failed on updating file. Log message not found");
+//        Assert.assertTrue(esbUtils.isEndpointDeployed(contextUrls.getBackEndUrl(), sessionCookie, endpointName),
+//                "Endpoint Deployment failed on updating file");
+//
+//        Awaitility.await().atMost(10, SECONDS).until(fileDelete(endpointFile));
+//        Assert.assertTrue(esbUtils.isEndpointUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, endpointName),
+//                "Endpoint Undeployment failed");
+//    }
+//
+//    @Test(groups = "wso2.esb",
+//          description = "API Hot Deployment")
+//    public void testAPIHotDeployment() throws Exception {
+//        String apiName = "HotDeploymentTestAPI";
+//        String apiFile = SERVER_DEPLOYMENT_DIR + "api" + File.separator + apiFileName;
+//
+//        Assert.assertTrue(esbUtils.isApiDeployed(contextUrls.getBackEndUrl(), sessionCookie, apiName),
+//                "API Deployment failed");
+//
+//        logViewerClient.clearLogs();
+//        FileUtils.touch(new File(apiFile));
+//        log.info(apiFileName + " has been updated and waiting for redeployment");
+//        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestAPI has been updated from the file"),
+//                "API deployment failed on updating file. Log message not found");
+//        Assert.assertTrue(esbUtils.isApiDeployed(contextUrls.getBackEndUrl(), sessionCookie, apiName),
+//                "API Deployment failed on updating file");
+//
+//        Awaitility.await().atMost(5, SECONDS).until(fileDelete(apiFile));
+//        Assert.assertTrue(esbUtils.isApiUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, apiName),
+//                "API Undeployment failed");
+//    }
+//
+//    @Test(groups = "wso2.esb",
+//          description = "Local Entry Hot Deployment")
+//    public void testLocalEntryHotDeployment() throws Exception {
+//        String localEntryName = "HotDeploymentTestLocalEntry";
+//        String localEntryFile = SERVER_DEPLOYMENT_DIR + "local-entries" + File.separator + localEntryFileName;
+//
+//        Assert.assertTrue(esbUtils.isLocalEntryDeployed(contextUrls.getBackEndUrl(), sessionCookie, localEntryName),
+//                "Local Entry Deployment failed");
+//
+//        logViewerClient.clearLogs();
+//        FileUtils.touch(new File(localEntryFile));
+//        log.info(localEntryFileName + " has been updated and waiting for redeployment");
+//        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestLocalEntry has been updated from the file"),
+//                "Local Entry deployment failed on updating file. Log message not found");
+//        Assert.assertTrue(esbUtils.isLocalEntryDeployed(contextUrls.getBackEndUrl(), sessionCookie, localEntryName),
+//                "Local Entry Deployment failed on updating file");
+//        Awaitility.await().atMost(10, SECONDS).until(fileDelete(localEntryFile));
+//        Assert.assertTrue(esbUtils.isLocalEntryUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, localEntryName),
+//                "Local Entry Undeployment failed");
+//    }
+//
+//    @Test(groups = "wso2.esb",
+//          description = "Message Store Hot Deployment")
+//    public void testMessageStoreHotDeployment() throws Exception {
+//        String messageStoreName = "HotDeploymentTestMessageStore";
+//        String messageStoreFile = SERVER_DEPLOYMENT_DIR + "message-stores" + File.separator + messageStoreFileName;
+//
+//        Assert.assertTrue(esbUtils.isMessageStoreDeployed(contextUrls.getBackEndUrl(), sessionCookie, messageStoreName),
+//                "Message Store Deployment failed");
+//
+//        logViewerClient.clearLogs();
+//        FileUtils.touch(new File(messageStoreFile));
+//        log.info(messageStoreFileName + " has been updated and waiting for redeployment");
+//        Assert.assertTrue(searchInLogs(logViewerClient, "HotDeploymentTestMessageStore has been updated from the file"),
+//                "Message Store deployment failed on updating file. Log message not found");
+//        Assert.assertTrue(esbUtils.isMessageStoreDeployed(contextUrls.getBackEndUrl(), sessionCookie, messageStoreName),
+//                "Message Store Deployment failed on updating file");
+//        Awaitility.await().atMost(10, SECONDS).until(fileDelete(messageStoreFile));
+//        Assert.assertTrue(esbUtils.isSequenceUnDeployed(contextUrls.getBackEndUrl(), sessionCookie, messageStoreName),
+//                "Message Store Undeployment failed");
+//    }
+//
     @AfterClass(alwaysRun = true)
     public void unDeployService() throws Exception {
         super.cleanup();
