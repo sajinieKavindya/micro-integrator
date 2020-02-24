@@ -45,10 +45,9 @@ public class VFSQueryParameterAppendESBJAVA2373TestCase extends ESBIntegrationTe
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
         super.init();
-        File outfolder = new File(getClass().getResource(
-                File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig"
-                        + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out"
-                + File.separator);
+        File outfolder = new File(
+                getClass().getResource("/artifacts/ESB/synapseconfig/vfsTransport/").getPath() + "test" + File.separator
+                        + "out" + File.separator);
         outfolder.mkdirs();
         deployArtifacts();
     }
@@ -138,9 +137,8 @@ public class VFSQueryParameterAppendESBJAVA2373TestCase extends ESBIntegrationTe
                         + "           xmlns=\"http://ws.apache.org/ns/synapse\""
                         + "           transports=\"https http\"\n" + "           startOnLoad=\"true\"\n"
                         + "           trace=\"disable\">\n" + "        <target>\n" + "            <inSequence>\n"
-                        + "                <header name=\"To\" value=\"vfs:file://" + getClass().getResource(
-                        File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig"
-                                + File.separator + "vfsTransport" + File.separator).getPath()
+                        + "                <header name=\"To\" value=\"vfs:file://" + getClass()
+                        .getResource("/artifacts/ESB/synapseconfig/vfsTransport/").getPath()
                         + "out/vfs-ESBJAVA2373-append-true?transport.vfs.Append=true" + "\"/>"
                         + "                <log level=\"full\"/>"
                         + "                <property name=\"OUT_ONLY\" value=\"true\"/>\n"
