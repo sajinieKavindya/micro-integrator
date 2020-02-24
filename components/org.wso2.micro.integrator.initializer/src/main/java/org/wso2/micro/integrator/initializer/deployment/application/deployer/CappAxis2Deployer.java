@@ -101,10 +101,9 @@ public class CappAxis2Deployer extends AbstractDeployer {
      * @throws DeploymentException
      */
     public void undeploy(String filePath) throws DeploymentException {
-        String tenantId = AppDeployerUtils.getTenantIdString();
         String artifactPath = AppDeployerUtils.formatPath(filePath);
         CarbonApplication existingApp = null;
-        for (CarbonApplication carbonApp : CAppDeploymentManager.getCarbonApps(tenantId)) {
+        for (CarbonApplication carbonApp : CAppDeploymentManager.getCarbonApps()) {
             if (artifactPath.equals(carbonApp.getAppFilePath())) {
                 existingApp = carbonApp;
                 break;
@@ -114,23 +113,13 @@ public class CappAxis2Deployer extends AbstractDeployer {
             CAppDeploymentManager.getInstance().undeployCarbonApp(existingApp, axisConfig);
         } else {
             log.info("Undeploying Faulty Carbon Application On : " + filePath);
-            removeFaultyCAppOnUndeploy(filePath);
+            CAppDeploymentManager.getInstance().removeFaultyCarbonApp(filePath);
         }
         super.undeploy(filePath);
     }
 
-    private void removeFaultyCAppOnUndeploy(String filePath) {
-        String tenantId = AppDeployerUtils.getTenantIdString();
-        //check whether this application file name already exists in faulty app list
-        for (String faultyAppPath : CAppDeploymentManager.getInstance().getFaultyCarbonApps(tenantId).keySet()) {
-            if (filePath.equals(faultyAppPath)) {
-                CAppDeploymentManager.getInstance().removeFaultyCarbonApp(tenantId, faultyAppPath);
-                break;
-            }
-        }
-    }
-
-    public void cleanup() throws DeploymentException {
-//        //cleanup the capp list of a tenant during a tenant unload
+    public void cleanup() {
+        //cleanup the capp list during the unload
+        CAppDeploymentManager.getInstance().cleanupCarbonApps();
     }
 }
