@@ -21,7 +21,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.DeploymentException;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
@@ -36,7 +35,6 @@ import org.wso2.micro.integrator.ndatasource.capp.deployer.DataSourceCappDeploye
 import org.wso2.micro.integrator.initializer.deployment.synapse.deployer.FileRegistryResourceDeployer;
 import org.wso2.micro.integrator.initializer.StartupFinalizer;
 import org.wso2.micro.integrator.initializer.services.SynapseEnvironmentService;
-import org.wso2.micro.core.util.CarbonException;
 import org.wso2.micro.application.deployer.handler.DefaultAppDeployer;
 import org.wso2.micro.integrator.initializer.deployment.application.deployer.CAppDeploymentManager;
 import org.wso2.micro.integrator.initializer.deployment.artifact.deployer.ArtifactDeploymentManager;

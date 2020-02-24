@@ -90,8 +90,8 @@ public class StartupFinalizer {
                     forName("org.wso2.micro.integrator.initializer.deployment.application.deployer.CappAxis2Deployer");
 
             Deployer deployer = (Deployer) deployerClass.newInstance();
-            deployer.setDirectory(appsRepo);
-            deployer.setExtension("car");
+//            deployer.setDirectory(appsRepo);
+//            deployer.setExtension("car");
 
             //Add the deployer to deployment engine
             DeploymentEngine deploymentEngine =

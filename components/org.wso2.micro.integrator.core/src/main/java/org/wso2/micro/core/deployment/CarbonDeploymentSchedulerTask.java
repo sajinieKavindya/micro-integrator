@@ -37,18 +37,12 @@ public class CarbonDeploymentSchedulerTask extends SchedulerTask {
      * Indicates whether a Deployment repo update has to be performed
      */
     public static final String REPO_UPDATE_REQUIRED = "repo.update.required";
-    private static final Integer REPO_UPDATE_MIN_TIME_SECONDS = 300;
-    private static final Integer REPO_UPDATE_MAX_TIME_SECONDS = 900;
-    private static final Integer DEPLOYMENT_INTERVAL = 15;
 
-    private static final Log log = LogFactory.getLog(
-            org.wso2.micro.core.deployment.CarbonDeploymentSchedulerTask.class);
-    private AxisConfiguration axisConfig;
+    private static final Log log = LogFactory.getLog(CarbonDeploymentSchedulerTask.class);
 
     public CarbonDeploymentSchedulerTask(RepositoryListener listener,
                                          AxisConfiguration axisConfig) {
         super(listener, axisConfig);
-        this.axisConfig = axisConfig;
 
         try {
             axisConfig.addParameter(REPO_UPDATE_REQUIRED, new AtomicBoolean(false));
@@ -65,7 +59,6 @@ public class CarbonDeploymentSchedulerTask extends SchedulerTask {
     public synchronized void run() {
         try {
             runAxisDeployment(); // artifact meta files which need to be committed may be generated during this super
-            // .run() call
 
         } catch (Throwable t) {
             // we cannot let exceptions to be handled in the executor framework. It will kill the thread altogether

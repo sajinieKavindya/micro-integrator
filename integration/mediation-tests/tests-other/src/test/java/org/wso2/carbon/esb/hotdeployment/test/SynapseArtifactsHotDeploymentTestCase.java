@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -35,6 +34,7 @@ import org.wso2.esb.integration.common.utils.ESBTestConstant;
 import org.wso2.esb.integration.common.utils.common.TestConfigurationProvider;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 
 /**
@@ -98,7 +98,7 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isProxyUnDeployed(proxyName));
-        Assert.assertFalse(checkProxyServiceExistence(proxyName),
+        assertFalse(checkProxyServiceExistence(proxyName),
                            "Proxy Undeployment failed");
     }
 
@@ -132,7 +132,7 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isSequenceUnDeployed(sequenceName));
-        Assert.assertFalse(checkSequenceExistence(sequenceName),
+        assertFalse(checkSequenceExistence(sequenceName),
                            "Sequence Undeployment failed");
     }
 
@@ -146,7 +146,7 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isEndpointHotDeployed(endpointName));
-        Assert.assertTrue(checkEndpointExistence(endpointName), "Endpoint Deployment failed");
+        assertTrue(checkEndpointExistence(endpointName), "Endpoint Deployment failed");
 
         carbonLogReader.clearLogs();
         FileUtils.touch(new File(endpointFile));
@@ -159,13 +159,13 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isEndpointHotDeployed(endpointName));
-        Assert.assertTrue(checkEndpointExistence(endpointName), "Endpoint Deployment failed on updating file");
+        assertTrue(checkEndpointExistence(endpointName), "Endpoint Deployment failed on updating file");
 
         Awaitility.await().atMost(20, SECONDS).until(fileDelete(endpointFile));
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isEndpointUnDeployed(endpointName));
-        Assert.assertFalse(checkEndpointExistence(endpointName),
+        assertFalse(checkEndpointExistence(endpointName),
                            "Endpoint Undeployment failed");
     }
 
@@ -196,7 +196,7 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isApiUnDeployed(apiName));
-        Assert.assertFalse(checkApiExistence(apiName),
+        assertFalse(checkApiExistence(apiName),
                            "API Undeployment failed");
     }
 
@@ -228,7 +228,7 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isLocalEntryUnDeployed(localEntryName));
-        Assert.assertFalse(checkLocalEntryExistence(localEntryName),
+        assertFalse(checkLocalEntryExistence(localEntryName),
                            "Local Entry Undeployment failed");
     }
 
@@ -260,7 +260,7 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isMessageStoreUnDeployed(messageStoreName));
-        Assert.assertFalse(checkMessageStoreExistence(messageStoreName),
+        assertFalse(checkMessageStoreExistence(messageStoreName),
                            "Message Store Undeployment failed");
     }
 
@@ -278,14 +278,14 @@ public class SynapseArtifactsHotDeploymentTestCase extends ESBIntegrationTest {
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isProxyHotDeployed("hotDeploymentCAppTestingProxy"));
-        Assert.assertTrue(checkProxyServiceExistence("hotDeploymentCAppTestingProxy"),
+        assertTrue(checkProxyServiceExistence("hotDeploymentCAppTestingProxy"),
                           "transform Proxy service deployment failed");
 
         Awaitility.await().atMost(20, SECONDS).until(fileDelete(cAppFile));
         Awaitility.await().pollInterval(500, TimeUnit.MILLISECONDS).atMost(SERVICE_DEPLOYMENT_DELAY,
                                                                            TimeUnit.MILLISECONDS).until(
                 isCAppUnDeployed(cAppName));
-        Assert.assertFalse(checkCarbonAppExistence(cAppName),
+        assertFalse(checkCarbonAppExistence(cAppName),
                            "Carbon Application Undeployment failed");
     }
 

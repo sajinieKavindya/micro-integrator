@@ -36,7 +36,15 @@ public class CappAxis2Deployer extends AbstractDeployer {
 
     private AxisConfiguration axisConfig;
 
+    /**
+     * Carbon application repository directory
+     */
     private String cAppDir;
+
+    /**
+     * Carbon application file directory (i.e. '.car')
+     */
+    private String extension;
 
     public void init(ConfigurationContext configurationContext) {
         if (log.isDebugEnabled()) {
@@ -48,10 +56,6 @@ public class CappAxis2Deployer extends AbstractDeployer {
         String appUnzipDir = AppDeployerUtils.getAppUnzipDir() + File.separator +
                 AppDeployerUtils.getTenantIdString();
         FileManipulator.deleteDir(appUnzipDir);
-
-        // load the existing Carbon apps from tenant registry space
-//        loadPersistedApps();
-
     }
 
     /**
@@ -62,11 +66,6 @@ public class CappAxis2Deployer extends AbstractDeployer {
      * @throws DeploymentException - error while deploying cApp
      */
     public void deploy(DeploymentFileData deploymentFileData) throws DeploymentException {
-        /**
-         * Before each cApp deployment, we load the existing apps from registry. This is to fix
-         * an issue which occurs in a cluster with deployment synchronizer.
-         */
-//        loadPersistedApps();
         String artifactPath = deploymentFileData.getAbsolutePath();
         try {
             CAppDeploymentManager.getInstance().deploy(artifactPath, axisConfig);
@@ -78,12 +77,20 @@ public class CappAxis2Deployer extends AbstractDeployer {
 
     }
 
-    public void setDirectory(String s) {
-        this.cAppDir = s;
+    public void setDirectory(String cAppDir) {
+        this.cAppDir = cAppDir;
     }
 
-    public void setExtension(String s) {
+    public String getDirectory() {
+        return cAppDir;
+    }
 
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     /**

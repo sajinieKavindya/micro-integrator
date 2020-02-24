@@ -32,7 +32,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Startup;
-import org.apache.synapse.SynapseArtifact;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.config.Entry;
@@ -85,7 +84,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -285,6 +283,7 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                         deployer.undeploy(artifactPath);
                     } else if (SynapseAppDeployerConstants.SEQUENCE_TYPE.equals(artifact.getType())
                                && handleMainFaultSeqUndeployment(artifact, axisConfig)) {
+                        log.debug("Handling main and fault sequence un-deployment");
                     } else if (artifactInRepo.exists()) {
                         log.info("Deleting artifact at " + artifactInRepo.getAbsolutePath());
                         if (!artifactInRepo.delete()) {
@@ -1252,6 +1251,9 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                         }
                     }
                     break;
+                default:
+                    // do nothing
+
             }
             deploymentEngine.addDeployer(deployer, artifactDir, ServiceBusConstants.ARTIFACT_EXTENSION);
         }

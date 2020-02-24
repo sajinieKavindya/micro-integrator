@@ -148,8 +148,13 @@ public class CAppDeploymentManager {
      * Builds the carbon application from app configuration created using the artifacts.xml path.
      *
      * @param targetCAppPath - path to target carbon application
+<<<<<<< HEAD
      * @param cAppName       - name of the carbon application
      * @param axisConfig     - AxisConfiguration instance
+=======
+     * @param cAppName - name of the carbon application
+     * @param axisConfig -AxisConfiguration instance
+>>>>>>> refactor the code
      * @return - CarbonApplication instance if successfull. otherwise null..
      * @throws CarbonException - error while building
      */
@@ -199,8 +204,13 @@ public class CAppDeploymentManager {
     }
 
     /**
+<<<<<<< HEAD
      * Check whether there is an already existing Carbon application with the given name. Use app name with version to
      * support multiple capp versions.
+=======
+     * Check whether there is an already existing Carbon application with the given name.
+     * Use app name with version to support multiple capp versions
+>>>>>>> refactor the code
      *
      * @param newAppNameWithVersion - name of the new app
      * @param axisConfig            - AxisConfiguration instance

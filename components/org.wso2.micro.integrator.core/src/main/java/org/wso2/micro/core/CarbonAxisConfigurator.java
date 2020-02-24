@@ -379,7 +379,7 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
     }*/
 
     public synchronized void runDeployment() {
-//        schedulerTask.runAxisDeployment();
+        schedulerTask.runAxisDeployment();
     }
 
     public void setRepoUpdateFailed() {
@@ -405,9 +405,9 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
     @Override
     public void cleanup() {
         //NULL check for if hot deployment/update is turned off
-/*        if (scheduler != null) {
+        if (scheduler != null) {
             scheduler.shutdown();
-        }*/
+        }
         super.cleanup();
     }
 
