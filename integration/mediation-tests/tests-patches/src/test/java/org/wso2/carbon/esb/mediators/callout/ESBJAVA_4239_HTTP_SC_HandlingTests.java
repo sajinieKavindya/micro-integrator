@@ -56,6 +56,9 @@ public class ESBJAVA_4239_HTTP_SC_HandlingTests extends ESBIntegrationTest {
         String soapRequest =
                 TestConfigurationProvider.getResourceLocation() + "artifacts" + File.separator + "ESB" + File.separator
                         + "mediatorconfig" + File.separator + "callout" + File.separator + "SOAPRequestWithHeader.xml";
+        log.info("TestConfigurationProvider.getResourceLocation() ::::::::::::::: " + TestConfigurationProvider.getResourceLocation() );
+        log.info("Soap Request File ::::::::::::::: " + soapRequest );
+        log.info("Soap Request File Exists ::::::::::::::: " + new File(soapRequest).exists() );
         File input = new File(soapRequest);
         PostMethod post = new PostMethod(endpoint);
         RequestEntity entity = new FileRequestEntity(input, "text/xml");
