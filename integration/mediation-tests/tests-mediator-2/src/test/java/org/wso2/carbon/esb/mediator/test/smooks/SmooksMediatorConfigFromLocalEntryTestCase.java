@@ -57,6 +57,7 @@ public class SmooksMediatorConfigFromLocalEntryTestCase extends ESBIntegrationTe
         Thread.sleep(3000);
 
         Path outPutFilePath = Paths.get(smooksResourceDir, "test", "out", "config-localentry-test-out.xml");
+        log.info("output file path :::::::::::::::::::::::::::::"  + outPutFilePath);
         Assert.assertTrue(Files.exists(outPutFilePath), "output file has not been created, there could be an issue "
                 + "in picking up smooks configuration as a local entry");
         String smooksOut = new String(Files.readAllBytes(outPutFilePath));

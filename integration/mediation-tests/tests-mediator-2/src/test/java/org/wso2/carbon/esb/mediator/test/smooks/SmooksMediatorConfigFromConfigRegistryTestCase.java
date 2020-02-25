@@ -58,6 +58,7 @@ public class SmooksMediatorConfigFromConfigRegistryTestCase extends ESBIntegrati
         Thread.sleep(2000);
 
         Path outPutFilePath = Paths.get(smooksResourceDir, "test", "out", "config-reg-test-out.xml");
+        log.info("Output file path ::::::::::::::::::::::::::::::::::::;; " + outPutFilePath);
         Assert.assertTrue(Files.exists(outPutFilePath), "output file has not been created, there could be an issue "
                 + "in picking up smooks configuration from registry");
         String smooksOut = new String(Files.readAllBytes(outPutFilePath));
