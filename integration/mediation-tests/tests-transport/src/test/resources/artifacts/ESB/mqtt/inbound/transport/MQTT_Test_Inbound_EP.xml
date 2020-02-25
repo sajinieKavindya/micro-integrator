@@ -10,5 +10,6 @@
             <parameter name="mqtt.subscription.qos">0</parameter>
             <parameter name="mqtt.session.clean">true</parameter>
             <parameter name="mqtt.ssl.enable">false</parameter>
+
         </parameters>
     </inboundEndpoint>
