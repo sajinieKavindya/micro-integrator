@@ -73,7 +73,7 @@ public class MQTTInboundMessagePollingTestCase extends ESBIntegrationTest {
         byte[] payload = messageToSend.getBytes();
         MQTTTestClient mqttPublisherClient = null;
         Assert.assertTrue(carbonLogReader.checkForLog("MQTT_Test_Inbound_EP connected to the broker",
-                                                      120), "MQTT_Test_Inbound_EP could not connect to the broker");
+                                                      20), "MQTT_Test_Inbound_EP could not connect to the broker");
         try {
             mqttPublisherClient = new MQTTTestClient(brokerURL, userName, password, publisherClientId);
             mqttPublisherClient.publishMessage(topic, payload, QualityOfService.LEAST_ONCE.getValue(), false);
