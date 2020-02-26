@@ -80,7 +80,7 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
     private BundleContext bundleContext;
     private String carbonContextRoot;
     private ScheduledExecutorService scheduler;
-    private CarbonDeploymentSchedulerTask schedulerTask;
+    /*private CarbonDeploymentSchedulerTask schedulerTask;*/
 
     public boolean isInitialized() {
         return isInitialized;
@@ -379,7 +379,7 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
     }*/
 
     public synchronized void runDeployment() {
-        schedulerTask.runAxisDeployment();
+//        schedulerTask.runAxisDeployment();
     }
 
     public void setRepoUpdateFailed() {
@@ -388,7 +388,7 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
 
     @Override
     protected void startSearch(RepositoryListener listener) {
-        schedulerTask = new CarbonDeploymentSchedulerTask(listener, axisConfig);
+        CarbonDeploymentSchedulerTask schedulerTask = new CarbonDeploymentSchedulerTask(listener, axisConfig);
         scheduler = Executors.newScheduledThreadPool(1, new CarbonThreadFactory(
                 new ThreadGroup("CarbonDeploymentSchedulerThread")));
 
@@ -484,7 +484,6 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
     }
 
     public void deployServices() {
-        setWebLocationString(webLocation);
         if (repoLocation != null && repoLocation.trim().length() != 0) {
             if (isUrlRepo) {
                 try {

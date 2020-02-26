@@ -30,9 +30,9 @@ import org.wso2.micro.application.deployer.AppDeployerUtils;
 import org.wso2.micro.application.deployer.CarbonApplication;
 import org.wso2.micro.core.util.FileManipulator;
 
-public class CappAxis2Deployer extends AbstractDeployer {
+public class CappDeployer extends AbstractDeployer {
 
-    private static final Log log = LogFactory.getLog(CappAxis2Deployer.class);
+    private static final Log log = LogFactory.getLog(CappDeployer.class);
 
     private AxisConfiguration axisConfig;
 
@@ -48,7 +48,7 @@ public class CappAxis2Deployer extends AbstractDeployer {
 
     public void init(ConfigurationContext configurationContext) {
         if (log.isDebugEnabled()) {
-            log.debug("Initializing Capp Axis2 Deployer..");
+            log.debug("Initializing Capp Deployer..");
         }
         this.axisConfig = configurationContext.getAxisConfiguration();
 
@@ -60,7 +60,7 @@ public class CappAxis2Deployer extends AbstractDeployer {
 
     /**
      * Axis2 deployment engine will call this method when a .car archive is deployed. So we only have to call the
-     * applicationManager to deploy it using the absolute path of the deployed .car file.
+     * cAppDeploymentManager to deploy it using the absolute path of the deployed .car file.
      *
      * @param deploymentFileData - info about the deployed file
      * @throws DeploymentException - error while deploying cApp
@@ -98,7 +98,7 @@ public class CappAxis2Deployer extends AbstractDeployer {
      * the file path and call the undeploy method on applicationManager.
      *
      * @param filePath - deleted .car file path
-     * @throws DeploymentException
+     * @throws DeploymentException - error while un-deploying cApp
      */
     public void undeploy(String filePath) throws DeploymentException {
         String artifactPath = AppDeployerUtils.formatPath(filePath);

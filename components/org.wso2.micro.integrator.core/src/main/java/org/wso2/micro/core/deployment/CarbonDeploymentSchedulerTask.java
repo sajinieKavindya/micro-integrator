@@ -29,19 +29,18 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This task takes care of deployment in WSO2 Carbon servers.
  * <p/>
- * It will do a deployment synchronization, followed by hot deployment
+ * It will do a deployment synchronization, followed by hot deployment.
  */
 public class CarbonDeploymentSchedulerTask extends SchedulerTask {
 
     /**
-     * Indicates whether a Deployment repo update has to be performed
+     * Indicates whether a Deployment repo update has to be performed.
      */
-    public static final String REPO_UPDATE_REQUIRED = "repo.update.required";
+    private static final String REPO_UPDATE_REQUIRED = "repo.update.required";
 
     private static final Log log = LogFactory.getLog(CarbonDeploymentSchedulerTask.class);
 
-    public CarbonDeploymentSchedulerTask(RepositoryListener listener,
-                                         AxisConfiguration axisConfig) {
+    public CarbonDeploymentSchedulerTask(RepositoryListener listener, AxisConfiguration axisConfig) {
         super(listener, axisConfig);
 
         try {
@@ -51,14 +50,10 @@ public class CarbonDeploymentSchedulerTask extends SchedulerTask {
         }
     }
 
-    public synchronized void runAxisDeployment() {
-        super.run();
-    }
-
     @Override
     public synchronized void run() {
         try {
-            runAxisDeployment(); // artifact meta files which need to be committed may be generated during this super
+            super.run(); // artifact meta files which need to be committed may be generated during this super
 
         } catch (Throwable t) {
             // we cannot let exceptions to be handled in the executor framework. It will kill the thread altogether

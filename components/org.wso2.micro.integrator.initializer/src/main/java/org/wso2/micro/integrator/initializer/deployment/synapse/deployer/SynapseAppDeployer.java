@@ -28,6 +28,7 @@ import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,6 +94,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
+import static org.wso2.micro.integrator.initializer.deployment.DeploymentConstants.TAG_HOT_DEPLOYMENT;
 
 public class SynapseAppDeployer implements AppDeploymentHandler {
 
@@ -251,7 +254,8 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
             } else if(SynapseAppDeployerConstants.SYNAPSE_LIBRARY_TYPE.equals(artifact.getType())) {
                 deployer = getSynapseLibraryDeployer(axisConfig);
             } else {
-                String artifactDirName = getArtifactDirName(artifact);
+                String artifactType = artifact.getType();
+                String artifactDirName = getArtifactDirName(artifactType);
                 if (artifactDirName == null) {
                     continue;
                 }
@@ -794,11 +798,12 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
      * @return whether main or fault sequence is handled
      */
     private boolean handleMainFaultSeqDeployment(Artifact artifact,
-                                                 AxisConfiguration axisConfig) throws DeploymentException {
+                                                 AxisConfiguration axisConfig, Deployer deployer) throws DeploymentException {
 
         String fileName = artifact.getFiles().get(0).getName();
         String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
         boolean isMainOrFault = false;
+        Parameter hotDeployment = axisConfig.getParameter(TAG_HOT_DEPLOYMENT);
 
         if (fileName.matches(MAIN_SEQ_REGEX) || fileName.matches(SynapseAppDeployerConstants.MAIN_SEQ_FILE)) {
             isMainOrFault = true;
@@ -806,9 +811,27 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                 String mainXMLPath = getMainXmlPath(axisConfig);
                 log.info("Copying main sequence to " + mainXMLPath);
                 FileUtils.copyFile(new File(artifactPath), new File(mainXMLPath));
+
+                if (hotDeployment != null && JavaUtils.isFalse(hotDeployment.getValue(), true)) {
+                    deployer.deploy(new DeploymentFileData(new File(mainXMLPath), deployer));
+                }
                 artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_DEPLOYED);
+            } catch (DeploymentException e) {
+                artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
+                throw e;
             } catch (IOException e) {
                 log.error("Error copying main.xml to sequence directory", e);
+            } catch (Throwable throwable) {
+                artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
+                // Since there can be different deployers, they can throw any error.
+                // So need to handle unhandled exception has occurred during deployement. Hence catch all and
+                // wrap it with DeployementException and throw it
+                throw new DeploymentException(throwable);
+            } finally {
+                //clear the log appender once deployment is finished to avoid appending the
+                //same log to other classes.
+                setCustomLogContent(deployer, null);
+                CustomLogSetter.getInstance().clearThreadLocalContent();
             }
         } else if (fileName.matches(FAULT_SEQ_REGEX) || fileName.matches(SynapseAppDeployerConstants.FAULT_SEQ_FILE)) {
             isMainOrFault = true;
@@ -816,9 +839,27 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                 String faultXMLPath = getFaultXmlPath(axisConfig);
                 log.info("Copying fault sequence to " + faultXMLPath);
                 FileUtils.copyFile(new File(artifactPath), new File(faultXMLPath));
+
+                if (hotDeployment != null && JavaUtils.isFalse(hotDeployment.getValue(), true)) {
+                    deployer.deploy(new DeploymentFileData(new File(faultXMLPath), deployer));
+                }
                 artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_DEPLOYED);
+            } catch (DeploymentException e) {
+                artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
+                throw e;
             } catch (IOException e) {
                 log.error("Error copying main.xml to sequence directory", e);
+            } catch (Throwable throwable) {
+                artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
+                // Since there can be different deployers, they can throw any error.
+                // So need to handle unhandled exception has occurred during deployement. Hence catch all and
+                // wrap it with DeployementException and throw it
+                throw new DeploymentException(throwable);
+            } finally {
+                //clear the log appender once deployment is finished to avoid appending the
+                //same log to other classes.
+                setCustomLogContent(deployer, null);
+                CustomLogSetter.getInstance().clearThreadLocalContent();
             }
         }
         return isMainOrFault;
@@ -941,12 +982,11 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
     /**
      * Get the artifact directory name for the artifact type
      *
-     * @param artifact  synapse artifact
+     * @param artifactType  type of the synapse artifact
      * @return artifact directory
      */
-    private String getArtifactDirName(Artifact artifact) {
+    private String getArtifactDirName(String artifactType) {
 
-        String artifactType = artifact.getType();
         if (SynapseAppDeployerConstants.SEQUENCE_TYPE.equals(artifactType)) {
             return SynapseAppDeployerConstants.SEQUENCES_FOLDER;
         } else if (SynapseAppDeployerConstants.ENDPOINT_TYPE.equals(artifactType)) {
@@ -968,42 +1008,13 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
         } else if (SynapseAppDeployerConstants.TEMPLATE_TYPE.endsWith(artifactType)) {
             return SynapseAppDeployerConstants.TEMPLATES_FOLDER;
         } else if (SynapseAppDeployerConstants.INBOUND_ENDPOINT_TYPE.endsWith(artifactType)) {
-           return SynapseAppDeployerConstants.INBOUND_ENDPOINT_FOLDER;            
+           return SynapseAppDeployerConstants.INBOUND_ENDPOINT_FOLDER;
         } else if (SynapseAppDeployerConstants.SYNAPSE_LIBRARY_TYPE.equals(artifactType)) {
             return SynapseAppDeployerConstants.SYNAPSE_LIBS;
         }
         return null;
     }
 
-    private String getArtifactDirName(String artifactType) {
-
-        if (SynapseAppDeployerConstants.SEQUENCE_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.SEQUENCES_FOLDER;
-        } else if (SynapseAppDeployerConstants.ENDPOINT_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.ENDPOINTS_FOLDER;
-        } else if (SynapseAppDeployerConstants.PROXY_SERVICE_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.PROXY_SERVICES_FOLDER;
-        } else if (SynapseAppDeployerConstants.LOCAL_ENTRY_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.LOCAL_ENTRIES_FOLDER;
-        } else if (SynapseAppDeployerConstants.EVENT_SOURCE_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.EVENTS_FOLDER;
-        } else if (SynapseAppDeployerConstants.TASK_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.TASKS_FOLDER;
-        } else if (SynapseAppDeployerConstants.MESSAGE_STORE_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.MESSAGE_STORE_FOLDER;
-        } else if (SynapseAppDeployerConstants.MESSAGE_PROCESSOR_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.MESSAGE_PROCESSOR_FOLDER;
-        } else if (SynapseAppDeployerConstants.API_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.APIS_FOLDER;
-        } else if (SynapseAppDeployerConstants.TEMPLATE_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.TEMPLATES_FOLDER;
-        } else if (SynapseAppDeployerConstants.INBOUND_ENDPOINT_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.INBOUND_ENDPOINT_FOLDER;
-        } else if (SynapseAppDeployerConstants.SYNAPSE_LIBRARY_TYPE.equals(artifactType)) {
-            return SynapseAppDeployerConstants.SYNAPSE_LIBS;
-        }
-        return null;
-    }
     /**
      * Get the absolute path of the artifact directory
      *
@@ -1068,7 +1079,8 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                                 AxisConfiguration axisConfig) throws DeploymentException {
         for (Artifact.Dependency dep : artifacts) {
             Artifact artifact = dep.getArtifact();
-            String artifactDirName = getArtifactDirName(artifact);
+            String artifactType = artifact.getType();
+            String artifactDirName = getArtifactDirName(artifactType);
 
             if (!validateArtifact(artifact) || artifactDirName == null) {
                 continue;
@@ -1085,7 +1097,8 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                 File artifactInRepo = new File(artifactDir + File.separator + fileName);
 
                 if (SynapseAppDeployerConstants.SEQUENCE_TYPE.equals(artifact.getType()) &&
-                        handleMainFaultSeqDeployment(artifact, axisConfig)) {
+                        handleMainFaultSeqDeployment(artifact, axisConfig, deployer)) {
+                    log.debug("Handling main and fault sequence deployment");
                 } else if (artifactInRepo.exists()) {
                     log.warn("Artifact " + fileName + " already found in " + artifactInRepo.getAbsolutePath() +
                             ". Ignoring CAPP's artifact");
@@ -1165,6 +1178,13 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
         synapseDeployers.put(type, deployer);
     }
 
+    /**
+     * Register synapse deployers to the deployment engine.
+     *
+     * @param axisConfig   - axisConfiguration to which this deployer belongs
+     * @param artifactType - type of the artifact
+     * @param deployer     - related deployer
+     */
     private void registerSynapseDeployer(AxisConfiguration axisConfig, String artifactType, Deployer deployer) {
 
         DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();

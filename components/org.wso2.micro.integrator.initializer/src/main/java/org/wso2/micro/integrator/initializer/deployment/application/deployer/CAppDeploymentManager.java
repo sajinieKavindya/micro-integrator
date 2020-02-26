@@ -149,12 +149,17 @@ public class CAppDeploymentManager {
      *
      * @param targetCAppPath - path to target carbon application
 <<<<<<< HEAD
+<<<<<<< HEAD
      * @param cAppName       - name of the carbon application
      * @param axisConfig     - AxisConfiguration instance
 =======
      * @param cAppName - name of the carbon application
      * @param axisConfig -AxisConfiguration instance
 >>>>>>> refactor the code
+=======
+     * @param cAppName       - name of the carbon application
+     * @param axisConfig     - AxisConfiguration instance
+>>>>>>> Remove code duplications
      * @return - CarbonApplication instance if successfull. otherwise null..
      * @throws CarbonException - error while building
      */
@@ -205,12 +210,17 @@ public class CAppDeploymentManager {
 
     /**
 <<<<<<< HEAD
+<<<<<<< HEAD
      * Check whether there is an already existing Carbon application with the given name. Use app name with version to
      * support multiple capp versions.
 =======
      * Check whether there is an already existing Carbon application with the given name.
      * Use app name with version to support multiple capp versions
 >>>>>>> refactor the code
+=======
+     * Check whether there is an already existing Carbon application with the given name. Use app name with version to
+     * support multiple capp versions.
+>>>>>>> Remove code duplications
      *
      * @param newAppNameWithVersion - name of the new app
      * @param axisConfig            - AxisConfiguration instance
