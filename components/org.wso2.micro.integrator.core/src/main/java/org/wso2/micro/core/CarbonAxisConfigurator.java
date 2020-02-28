@@ -80,7 +80,7 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
     private BundleContext bundleContext;
     private String carbonContextRoot;
     private ScheduledExecutorService scheduler;
-    /*private CarbonDeploymentSchedulerTask schedulerTask;*/
+//    private CarbonDeploymentSchedulerTask schedulerTask;
 
     public boolean isInitialized() {
         return isInitialized;
@@ -483,6 +483,9 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
         return axis2xmlStream;
     }
 
+    /**
+     * Deploy all services in the given repoLocation.
+     */
     public void deployServices() {
         if (repoLocation != null && repoLocation.trim().length() != 0) {
             if (isUrlRepo) {
