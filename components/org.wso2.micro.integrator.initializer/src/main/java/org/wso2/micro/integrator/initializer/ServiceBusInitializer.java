@@ -181,7 +181,7 @@ public class ServiceBusInitializer {
                     configurationManager);*/
 
             // Start Inbound Endpoint Listeners
-            EndpointListenerLoader.loadListeners();
+            EndpointListenerLoader.loadListeners(configCtxSvc.getServerConfigContext().getAxisConfiguration());
         } catch (Exception e) {
             handleFatal("Couldn't initialize the ESB...", e);
         } catch (Throwable t) {

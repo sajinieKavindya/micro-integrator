@@ -18,8 +18,14 @@
 
 package org.wso2.micro.integrator.probes;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -27,11 +33,8 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.inbound.endpoint.internal.http.api.APIResource;
 import org.wso2.micro.integrator.core.services.CarbonServerConfigurationService;
-import org.wso2.micro.integrator.initializer.deployment.application.deployer.CAppDeploymentManager;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import org.wso2.micro.integrator.initializer.deployment.application.deployer.CappDeployer;
+import static org.wso2.carbon.inbound.endpoint.internal.http.api.Constants.TAG_HOT_DEPLOYMENT;
 
 /**
  * API resource of the readiness probe API.
@@ -43,6 +46,7 @@ public class ReadinessResource extends APIResource {
     private static final String HTTP_SC = "HTTP_SC";
     private static String CACHED_RESPONSE = "";
     private static int CACHED_RESPONSE_CODE;
+    private static Boolean HOT_DEPLOYMENT = null;
 
     /**
      * Constructor for creating an API Resource.
@@ -81,7 +85,7 @@ public class ReadinessResource extends APIResource {
             String miVersion = serverConfig.getServerVersion();
             response = "{\"version\":\"" + miVersion + "\",";
 
-            ArrayList<String> faultyCapps = new ArrayList<>(CAppDeploymentManager.getFaultyCapps());
+            ArrayList<String> faultyCapps = new ArrayList<>(CappDeployer.getFaultyCapps());
             if (faultyCapps.size() > 0) {
                 String faultyList = String.join("\",\"", faultyCapps);
                 response += "\"status\": \"not ready, faulty CAPPs detected\", \"Faulty CAPPs\" : [\"" + faultyList +
@@ -96,6 +100,19 @@ public class ReadinessResource extends APIResource {
         }
 
         axisCtx.setProperty(HTTP_SC, CACHED_RESPONSE_CODE);
+        if (HOT_DEPLOYMENT == null) {
+            Parameter hotDeployment = axisCtx.getConfigurationContext().getAxisConfiguration().getParameter(
+                    TAG_HOT_DEPLOYMENT);
+            if (hotDeployment != null) {
+                HOT_DEPLOYMENT = JavaUtils.isTrue(hotDeployment.getValue(), true);
+            }
+        }
+
+        if (HOT_DEPLOYMENT) {
+            log.warn(
+                    "Readiness probe configured while hot deployment is enabled. Faulty artifact deployment will not " +
+                            "prevent the probe from being activated.");
+        }
 
         try {
             JsonUtil.getNewJsonPayload(axisCtx, CACHED_RESPONSE, true, true);

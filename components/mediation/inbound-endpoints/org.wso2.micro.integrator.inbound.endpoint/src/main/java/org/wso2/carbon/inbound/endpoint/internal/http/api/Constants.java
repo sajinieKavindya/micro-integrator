@@ -30,4 +30,6 @@ public class Constants {
     public static final String INTERNAL_APIS_FILE = "internal-apis.xml";
     public static final String PREFIX_TO_ENABLE_INTERNAL_APIS = "enable";
 
+    public static final String TAG_HOT_DEPLOYMENT = "hotdeployment";
+
 }

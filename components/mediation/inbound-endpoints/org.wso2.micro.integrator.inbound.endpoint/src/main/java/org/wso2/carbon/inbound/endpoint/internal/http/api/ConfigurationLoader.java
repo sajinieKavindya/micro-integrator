@@ -17,16 +17,6 @@
  */
 package org.wso2.carbon.inbound.endpoint.internal.http.api;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.commons.util.MiscellaneousUtil;
-import org.apache.synapse.rest.cors.CORSConfiguration;
-import org.apache.synapse.transport.passthru.core.ssl.SSLConfiguration;
-import org.wso2.carbon.inbound.endpoint.persistence.PersistenceUtils;
-import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -38,6 +28,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.commons.util.MiscellaneousUtil;
+import org.apache.synapse.rest.cors.CORSConfiguration;
+import org.apache.synapse.transport.passthru.core.ssl.SSLConfiguration;
+import org.wso2.carbon.inbound.endpoint.DataHolder;
+import org.wso2.carbon.inbound.endpoint.persistence.PersistenceUtils;
+import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
+import static org.wso2.carbon.inbound.endpoint.internal.http.api.Constants.TAG_HOT_DEPLOYMENT;
 
 /**
  * {@code ConfigurationLoader} contains utilities to load configuration file content required for Internal APIs
@@ -63,6 +67,7 @@ public class ConfigurationLoader {
     private static final String HTTPS_PROTOCOLS_ATT = "httpsProtocols";
     private static final String CERTIFICATE_REVOCATION_VERIFIER_ATT = "certificateRevocationVerifier";
     private static final String PREFERRED_CIPHERS_ATT = "preferredCiphers";
+    private static final String READINESS_PROBE = "ReadinessProbe";
 
     private static SSLConfiguration sslConfiguration;
     private static boolean sslConfiguredSuccessfully;
@@ -111,6 +116,15 @@ public class ConfigurationLoader {
                             if (!Boolean.parseBoolean(
                                     System.getProperty(Constants.PREFIX_TO_ENABLE_INTERNAL_APIS + name))) {
                                 continue;
+                            }
+                            if (READINESS_PROBE.equals(name)) {
+                                Parameter hotDeployment = DataHolder.getInstance().getAxisConfiguration().getParameter(
+                                        TAG_HOT_DEPLOYMENT);
+                                if (hotDeployment != null && JavaUtils.isTrue(hotDeployment.getValue(), true)) {
+                                    log.warn(
+                                            "Readiness probe configured while hot deployment is enabled. Faulty " +
+                                                    "artifact deployment will not prevent the probe from being activated.");
+                                }
                             }
                         } else {
                             handleException("Name not defined in one or more handlers");

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.inbound.endpoint;
 
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.inbound.InboundProcessorParams;
@@ -54,7 +55,7 @@ public class EndpointListenerLoader {
      * So to make sure persistence service is available, we need to depend on some other technique
      * like the one described above
      */
-    public static void loadListeners() {
+    public static void loadListeners(AxisConfiguration axisConfiguration) {
 
         Map<Integer, List<InboundEndpointInfoDTO>> tenantData = InboundEndpointsDataStore.getInstance()
                 .getAllListeningEndpointData();
@@ -100,6 +101,7 @@ public class EndpointListenerLoader {
             }
         }
 
+        DataHolder.getInstance().setAxisConfiguration(axisConfiguration);
         loadInternalInboundApis();
     }
 
