@@ -6,7 +6,7 @@
     <description/>
     <target faultSequence="ESBJAVA4239FaultSeq">
         <inSequence>
-            <callout serviceURL="http://localhost:1995" action="urn:getQuote">
+            <callout serviceURL="http://localhost:9045" action="urn:getQuote">
                 <source xmlns:s12="http://www.w3.org/2003/05/soap-envelope"
                         xmlns:s11="http://schemas.xmlsoap.org/soap/envelope/"
                         xpath="s11:Body/child::*[fn:position()=1] | s12:Body/child::*[fn:position()=1]"/>

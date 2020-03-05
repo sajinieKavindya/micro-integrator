@@ -47,6 +47,7 @@ public class SimpleSocketServer extends Thread {
             System.err.println("Server starting on port : " + port);
 
             while (true) {
+                System.err.println("Counting beginning :::::::::::: ");
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected");
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -55,7 +56,8 @@ public class SimpleSocketServer extends Thread {
                 while (true) {
                     String s;
                     if ((s = in.readLine()) != null) {
-                        System.out.println(s);
+                        System.err.println("Counting in the middle :::::::::::: ");
+                        System.err.println(s);
                         if (!s.isEmpty()) {
                             if (receivedRequest == null) {
                                 receivedRequest = new StringBuffer();
@@ -66,10 +68,11 @@ public class SimpleSocketServer extends Thread {
                     }
 
                     out.write(expectedOutput);
+                    System.err.println("Counting finished :::::::::::: ");
                     System.err.println("connection terminated");
-                    out.close();
-                    in.close();
-                    clientSocket.close();
+//                    out.close();
+//                    in.close();
+//                    clientSocket.close();
                     break;
                 }
 

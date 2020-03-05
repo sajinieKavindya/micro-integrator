@@ -38,13 +38,12 @@ public class ESBJAVA_4239_HTTP_SC_HandlingTests extends ESBIntegrationTest {
     @BeforeClass(alwaysRun = true)
     public void deployService() throws Exception {
         super.init();
-        int port = 1995;
+        int port = 9045;
         String expectedResponse =
                 "HTTP/1.1 404 Not Found\r\nServer: testServer\r\n" + "Content-Type: text/xml; charset=UTF-8\r\n"
                         + "Transfer-Encoding: chunked\r\n" + "\r\n" + "\"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                         + "<test></test>";
         simpleSocketServer = new SimpleSocketServer(port, expectedResponse);
-        simpleSocketServer.start();
         carbonLogReader = new CarbonLogReader();
         carbonLogReader.start();
     }
@@ -68,6 +67,7 @@ public class ESBJAVA_4239_HTTP_SC_HandlingTests extends ESBIntegrationTest {
         boolean errorLog = false;
 
         try {
+            simpleSocketServer.start();
             httpClient.executeMethod(post);
             errorLog = carbonLogReader.checkForLog("STATUS-Fault", DEFAULT_TIMEOUT) && carbonLogReader.
                     checkForLog("404 Error: Not Found", DEFAULT_TIMEOUT);
