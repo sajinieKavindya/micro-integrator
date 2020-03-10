@@ -16,7 +16,6 @@
             <class name="org.wso2.carbon.esb.mediator.test.smooks.SmooksMediatorConfigFromConfigRegistryTestCase"/>
             <class name="org.wso2.carbon.esb.mediator.test.smooks.SmooksMediatorConfigFromLocalEntryTestCase"/>
             <class name="org.wso2.carbon.esb.mediator.test.validate.ValidateIntegrationDynamicSchemaChangeTestCase"></class>
-
         </classes>
     </test>
 
