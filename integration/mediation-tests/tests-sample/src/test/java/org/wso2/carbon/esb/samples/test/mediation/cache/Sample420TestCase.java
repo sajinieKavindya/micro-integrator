@@ -50,7 +50,7 @@ public class Sample420TestCase extends ESBSampleIntegrationTest {
         response = axis2Client.sendSimpleStockQuoteRequest(serviceEp, "", "IBM");
         String firstResponse = response.getFirstElement().toString();
 
-        while (timeDiff < 20000) {
+        while (timeDiff < 40000) {
 
             response = axis2Client.sendSimpleStockQuoteRequest(serviceEp, "", "IBM");
 
