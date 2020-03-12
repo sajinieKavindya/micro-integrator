@@ -64,7 +64,9 @@ public class JMSTransportProxyTestCase extends ESBIntegrationTest {
         try {
             consumer.connect(queueName);
             for (int i = 0; i < 3; i++) {
-                if (consumer.popMessage() != null) {
+                String message = consumer.popMessage();
+                log.info("testing testMessageInjection :::::::::::::::: " + message);
+                if (message != null) {
                     Assert.fail("JMS Proxy service failed to pick the messages from Queue");
                 }
             }

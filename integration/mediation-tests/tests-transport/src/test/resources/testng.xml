@@ -80,24 +80,24 @@
 
     <test name="JMS-transport-Test" preserve-order="true" verbose="2">
         <classes>
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA1793TestCase"/>-->
+            <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA1793TestCase"/>
             <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA1832MessageInjectorTestCase"/>
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA2464TestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA2907TestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSClientAndRestServiceTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSEndpointSuspensionTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSEndpointTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMapMessageTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMessageProcessorTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMessageStoreProcRESTTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.MSMPCronForwarderCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSOutOnlyTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSQueueAsProxyEndpointTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSSenderStaleConnectionsTestCase"/>-->
+            <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA2464TestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.ESBJAVA2907TestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSClientAndRestServiceTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSEndpointSuspensionTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSEndpointTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMapMessageTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMessageProcessorTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMessageStoreProcRESTTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.MSMPCronForwarderCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSOutOnlyTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSQueueAsProxyEndpointTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSSenderStaleConnectionsTestCase"/>
             <class name="org.wso2.carbon.esb.jms.transport.test.JMSTransportProxyTestCase"/>
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMessageStoreUnavailableTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.SpecialCharacterTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.jms.transport.test.topic.JMSTopicAsProxyEndpointTestCase"/>-->
+            <class name="org.wso2.carbon.esb.jms.transport.test.JMSMessageStoreUnavailableTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.SpecialCharacterTestCase"/>
+            <class name="org.wso2.carbon.esb.jms.transport.test.topic.JMSTopicAsProxyEndpointTestCase"/>
         </classes>
     </test>
 
@@ -166,11 +166,11 @@
     <!--</packages>-->
     <!--</test>-->
 
-    <test name="inbound-MQTT-Transport-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mqtt.inbound.transport.test"/>
-        </packages>
-    </test>
+<!--    <test name="inbound-MQTT-Transport-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mqtt.inbound.transport.test"/>-->
+<!--        </packages>-->
+<!--    </test>-->
 
     <!-- Kafka is not availble with framework-->
     <!--test name="inbound-KAFKA Transport-Test" preserve-order="true" verbose="2">
@@ -197,11 +197,11 @@
 <!--        </packages>-->
 <!--    </test>-->
 
-    <test name="SSL Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.ssl.test"/>
-        </packages>
-    </test>
+<!--    <test name="SSL Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.ssl.test"/>-->
+<!--        </packages>-->
+<!--    </test>-->
 
 <!--    <test name="WebSocket-Inbound-Test" preserve-order="true" verbose="2">-->
 <!--        <packages>-->
