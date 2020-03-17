@@ -141,6 +141,7 @@ public class CarbonServerManager {
                     serverShutdown(portOffset , false);
                 } catch (Exception e) {
                     log.error("Error while server shutdown ..", e);
+
                 }
             }));
 
@@ -238,9 +239,22 @@ public class CarbonServerManager {
             log.info("Shutting down server ...");
 
             try {
+                // trying to stop the server for multiple times until it gets properly shutdown.
+                int retryCount = 36; // (180/5 = 36)
+                for (int i = 0; i < retryCount; i++) {
+                    if (isRemotePortInUse("localhost", managementPort)) {
+                        log.info("server killing ::::::::::::::: ");
+                        startProcess(carbonHome, getStartScriptCommand("stop"));
+                        waitTill(() -> isRemotePortInUse("localhost", managementPort), 5, TimeUnit.SECONDS);
+                    } else {
+                        log.info("server killed ::::::::::::::: ");
+                        break;
+                    }
+                }
 
-                startProcess(carbonHome, getStartScriptCommand("stop"));
-                waitTill(() -> isRemotePortInUse("localhost", managementPort), 180, TimeUnit.SECONDS);
+                if (isRemotePortInUse("localhost", managementPort)) {
+                    throw new RuntimeException("Server shutting down failed");
+                }
 
                 log.info("Server stopped successfully ...");
 
