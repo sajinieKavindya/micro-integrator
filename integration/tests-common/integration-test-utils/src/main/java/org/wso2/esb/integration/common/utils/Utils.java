@@ -329,7 +329,9 @@ public class Utils {
             config.serialize(outputStream);
             config.serialize(System.out);
             if (isRestartRequired) {
+                log.info("restart begin :::::::::::::::: ");
                 CarbonServerExtension.restartServer();
+                log.info("restart end :::::::::::::::: ");
             }
         } catch (IOException exception) {
             log.error("Error when creating file", exception);

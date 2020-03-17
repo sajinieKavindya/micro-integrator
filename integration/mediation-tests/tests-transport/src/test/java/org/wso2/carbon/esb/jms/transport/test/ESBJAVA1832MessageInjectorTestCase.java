@@ -49,17 +49,21 @@ public class ESBJAVA1832MessageInjectorTestCase extends ESBIntegrationTest {
                 + File.separator + "jms" + File.separator + "transport" + File.separator + "msgInjection" + File.separator
                 + "ESBJAVA1832MessageInjectorTestTask.xml")));
         Utils.deploySynapseConfiguration(omElement, "ESBJAVA1832MessageInjectorTestTask", "tasks", true);
+        Thread.sleep(10000);
     }
 
     @Test(groups = { "wso2.esb" }, description = "Test proxy service with jms transport")
     public void testMessageInjection() throws Exception {
         String queueName = "jmsQueue";
         int numberOfMsgToExpect = 10;
+
+
         TimeUnit.SECONDS.sleep(15);
         try {
             consumer.connect(queueName);
             for (int i = 0; i < numberOfMsgToExpect; i++) {
-                if (consumer.popMessage(javax.jms.Message.class) == null) {
+                javax.jms.Message message = consumer.popMessage(javax.jms.Message.class);
+                if (message == null) {
                     Assert.fail("Unable to pop the expected number of message in the queue " + queueName);
                 }
             }
