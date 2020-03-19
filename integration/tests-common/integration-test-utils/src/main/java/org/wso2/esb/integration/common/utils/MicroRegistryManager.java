@@ -20,6 +20,7 @@ package org.wso2.esb.integration.common.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.esb.integration.common.utils.common.FileManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -113,7 +114,7 @@ public class MicroRegistryManager {
         }
 
         try {
-            Files.copy(Paths.get(sourcePath), Paths.get(targetPath), StandardCopyOption.REPLACE_EXISTING);
+            FileManager.copyFile(Paths.get(sourcePath).toFile(), Paths.get(targetPath).toString());
             log.info("Successfully copied" + message);
         } catch (IOException e) {
             throw new MicroRegistryManagerException("Error occurred while copying" + message, e);
