@@ -175,7 +175,7 @@ public class TestServerManager {
 
         log.info("Preparing to start the MI server ...");
         carbonServer.startServerUsingCarbonHome(carbonHome, commandMap);
-        log.info("Server restarted successfully ...");
+        log.info("Server started successfully ...");
     }
 
 }

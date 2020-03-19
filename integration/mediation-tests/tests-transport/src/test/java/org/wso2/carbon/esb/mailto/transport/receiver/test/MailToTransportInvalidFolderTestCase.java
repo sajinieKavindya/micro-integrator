@@ -39,6 +39,8 @@ public class MailToTransportInvalidFolderTestCase extends ESBIntegrationTest {
 
     @BeforeClass(alwaysRun = true)
     public void initialize() throws Exception {
+        log.info("Running before class :::::::::::::::: MailToTransportInvalidFolderTestCase");
+
         super.init();
         OMElement mailToProxyOMElement = AXIOMUtil.stringToOM(FileUtils.readFileToString(new File(
                 getESBResourceLocation() + File.separator + "mailTransport" + File.separator
@@ -52,6 +54,8 @@ public class MailToTransportInvalidFolderTestCase extends ESBIntegrationTest {
         // Since ESB reads all unread emails one by one, we have to delete
         // the all unread emails before run the test
         GreenMailServer.deleteAllEmails("imap");
+        log.info("Finished running before class :::::::::::::::: MailToTransportInvalidFolderTestCase");
+
     }
 
     @Test(groups = { "wso2.esb" }, description = "Test email transport with invalid folder")
@@ -62,8 +66,12 @@ public class MailToTransportInvalidFolderTestCase extends ESBIntegrationTest {
 
     @AfterClass(alwaysRun = true)
     public void deleteService() throws Exception {
+        log.info("Running after class :::::::::::::::: MailToTransportInvalidFolderTestCase");
+
         Utils.undeploySynapseConfiguration("MailTransportInvalidFolder","proxy-services");
         carbonLogReader.stop();
+        log.info("Finished running after class :::::::::::::::: MailToTransportInvalidFolderTestCase");
+
     }
 
 }

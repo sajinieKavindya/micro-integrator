@@ -49,6 +49,8 @@ public class MailToTransportActionAfterProcessMoveTestCase extends ESBIntegratio
 
     @BeforeClass(alwaysRun = true)
     public void initialize() throws Exception {
+        log.info("Running before class :::::::::::::::: MailToTransportActionAfterProcessMoveTestCase");
+
         super.init();
         OMElement mailToProxyOMElement = AXIOMUtil.stringToOM(FileUtils.readFileToString(new File(
                 getESBResourceLocation() + File.separator + "mailTransport" + File.separator +
@@ -64,6 +66,8 @@ public class MailToTransportActionAfterProcessMoveTestCase extends ESBIntegratio
         // Since ESB reads all unread emails one by one, we have to delete
         // the all unread emails before run the test
         GreenMailServer.deleteAllEmails("imap");
+        log.info("Finished running before class :::::::::::::::: MailToTransportActionAfterProcessMoveTestCase");
+
     }
 
     @Test(groups = { "wso2.esb" }, description = "Test email transport action after process move")
@@ -79,7 +83,11 @@ public class MailToTransportActionAfterProcessMoveTestCase extends ESBIntegratio
 
     @AfterClass(alwaysRun = true)
     public void deleteService() throws Exception {
+        log.info("Running before class :::::::::::::::: MailToTransportActionAfterProcessMoveTestCase");
+
         Utils.undeploySynapseConfiguration("MailTransportMove","proxy-services");
         carbonLogReader.stop();
+        log.info("Finished running after class :::::::::::::::: MailToTransportActionAfterProcessMoveTestCase");
+
     }
 }

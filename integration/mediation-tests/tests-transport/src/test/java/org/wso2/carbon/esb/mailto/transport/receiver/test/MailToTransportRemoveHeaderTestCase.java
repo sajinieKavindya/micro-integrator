@@ -48,6 +48,8 @@ public class MailToTransportRemoveHeaderTestCase extends ESBIntegrationTest {
 
     @BeforeClass(alwaysRun = true)
     public void initialize() throws Exception {
+        log.info("Running before class :::::::::::::::: MailToTransportRemoveHeaderTestCase");
+
         super.init();
         OMElement mailToProxyOMElement = AXIOMUtil.stringToOM(FileUtils.readFileToString(new File(
                 getESBResourceLocation() + File.separator + "mailTransport" + File.separator +
@@ -63,6 +65,8 @@ public class MailToTransportRemoveHeaderTestCase extends ESBIntegrationTest {
         // Since ESB reads all unread emails one by one, we have to delete
         // the all unread emails before run the test
         GreenMailServer.deleteAllEmails("imap");
+        log.info("Finished running before class :::::::::::::::: MailToTransportRemoveHeaderTestCase");
+
     }
 
     @Test(groups = { "wso2.esb" }, description = "Test email transport remove header parameter")
@@ -77,8 +81,12 @@ public class MailToTransportRemoveHeaderTestCase extends ESBIntegrationTest {
 
     @AfterClass(alwaysRun = true)
     public void deleteService() throws Exception {
+        log.info("Running after class :::::::::::::::: MailToTransportRemoveHeaderTestCase");
+
         Utils.undeploySynapseConfiguration("MailTransportRemoveHeader","proxy-services");
         carbonLogReader.stop();
+        log.info("Finished running after class :::::::::::::::: MailToTransportRemoveHeaderTestCase");
+
     }
 
 }

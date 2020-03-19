@@ -358,7 +358,7 @@ public class Utils {
             log.error("Error while deleting the file", e);
         }
         if (restartServer) {
-            CarbonServerExtension.restartServer();
+            CarbonServerExtension.startServer();
         }
     }
 

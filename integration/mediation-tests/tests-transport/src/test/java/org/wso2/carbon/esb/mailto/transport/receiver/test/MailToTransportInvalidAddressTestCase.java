@@ -42,6 +42,7 @@ public class MailToTransportInvalidAddressTestCase extends ESBIntegrationTest {
 
     @BeforeClass(alwaysRun = true)
     public void initialize() throws Exception {
+        log.info("Running before class :::::::::::::::: MailToTransportInvalidAddressTestCase");
         super.init();
         OMElement mailToProxyOMElement = AXIOMUtil.stringToOM(FileUtils.readFileToString(new File(
                 getESBResourceLocation() + File.separator + "mailTransport" + File.separator
@@ -55,6 +56,7 @@ public class MailToTransportInvalidAddressTestCase extends ESBIntegrationTest {
         // Since ESB reads all unread emails one by one, we have to delete
         // the all unread emails before run the test
         GreenMailServer.deleteAllEmails("pop3");
+        log.info("Finished running before class :::::::::::::::: MailToTransportInvalidAddressTestCase");
     }
 
     @Test(groups = {
@@ -66,7 +68,9 @@ public class MailToTransportInvalidAddressTestCase extends ESBIntegrationTest {
 
     @AfterClass(alwaysRun = true)
     public void deleteService() throws Exception {
+        log.info("Running after class :::::::::::::::: MailToTransportInvalidAddressTestCase");
         carbonLogReader.stop();
         Utils.undeploySynapseConfiguration("MailTransportInvalidAddress","proxy-services");
+        log.info("Finished running after class :::::::::::::::: MailToTransportInvalidAddressTestCase");
     }
 }

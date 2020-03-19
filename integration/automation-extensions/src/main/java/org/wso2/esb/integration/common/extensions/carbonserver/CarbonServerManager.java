@@ -83,6 +83,7 @@ public class CarbonServerManager {
         portOffset = getPortOffsetFromCommandMap(commandMap);
 
         try {
+            log.info("inside the try block in startServerUsingCarbonHome :::::::::::::::");
             if (!commandMap.isEmpty() && getPortOffsetFromCommandMap(commandMap) == 0) {
                 System.setProperty(ExtensionConstants.CARBON_HOME, carbonHome);
             }
@@ -138,7 +139,9 @@ public class CarbonServerManager {
             //register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
+                    log.info("Registering shutdown hook ::::::::::::::::::");
                     serverShutdown(portOffset , false);
+                    log.info("Registered shutdown hook ::::::::::::::::::");
                 } catch (Exception e) {
                     log.error("Error while server shutdown ..", e);
                 }
@@ -147,13 +150,19 @@ public class CarbonServerManager {
             managementPort = 9154 + portOffset;
             waitTill(() -> !isRemotePortInUse("localhost", managementPort), 180, TimeUnit.SECONDS);
 
+            log.info("checking if the remote port is in use :::::::::::::::::");
             if (!isRemotePortInUse("localhost", managementPort)) {
-                throw new RuntimeException("Server initialization failed");
+                log.info("Throwing server initialization failed error ::::::::::::::::::::");
+                throw new AutomationFrameworkException("Server initialization failed");
             }
+            log.info("The port is in use :::::::::::::::::");
 
             log.info("Server started successfully ...");
 
+            log.info("Server started successfully :::::::::::::::::");
+
         } catch (IOException | InterruptedException e) {
+            log.info("Unable to start the server :::::::::::::::::");
             throw new IllegalStateException("Unable to start server", e);
         }
     }
@@ -248,12 +257,17 @@ public class CarbonServerManager {
                         break;
                     }
                 }
+                log.info("checking if the remote port is not in use :::::::::::::::::");
 
                 if (isRemotePortInUse("localhost", managementPort)) {
+                    log.info("Throwing failed shutting down the server error :::::::::::::::");
                     throw new AutomationFrameworkException("Failed shutting down the sever");
                 }
+                log.info("The port is not in use :::::::::::::::::");
 
                 log.info("Server stopped successfully ...");
+
+                log.info("Server stopped successfully :::::::::::::::::");
 
             } catch (IOException | InterruptedException e) {
                 throw new AutomationFrameworkException("Failed to stop server ", e);
