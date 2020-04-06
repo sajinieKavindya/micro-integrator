@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.automation.engine.annotations.ExecutionEnvironment;
 import org.wso2.carbon.automation.engine.annotations.SetEnvironment;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
+import org.wso2.carbon.automation.engine.frameworkutils.FrameworkPathUtil;
 import org.wso2.carbon.automation.test.utils.generic.MutualSSLClient;
 import org.wso2.esb.integration.common.utils.ESBIntegrationTest;
 import org.wso2.esb.integration.common.utils.common.ServerConfigurationManager;
@@ -40,6 +41,7 @@ import java.util.Map;
 public class ClientSSLCertificateTestCase extends ESBIntegrationTest {
 
     private final String CONFIG_LOCATION = getESBResourceLocation() + File.separator + "ssl" + File.separator;
+    private final String CONFIG_LOCATION_SSL = FrameworkPathUtil.getSystemResourceLocation() + File.separator + "keystores" + File.separator + "products" + File.separator;
     private ServerConfigurationManager serverManager;
 
     @SetEnvironment(executionEnvironments = { ExecutionEnvironment.STANDALONE })
@@ -65,9 +67,9 @@ public class ClientSSLCertificateTestCase extends ESBIntegrationTest {
                 + "      </echo:echoString>\n" + "   </soapenv:Body>\n" + "</soapenv:Envelope>";
 
         //load key store file
-        MutualSSLClient.loadKeyStore(CONFIG_LOCATION + keyStoreName, keyStorePassword);
+        MutualSSLClient.loadKeyStore(CONFIG_LOCATION_SSL + keyStoreName, keyStorePassword);
         //load trust store file
-        MutualSSLClient.loadTrustStore(CONFIG_LOCATION + trustStoreName, trustStorePassword);
+        MutualSSLClient.loadTrustStore(CONFIG_LOCATION_SSL + trustStoreName, trustStorePassword);
         //create ssl socket factory instance with given key/trust stores
         MutualSSLClient.initMutualSSLConnection();
 
