@@ -1,0 +1,16 @@
+name: Docker
+
+on: [push]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    services:
+      wso2/wso2mi:
+        image: wso2/wso2mi:1.2.0-m3-ubuntu18.04
+        ports:
+          - 9201:9201
+        options: --health-cmd "curl --fail http://localhost:9201/healthz || exit 1" --health-interval=10s  --health-timeout=15s --health-retries=5
+    steps:
+      - name: Docker
+        run: echo "Hello"
