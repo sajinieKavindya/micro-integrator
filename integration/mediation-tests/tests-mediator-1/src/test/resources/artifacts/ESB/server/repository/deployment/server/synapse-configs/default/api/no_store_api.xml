@@ -14,7 +14,7 @@
                 </cache>
                 <send>
                     <endpoint>
-                        <http uri-template="http://localhost:8480/noStoreHeaderBackend"/>
+                        <http uri-template="http://localhost:8280/noStoreHeaderBackend"/>
                     </endpoint>
                 </send>
             </inSequence>

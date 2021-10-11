@@ -1,5 +1,5 @@
 <endpoint xmlns="http://ws.apache.org/ns/synapse" name="Reply_EP">
-    <http uri-template="http://localhost:8480/reply" method="post">
+    <http uri-template="http://localhost:8280/reply" method="post">
         <suspendOnFailure>
             <progressionFactor>1.0</progressionFactor>
         </suspendOnFailure>

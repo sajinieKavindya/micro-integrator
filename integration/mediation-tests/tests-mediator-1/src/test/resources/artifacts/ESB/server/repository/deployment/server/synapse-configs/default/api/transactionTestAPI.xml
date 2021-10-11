@@ -83,7 +83,7 @@
             <transaction action="suspend" />
             <call>
                 <endpoint>
-                    <http method="post" uri-template="http://localhost:8480/transaction-test/test?testEntry=Hope" />
+                    <http method="post" uri-template="http://localhost:8280/transaction-test/test?testEntry=Hope" />
                 </endpoint>
             </call>
             <log>
@@ -93,7 +93,7 @@
             <transaction action="commit" />
             <call>
                 <endpoint>
-                    <http method="post" uri-template="http://localhost:8480/transaction-test/test?testEntry=Hope" />
+                    <http method="post" uri-template="http://localhost:8280/transaction-test/test?testEntry=Hope" />
                 </endpoint>
             </call>
             <log>

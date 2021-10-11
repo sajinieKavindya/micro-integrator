@@ -34,7 +34,7 @@ import java.net.URL;
  * Perform different transactions and test for final indexes of the database entries
  */
 public class TransactionMediatorTestCase extends ESBIntegrationTest {
-    private static final String API_URL = "http://localhost:8480/transaction-test/";
+    private static final String API_URL = "http://localhost:8280/transaction-test/";
     private static final String INIT_CONTEXT = "init";
     private static final String NEW_CONTEXT = "new";
     private static final String COMMIT_CONTEXT = "commit";

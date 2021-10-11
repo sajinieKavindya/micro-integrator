@@ -24,7 +24,7 @@
                 <log level="full"/>
                 <send>
                     <endpoint>
-                        <http method="POST" uri-template="http://localhost:8480/testenrich1/datamapper"/>
+                        <http method="POST" uri-template="http://localhost:8280/testenrich1/datamapper"/>
                     </endpoint>
                 </send>
             </inSequence>
@@ -199,7 +199,7 @@
                 </enrich>
                 <send>
                     <endpoint>
-                        <http method="POST" uri-template="http://localhost:8480/testenrich12/echoxml"/>
+                        <http method="POST" uri-template="http://localhost:8280/testenrich12/echoxml"/>
                     </endpoint>
                 </send>
             </inSequence>
@@ -248,7 +248,7 @@
                 </enrich>
                 <send>
                     <endpoint>
-                        <http method="POST" uri-template="http://localhost:8480/testenrich13/echojson"/>
+                        <http method="POST" uri-template="http://localhost:8280/testenrich13/echojson"/>
                     </endpoint>
                 </send>
             </inSequence>

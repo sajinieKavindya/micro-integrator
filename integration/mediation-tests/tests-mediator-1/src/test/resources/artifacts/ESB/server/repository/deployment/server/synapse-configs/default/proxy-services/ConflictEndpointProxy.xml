@@ -3,7 +3,7 @@
         <inSequence>
             <call>
                 <endpoint>
-                    <http method="GET" uri-template="http://localhost:8480/responsesample/conflict"/>
+                    <http method="GET" uri-template="http://localhost:8280/responsesample/conflict"/>
                 </endpoint>
             </call>
             <loopback/>

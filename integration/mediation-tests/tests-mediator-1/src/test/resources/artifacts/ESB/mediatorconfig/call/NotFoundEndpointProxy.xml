@@ -10,7 +10,7 @@
             <call>
                 <endpoint>
                     <http method="GET"
-                          uri-template="http://localhost:8480/responsesample/not_found"/>
+                          uri-template="http://localhost:8280/responsesample/not_found"/>
                 </endpoint>
             </call>
             <loopback/>

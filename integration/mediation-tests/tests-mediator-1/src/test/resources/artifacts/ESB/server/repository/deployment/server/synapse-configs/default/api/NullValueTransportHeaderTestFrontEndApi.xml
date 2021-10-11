@@ -3,7 +3,7 @@
     <resource methods="POST">
         <inSequence>
             <call-template target="nullValueTransportHeaderTestTemplate">
-                <with-param name="end-point-url" value="http://localhost:8480/nullValueTransportHeaderTestBackEnd"/>
+                <with-param name="end-point-url" value="http://localhost:8280/nullValueTransportHeaderTestBackEnd"/>
             </call-template>
         </inSequence>
     </resource>
