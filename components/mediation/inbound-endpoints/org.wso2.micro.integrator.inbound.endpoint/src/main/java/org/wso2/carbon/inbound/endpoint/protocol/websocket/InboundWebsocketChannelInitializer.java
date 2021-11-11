@@ -26,12 +26,14 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.ssl.SslHandler;
+import org.apache.synapse.commons.handlers.MessagingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.ssl.InboundWebsocketSSLConfiguration;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.ssl.SSLHandlerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class InboundWebsocketChannelInitializer extends ChannelInitializer<SocketChannel> {
     private static final Logger log = LoggerFactory.getLogger(InboundWebsocketChannelInitializer.class);
@@ -44,6 +46,7 @@ public class InboundWebsocketChannelInitializer extends ChannelInitializer<Socke
     private boolean dispatchToCustomSequence;
     private ArrayList<AbstractSubprotocolHandler> subprotocolHandlers;
     private int portOffset;
+    private List<MessagingHandler> inboundEndpointHandlers;
 
     public InboundWebsocketChannelInitializer() {
     }
@@ -76,6 +79,16 @@ public class InboundWebsocketChannelInitializer extends ChannelInitializer<Socke
         this.subprotocolHandlers = subprotocolHandlers;
     }
 
+    public List<MessagingHandler> getInboundEndpointHandlers() {
+
+        return inboundEndpointHandlers;
+    }
+
+    public void setInboundEndpointHandlers(List<MessagingHandler> inboundEndpointHandlers) {
+
+        this.inboundEndpointHandlers = inboundEndpointHandlers;
+    }
+
     @Override
     protected void initChannel(SocketChannel websocketChannel) throws Exception {
 
@@ -92,6 +105,8 @@ public class InboundWebsocketChannelInitializer extends ChannelInitializer<Socke
         sourceHandler.setClientBroadcastLevel(clientBroadcastLevel);
         sourceHandler.setDispatchToCustomSequence(dispatchToCustomSequence);
         sourceHandler.setPortOffset(portOffset);
+        sourceHandler.setMessagingHandlers(inboundEndpointHandlers);
+
         if (outflowDispatchSequence != null)
             sourceHandler.setOutflowDispatchSequence(outflowDispatchSequence);
         if (outflowErrorSequence != null)

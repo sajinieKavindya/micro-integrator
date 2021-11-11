@@ -80,7 +80,8 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                                                              sourceHandler.getChannelHandlerContext().getChannelHandlerContext(),
                                                              customErrorMessage, false);
                     }
-                    sourceHandler.handleClientWebsocketChannelTermination(closeWebSocketFrame);
+                    sourceHandler.handleClientWebsocketChannelTermination(closeWebSocketFrame,
+                            sourceHandler.getChannelHandlerContext().getChannelHandlerContext());
                 }
             } catch (AxisFault fault) {
                 log.error("Error occurred while sending close frames", fault);
@@ -207,7 +208,8 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                             WebsocketLogUtil.printWebSocketFrame((Logger) log, closeWebSocketFrame,
                                     sourceHandler.getChannelHandlerContext().getChannelHandlerContext(), false);
                         }
-                        sourceHandler.handleClientWebsocketChannelTermination(closeWebSocketFrame);
+                        sourceHandler.handleClientWebsocketChannelTermination(closeWebSocketFrame,
+                                sourceHandler.getChannelHandlerContext().getChannelHandlerContext());
                         return;
                     }
                     RelayUtils.buildMessage(((Axis2MessageContext) msgContext).getAxis2MessageContext(), false);

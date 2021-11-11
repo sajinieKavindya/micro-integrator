@@ -143,6 +143,7 @@ public class WebsocketEndpointManager extends AbstractInboundEndpointManager {
         handler.setPipelineHandler(PipelineHandlerBuilderUtil.stringToPipelineHandlers(config.getPipelineHandler()));
         handler.setDispatchToCustomSequence(config.getDispatchToCustomSequence());
         handler.setPortOffset(PersistenceUtils.getPortOffset(params.getProperties()));
+        handler.setInboundEndpointHandlers(params.getHandlers());
         bootstrap.childHandler(handler);
         try {
             bootstrap.bind(new InetSocketAddress(port)).sync();
@@ -178,6 +179,7 @@ public class WebsocketEndpointManager extends AbstractInboundEndpointManager {
         handler.setPipelineHandler(PipelineHandlerBuilderUtil.stringToPipelineHandlers(config.getPipelineHandler()));
         handler.setDispatchToCustomSequence(config.getDispatchToCustomSequence());
         handler.setPortOffset(PersistenceUtils.getPortOffset(params.getProperties()));
+        handler.setInboundEndpointHandlers(params.getHandlers());
         bootstrap.childHandler(handler);
         try {
             bootstrap.bind(new InetSocketAddress(port)).sync();
