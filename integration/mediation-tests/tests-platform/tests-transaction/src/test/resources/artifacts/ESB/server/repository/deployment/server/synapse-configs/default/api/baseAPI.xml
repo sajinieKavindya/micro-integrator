@@ -21,7 +21,7 @@
         <inSequence>
             <send>
                 <endpoint>
-                    <http method="POST" uri-template="http://localhost:8480/echo"/>
+                    <http method="POST" uri-template="http://localhost:8280/echo"/>
                 </endpoint>
             </send>
         </inSequence>

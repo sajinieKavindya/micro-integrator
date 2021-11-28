@@ -1,22 +1,35 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.inbound.endpoint.protocol.httpws.management;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.transport.TransportListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.commons.handlers.MessagingHandler;
 import org.apache.synapse.inbound.InboundProcessorParams;
-import org.apache.synapse.transport.netty.listener.Axis2HttpTransportListener;
-import org.apache.synapse.transport.nhttp.NhttpConstants;
-import org.apache.synapse.transport.passthru.api.PassThroughInboundEndpointHandler;
+import org.apache.synapse.transport.netty.api.HttpWebSocketInboundEndpointHandler;
 import org.wso2.carbon.inbound.endpoint.common.AbstractInboundEndpointManager;
+import org.wso2.carbon.inbound.endpoint.inboundfactory.InboundRequestProcessorFactoryImpl;
 import org.wso2.carbon.inbound.endpoint.osgi.service.ServiceReferenceHolder;
-import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 import static org.wso2.carbon.inbound.endpoint.common.Constants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -27,6 +40,7 @@ public class HttpWebsocketEndpointManager extends AbstractInboundEndpointManager
     private static HttpWebsocketEndpointManager instance = null;
 
     public static HttpWebsocketEndpointManager getInstance() {
+
         if (instance == null) {
             instance = new HttpWebsocketEndpointManager();
         }
@@ -35,30 +49,24 @@ public class HttpWebsocketEndpointManager extends AbstractInboundEndpointManager
 
     @Override
     public boolean startListener(int port, String name, InboundProcessorParams inboundParameters) {
-        TransportListener httpTransportListener = new Axis2HttpTransportListener();
+
+        if (!HttpWebSocketInboundEndpointHandler.isPortAvailable(port)) {
+            LOGGER.error("A service is already listening on port " + port
+                    + ". Please select a different port for this endpoint.");
+            return false;
+        }
+
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().
                 getConfigurationContextService().getServerConfigContext();
-        TransportInDescription transportInDescription = new TransportInDescription("http");
-        try {
-            Parameter parameter = new Parameter();
-            parameter.setName("port");
-            parameter.setValue(port);
-            transportInDescription.addParameter(parameter);
+        List<MessagingHandler> inboundEndpointHandlers = inboundParameters.getHandlers();
 
-            Parameter parameter2 = new Parameter();
-            parameter2.setName(NhttpConstants.HTTP_GET_PROCESSOR);
-            parameter2.setValue(inboundParameters.getProperties().getProperty(NhttpConstants.HTTP_GET_PROCESSOR));
-            transportInDescription.addParameter(parameter2);
-
-            httpTransportListener.init(configurationContext, transportInDescription);
-        } catch (AxisFault e) {
-            LOGGER.error("Couldn't initialize the " + transportInDescription.getName() + "transport listener", e);
-        }
-        return false;
+        return HttpWebSocketInboundEndpointHandler.startEndpoint(new InetSocketAddress(port), configurationContext,
+                inboundEndpointHandlers, name);
     }
 
     @Override
     public boolean startEndpoint(int port, String name, InboundProcessorParams inboundParameters) {
+
         String epName = dataStore.getListeningEndpointName(port, SUPER_TENANT_DOMAIN_NAME);
         if (epName != null) {
             if (epName.equalsIgnoreCase(name)) {
@@ -69,8 +77,8 @@ public class HttpWebsocketEndpointManager extends AbstractInboundEndpointManager
                 throw new SynapseException(msg);
             }
         } else {
-            dataStore.registerListeningEndpoint(port, SUPER_TENANT_DOMAIN_NAME, InboundWebsocketConstants.WS, name,
-                    inboundParameters);
+            dataStore.registerListeningEndpoint(port, SUPER_TENANT_DOMAIN_NAME,
+                    InboundRequestProcessorFactoryImpl.Protocols.httpws.toString(), name, inboundParameters);
             boolean start = startListener(port, name, inboundParameters);
 
             if (!start) {

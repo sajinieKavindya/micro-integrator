@@ -11,6 +11,6 @@
             <respond/>
         </inSequence>
     </target>
-    <publishWSDL uri="http://localhost:8480/delay?wsdl"/>
+    <publishWSDL uri="http://localhost:8280/delay?wsdl"/>
     <description/>
 </proxy>

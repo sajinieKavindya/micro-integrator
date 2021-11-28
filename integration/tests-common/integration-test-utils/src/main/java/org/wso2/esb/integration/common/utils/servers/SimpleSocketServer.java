@@ -40,6 +40,16 @@ public class SimpleSocketServer extends Thread {
         this.expectedOutput = expectedOutput;
     }
 
+//    public static void main(String[] args) {
+//        String expectedResponse =
+//                "HTTP/1.1 417 Custom response\r\nServer: testServer\r\n" + "Content-Type: text/xml; charset=UTF-8\r\n"
+//                        + "Transfer-Encoding: chunked\r\n" + "\r\n" + "\"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+//                        + "<test></test>";
+//        //start socket server
+//        SimpleSocketServer simpleSocketServer = new SimpleSocketServer(5389, expectedResponse);
+//        simpleSocketServer.start();
+//    }
+
     public void run() {
 
         try {

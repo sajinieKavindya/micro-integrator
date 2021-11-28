@@ -45,18 +45,18 @@
 <!--    </test>-->
 
 
-    <test name="Cache-mediator-Test" preserve-order="true" verbose="2">
+<!--    <test name="Cache-mediator-Test" preserve-order="true" verbose="2">-->
 <!--        <packages>-->
 <!--            <package name="org.wso2.carbon.esb.mediator.test.cache"/>-->
 <!--        </packages>-->
-        <classes>
-            <class name="org.wso2.carbon.esb.mediator.test.cache.CacheResponseCodeRegexTestCase">
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.cache.LargeCacheTimeOutTestCase">-->
 <!--                <methods>-->
 <!--                    <exclude name=".*" />-->
 <!--                </methods>-->
-            </class>
-        </classes>
-    </test>
+<!--            </class>-->
+<!--        </classes>-->
+<!--    </test>-->
 
 <!--    <test name="Call-Template-Mediator-Test" preserve-order="true" verbose="2">-->
 <!--        <packages>-->
@@ -89,8 +89,8 @@
 <!--    </test>-->
 
 
-<!--    <test name="Call-mediator-Test" preserve-order="true" verbose="2">-->
-<!--        <classes>-->
+    <test name="Call-mediator-Test" preserve-order="true" verbose="2">
+        <classes>
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorHttpStatusResponseTestCase"/>-->
 <!--            &lt;!&ndash;<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorAPIWithNamedSeqCase"/>&ndash;&gt;-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingAPITestCase"/>-->
@@ -121,7 +121,7 @@
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSwitchTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInTemplateTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorLoadBalanceFailoverTest"/>-->
+            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorLoadBalanceFailoverTest"/>
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorOutOnlyTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorProxyWithNamedSeqCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA4469CallMediatorWithOutOnlyTestCase"/>-->
@@ -156,8 +156,8 @@
 <!--                                <exclude name=".*" />-->
 <!--                            </methods>-->
 <!--                        </class>&ndash;&gt;&ndash;&gt;-->
-<!--        </classes>-->
-<!--    </test>-->
+        </classes>
+    </test>
 
 <!--    <test name="Clone-mediator-Test" preserve-order="true" verbose="2">-->
 <!--        <packages>-->
@@ -237,6 +237,8 @@
 <!--                    <exclude name=".*"/>-->
 <!--                </methods>-->
 <!--            </class>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.fault.Soap12FaultStringExpressionTestCase"></class>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.fault.Soap11FaultStringExpressionTestCase"></class>-->
 <!--        </classes>-->
 <!--    </test>-->
 
@@ -326,4 +328,3 @@
 <!--    </test>-->
 
 </suite>
-

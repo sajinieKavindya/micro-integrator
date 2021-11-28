@@ -45,7 +45,7 @@
                 </log>
                 <send>
                     <endpoint>
-                        <address uri="http://localhost:8480/services/mockProxy"/>
+                        <address uri="http://localhost:8280/services/mockProxy"/>
                     </endpoint>
                 </send>
             </inSequence>

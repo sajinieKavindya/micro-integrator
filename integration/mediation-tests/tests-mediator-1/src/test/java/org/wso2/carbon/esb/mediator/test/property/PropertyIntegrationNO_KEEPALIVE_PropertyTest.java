@@ -52,7 +52,7 @@ public class PropertyIntegrationNO_KEEPALIVE_PropertyTest extends ESBIntegration
             //ignore since wire message is captured
         }
         String response = wireServer.getCapturedMessage();
-        assertTrue(response.contains("Connection: Close"), "Property Not Set");
+        assertTrue(response.contains("Connection: Close") || response.contains("connection: close"), "Property Not Set");
 
     }
 }

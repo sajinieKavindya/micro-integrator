@@ -100,8 +100,8 @@
                     <host type="manager">mgt.esb.wso2con.com</host>
                 </hosts>
                 <ports>
-                    <port type="nhttps">8443</port>
-                    <port type="nhttp">8480</port>
+                    <port type="nhttps">8543</port>
+                    <port type="nhttp">8280</port>
                 </ports>
                 <properties>
 
@@ -115,7 +115,7 @@
                     <port type="http">9964</port>
                     <port type="https">9644</port>
                     <port type="nhttps">9646</port>
-                    <port type="nhttp">8480</port>
+                    <port type="nhttp">8280</port>
                 </ports>
                 <properties>
                 </properties>
@@ -128,8 +128,8 @@
                 <ports>
                     <port type="http">9963</port>
                     <port type="https">9643</port>
-                    <port type="nhttps">8443</port>
-                    <port type="nhttp">8480</port>
+                    <port type="nhttps">8543</port>
+                    <port type="nhttp">8280</port>
                 </ports>
                 <properties>
 
@@ -143,7 +143,7 @@
                     <port type="http">9965</port>
                     <port type="https">9645</port>
                     <port type="nhttps">9646</port>
-                    <port type="nhttp">8480</port>
+                    <port type="nhttp">8280</port>
                 </ports>
                 <properties>
                 </properties>
@@ -168,7 +168,7 @@
                 </class>
                 <class>
                     <name>org.wso2.esb.integration.common.extensions.carbonserver.CarbonServerExtension</name>
-                    <parameter name="-DportOffset" value="200"/>
+                    <parameter name="-DportOffset" value="300"/>
                     <parameter name="startupScript" value="micro-integrator"/>
                     <parameter name="-DgracefulShutdown" value="false"></parameter>
                     <!--<parameter name="cmdArg" value="debug 5005" />-->

@@ -42,7 +42,7 @@ public class HttpEPServiceChainingTestCase extends ESBIntegrationTest {
     @Test(groups = { "wso2.esb" }, description = "Service Chaining test with Http endpoint")
     public void testHTTPEPServiceChaining() throws Exception {
         OMElement response = axis2Client
-                .sendSimpleStockQuoteRequest("http://localhost:8480/services/ChainingTestProxy", null, "IBM");
+                .sendSimpleStockQuoteRequest("http://localhost:8280/services/ChainingTestProxy", null, "IBM");
 
         assertTrue(response.toString().contains("Service3"), "Services in the chain are not invoked properly");
 

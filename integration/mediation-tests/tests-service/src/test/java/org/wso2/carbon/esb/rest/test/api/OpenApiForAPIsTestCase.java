@@ -49,7 +49,7 @@ public class OpenApiForAPIsTestCase  extends ESBIntegrationTest {
 
     @Test(groups = "wso2.esb", description = "Get the API definition in JSON format")
     public void getOASJsonTest() throws Exception {
-        String restURL = "http://localhost:8480/SwaggerPetstore:v1.0.5?swagger.json";
+        String restURL = "http://localhost:8280/SwaggerPetstore:v1.0.5?swagger.json";
         HttpResponse response = HttpRequestUtil.doGet(restURL, requestHeader);
         String responseString = response.getData();
         assertNotNull(responseString, "Failed to get the swagger response.");
@@ -64,7 +64,7 @@ public class OpenApiForAPIsTestCase  extends ESBIntegrationTest {
 
     @Test(groups = "wso2.esb", description = "Get the API definition in YAML format")
     public void getOASYamlTest() throws Exception {
-        String restURL = "http://localhost:8480/SwaggerPetstore:v1.0.5?swagger.yaml";
+        String restURL = "http://localhost:8280/SwaggerPetstore:v1.0.5?swagger.yaml";
         HttpResponse response = HttpRequestUtil.doGet(restURL, requestHeader);
         String responseString = response.getData();
         assertNotNull(responseString, "Failed to get the swagger response.");

@@ -33,7 +33,7 @@
                       type="STRING"/>
             <send>
                 <endpoint name="SoapFaultEP">
-                    <address uri="http://localhost:8480/services/SoapFaultBackend" format="soap11"/>
+                    <address uri="http://localhost:8280/services/SoapFaultBackend" format="soap11"/>
                 </endpoint>
             </send>
         </inSequence>

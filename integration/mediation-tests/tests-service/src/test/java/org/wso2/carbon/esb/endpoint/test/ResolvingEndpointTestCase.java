@@ -43,7 +43,7 @@ public class ResolvingEndpointTestCase extends ESBIntegrationTest {
     public void testSendingToDynamicallyResolvedEndpoint() throws AxisFault {
 
         OMElement response = axis2Client.sendSimpleStockQuoteRequest(
-                "http://localhost:8480/services/resolvingEndpointTestProxy?myKey=resolvingEP", null, "WSO2");
+                "http://localhost:8280/services/resolvingEndpointTestProxy?myKey=resolvingEP", null, "WSO2");
         Assert.assertNotNull(response);
         Assert.assertTrue(response.toString().contains("WSO2 Company"));
     }

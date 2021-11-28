@@ -74,7 +74,7 @@
 
     <!--Template Endpoint with timeout parameterized to delayed endpoint-->
     <endpoint name="MockDelayedTimeoutTemplateEndpoint"
-              template="HTTPEndpointTemplate" uri="http://localhost:8480/getDelayedQuote">
+              template="HTTPEndpointTemplate" uri="http://localhost:8280/getDelayedQuote">
         <axis2ns167:parameter name="timeout"
                               value="{get-property('timeout')}" xmlns:axis2ns167="http://ws.apache.org/ns/synapse"/>
     </endpoint>
@@ -82,14 +82,14 @@
 
     <!--Template Endpoint with timeout parameterized to default endpoint-->
     <endpoint name="MockTimeoutTemplateEndpoint"
-              template="HTTPEndpointTemplate" uri="http://localhost:8480/getQuote">
+              template="HTTPEndpointTemplate" uri="http://localhost:8280/getQuote">
         <axis2ns168:parameter name="timeout"
                               value="{get-property('timeout')}" xmlns:axis2ns168="http://ws.apache.org/ns/synapse"/>
     </endpoint>
 
     <!--Endpoint with timeout parameterized to default api-->
     <endpoint name="MockTimeoutEndpoint">
-        <http method="GET" uri-template="http://localhost:8480/getQuote">
+        <http method="GET" uri-template="http://localhost:8280/getQuote">
             <timeout>
                 <duration>{get-property('timeout')}</duration>
                 <responseAction>fault</responseAction>
@@ -99,7 +99,7 @@
 
     <!--Endpoint with timeout from local entry to the delayed api-->
     <endpoint name="MockDelayedTimeoutEndpoint">
-        <http method="GET" uri-template="http://localhost:8480/getDelayedQuote">
+        <http method="GET" uri-template="http://localhost:8280/getDelayedQuote">
             <timeout>
                 <duration>{get-property('timeout')}</duration>
                 <responseAction>fault</responseAction>

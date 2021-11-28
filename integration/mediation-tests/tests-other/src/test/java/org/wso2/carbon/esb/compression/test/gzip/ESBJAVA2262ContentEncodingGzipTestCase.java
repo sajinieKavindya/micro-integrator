@@ -69,8 +69,10 @@ public class ESBJAVA2262ContentEncodingGzipTestCase extends ESBIntegrationTest {
         MessageContext inMessageContext = operationContext.getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
         CommonsTransportHeaders transportHeaders = (CommonsTransportHeaders) inMessageContext
                 .getProperty(TRANSPORT_HEADERS);
-        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING), "Response Message not encoded");
-        Assert.assertEquals(transportHeaders.get(CONTENT_ENCODING), "gzip", "Response Message not gzip encoded");
+        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING)
+                || transportHeaders.containsKey("content-encoding"), "Response Message not encoded");
+        Assert.assertTrue("gzip".equals(transportHeaders.get(CONTENT_ENCODING))
+                || "gzip".equals(transportHeaders.get("content-encoding")), "Response Message not gzip encoded");
         Assert.assertTrue(response.toString().contains("GZIP"));
         Assert.assertTrue(response.toString().contains("GZIP Company"));
 
@@ -86,8 +88,10 @@ public class ESBJAVA2262ContentEncodingGzipTestCase extends ESBIntegrationTest {
         MessageContext inMessageContext = operationContext.getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
         CommonsTransportHeaders transportHeaders = (CommonsTransportHeaders) inMessageContext
                 .getProperty(TRANSPORT_HEADERS);
-        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING), "Response Message not encoded");
-        Assert.assertEquals(transportHeaders.get(CONTENT_ENCODING), "gzip", "Response Message not gzip encoded");
+        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING)
+                || transportHeaders.containsKey("content-encoding"), "Response Message not encoded");
+        Assert.assertTrue("gzip".equals(transportHeaders.get(CONTENT_ENCODING))
+                || "gzip".equals(transportHeaders.get("content-encoding")), "Response Message not gzip encoded");
         Assert.assertTrue(response.toString().contains("GZIP"));
         Assert.assertTrue(response.toString().contains("GZIP Company"));
 
@@ -112,8 +116,10 @@ public class ESBJAVA2262ContentEncodingGzipTestCase extends ESBIntegrationTest {
         MessageContext inMessageContext = operationContext.getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
         CommonsTransportHeaders transportHeaders = (CommonsTransportHeaders) inMessageContext
                 .getProperty(TRANSPORT_HEADERS);
-        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING), "Response Message not encoded");
-        Assert.assertEquals(transportHeaders.get(CONTENT_ENCODING), "gzip", "Response Message not gzip encoded");
+        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING)
+                || transportHeaders.containsKey("content-encoding"), "Response Message not encoded");
+        Assert.assertTrue("gzip".equals(transportHeaders.get(CONTENT_ENCODING))
+                || "gzip".equals(transportHeaders.get("content-encoding")), "Response Message not gzip encoded");
         Assert.assertTrue(response.toString().contains("GZIP"));
         Assert.assertTrue(response.toString().contains("GZIP Company"));
     }
@@ -128,8 +134,10 @@ public class ESBJAVA2262ContentEncodingGzipTestCase extends ESBIntegrationTest {
         MessageContext inMessageContext = operationContext.getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
         CommonsTransportHeaders transportHeaders = (CommonsTransportHeaders) inMessageContext
                 .getProperty(TRANSPORT_HEADERS);
-        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING), "Response Message not encoded");
-        Assert.assertEquals(transportHeaders.get(CONTENT_ENCODING), "gzip", "Response Message not gzip encoded");
+        Assert.assertTrue(transportHeaders.containsKey(CONTENT_ENCODING)
+                || transportHeaders.containsKey("content-encoding"), "Response Message not encoded");
+        Assert.assertTrue("gzip".equals(transportHeaders.get(CONTENT_ENCODING))
+                || "gzip".equals(transportHeaders.get("content-encoding")), "Response Message not gzip encoded");
         Assert.assertTrue(response.toString().contains("GZIP"));
         Assert.assertTrue(response.toString().contains("GZIP Company"));
     }

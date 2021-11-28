@@ -8,7 +8,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample4/echojson4"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample4/echojson4"/>
                                 </endpoint>
                             </send>
                         </sequence>

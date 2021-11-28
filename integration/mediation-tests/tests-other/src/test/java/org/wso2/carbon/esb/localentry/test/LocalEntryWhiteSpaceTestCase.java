@@ -41,7 +41,7 @@ public class LocalEntryWhiteSpaceTestCase extends ESBIntegrationTest {
     @Test(groups = "wso2.esb", description = "Test local entry value retrieval for endpoint url")
     public void testLocalEntryProxy() throws Exception {
         OMElement response = axis2Client
-                .sendSimpleStockQuoteRequest("http://localhost:8480/services/LocalEntryTestProxy", null, "IBM");
+                .sendSimpleStockQuoteRequest("http://localhost:8280/services/LocalEntryTestProxy", null, "IBM");
         String lastPrice = response.getFirstElement()
                 .getFirstChildWithName(new QName("http://services.samples/xsd", "last")).getText();
         assertNotNull(lastPrice, "Fault: response message 'last' price null");

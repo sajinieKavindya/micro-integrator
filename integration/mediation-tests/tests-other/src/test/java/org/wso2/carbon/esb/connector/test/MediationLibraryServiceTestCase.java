@@ -220,7 +220,7 @@ public class MediationLibraryServiceTestCase extends ESBIntegrationTest {
     @Test(groups = "wso2.esb", description = "Test connector upload and invoke.")
     public void invokeConnectorTest() throws Exception {
 
-        String apiURI = "http://localhost:8480/library-service/get-message";
+        String apiURI = "http://localhost:8280/library-service/get-message";
         String expectedOutput = "<message>Bob</message>";
         HttpResponse httpResponse = HttpRequestUtil.doPost(new URL(apiURI), "");
         Assert.assertEquals(httpResponse.getData(), expectedOutput, "Invoking hello connector fails.");

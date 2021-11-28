@@ -205,7 +205,8 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
                                          String requestUrl,
                                          String queryString,
                                          String item,
-                                         OutputStream outputStream) throws Exception {
+                                         OutputStream outputStream,
+                                         MessageContext messageContext) throws Exception {
         OverflowBlob temporaryData = new OverflowBlob(256, 4048, "_nhttp", ".dat");
         try {
             CarbonHttpRequest carbonHttpRequest = new CarbonHttpRequest(
@@ -269,7 +270,8 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
             }
 
 //            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
-            inboundCarbonMsg.setProperty("conn", ProtocolState.WSDL_RESPONSE_DONE);
+            inboundCarbonMsg.setProperty("WSDL_RESPONSE_DONE", true);
+            messageContext.setProperty("WSDL_GEN_HANDLED", true);
 
 
             try{
@@ -454,7 +456,8 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
         if (uri.equals("/favicon.ico")) {
             outboundCarbonMsg.setHttpStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
             outboundCarbonMsg.setHeader("Location", "http://wso2.org/favicon.ico");
-            inboundCarbonMsg.setProperty("conn", ProtocolState.WSDL_RESPONSE_DONE);
+            inboundCarbonMsg.setProperty("WSDL_RESPONSE_DONE", true);
+            messageContext.setProperty("WSDL_GEN_HANDLED", true);
 //            response.setStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
 //            response.addHeader("Location", "http://wso2.org/favicon.ico");
 //            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
@@ -613,11 +616,8 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
         try {
             byte[] bytes = getServicesHTML(
                     servicePath.endsWith("/") ? "" : servicePath + "/").getBytes();
-//            response.addHeader(CONTENT_TYPE, TEXT_HTML);
             outboundCarbonMsg.setHeader(CONTENT_TYPE, TEXT_HTML);
-//            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
-            inboundCarbonMsg.setProperty("conn", ProtocolState.WSDL_RESPONSE_DONE);
-//            sourceHandler.commitResponseHideExceptions(conn, response);
+            inboundCarbonMsg.setProperty("WSDL_RESPONSE_DONE", true);
             try {
                 inboundCarbonMsg.respond(outboundCarbonMsg);
             } catch (ServerConnectorException e) {
@@ -626,9 +626,11 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
             os.write(bytes);
 
         } catch (IOException e) {
-//            handleBrowserException(response, conn, os,
-//                    "Error generating services list", e);
             log.error("Error generating services list", e);
+            try {
+                os.close();
+            } catch (IOException ignore) {
+            }
         }
     }
 
@@ -736,6 +738,43 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
     protected void handleBrowserException(HttpResponse response,
                                           NHttpServerConnection conn, OutputStream os,
                                           String msg, Exception e) {
+        if (e == null) {
+            log.error(msg);
+        } else {
+            log.error(msg, e);
+        }
+
+        if (!response.containsHeader(HTTP.TRANSFER_ENCODING)) {
+            response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.setReasonPhrase(msg);
+            //response.addHeader(CONTENT_TYPE, TEXT_HTML);
+            //serverHandler.commitResponseHideExceptions(conn, response);
+            try {
+                os.write(msg.getBytes());
+                os.close();
+            } catch (IOException ignore) {
+            }
+        }
+
+        if (conn != null) {
+            try {
+                conn.shutdown();
+            } catch (IOException ignore) {
+            }
+        }
+    }
+
+    /**
+     * Handles browser exception.
+     *
+     * @param response HttpResponse
+     * @param conn     NHttpServerConnection
+     * @param os       OutputStream
+     * @param msg      message
+     * @param e        Exception
+     */
+    protected void handleBrowserException(HttpCarbonMessage outboundCarbonMsg, OutputStream os, String msg,
+                                          Exception e) {
         if (e == null) {
             log.error(msg);
         } else {

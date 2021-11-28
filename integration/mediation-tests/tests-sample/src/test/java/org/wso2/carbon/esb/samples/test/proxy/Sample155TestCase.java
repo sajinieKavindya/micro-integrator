@@ -38,7 +38,7 @@ public class Sample155TestCase extends ESBSampleIntegrationTest {
     public void setEnvironment() throws Exception {
         super.init();
 
-        listener1 = new TCPMonListener(8481, "localhost", 8480);
+        listener1 = new TCPMonListener(8481, "localhost", 8280);
         listener1.start();
 
         listener2 = new TCPMonListener(9001, "localhost", 9000);

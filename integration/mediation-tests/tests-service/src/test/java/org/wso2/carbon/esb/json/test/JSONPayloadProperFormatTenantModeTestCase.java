@@ -50,7 +50,7 @@ public class JSONPayloadProperFormatTenantModeTestCase extends ESBIntegrationTes
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         HttpResponse response = HttpRequestUtil
-                .doPost(new URL("http://localhost:8480/json/payload"), JSON_PAYLOAD, headers);
+                .doPost(new URL("http://localhost:8280/json/payload"), JSON_PAYLOAD, headers);
 
         //checking whether JSON payload of wrong format is received
         assertFalse(response.getData().equals("{\"emails\":{\"value\":\"test@wso2.com\"}}"),

@@ -30,7 +30,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample1/echojson1"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample1/echojson1"/>
                                 </endpoint>
                             </send>
                         </sequence>
@@ -75,7 +75,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample2/echojson2"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample2/echojson2"/>
                                 </endpoint>
                             </send>
                         </sequence>
@@ -120,7 +120,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample3/echojson3"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample3/echojson3"/>
                                 </endpoint>
                             </send>
                         </sequence>
@@ -165,7 +165,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample4/echojson4"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample4/echojson4"/>
                                 </endpoint>
                             </send>
                         </sequence>
@@ -210,7 +210,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample5/echojson5"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample5/echojson5"/>
                                 </endpoint>
                             </send>
                         </sequence>
@@ -283,7 +283,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <call>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample7/echojson7"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample7/echojson7"/>
                                 </endpoint>
                             </call>
                         </sequence>
@@ -328,7 +328,7 @@
                             <header name="Content-Type" scope="transport" value="application/json"/>
                             <send>
                                 <endpoint>
-                                    <http method="POST" uri-template="http://localhost:8480/iteratesample8/echojson8"/>
+                                    <http method="POST" uri-template="http://localhost:8280/iteratesample8/echojson8"/>
                                 </endpoint>
                             </send>
                         </sequence>

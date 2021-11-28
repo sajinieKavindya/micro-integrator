@@ -27,7 +27,7 @@
             <property name="DISABLE_CHUNKING" value="true" scope="axis2" type="STRING"/>
             <send>
                 <endpoint>
-                    <address optimize="mtom" uri="http://localhost:8480/services/respondBE"/>
+                    <address optimize="mtom" uri="http://localhost:8280/services/respondBE"/>
                 </endpoint>
             </send>
         </inSequence>

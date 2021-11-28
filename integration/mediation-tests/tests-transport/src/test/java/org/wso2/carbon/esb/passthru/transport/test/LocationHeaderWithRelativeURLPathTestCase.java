@@ -36,7 +36,7 @@ import static org.testng.Assert.assertNotNull;
 public class LocationHeaderWithRelativeURLPathTestCase extends ESBIntegrationTest {
 
     private final String LOCATION_HEADER_NAME = "Location";
-    private final String EXPECTED_LOCATION_HEADER = "http://127.0.0.1:8480/services";
+    private final String EXPECTED_LOCATION_HEADER = "http://127.0.0.1:8280/services";
 
     @BeforeClass(alwaysRun = true)
     protected void init() throws Exception {

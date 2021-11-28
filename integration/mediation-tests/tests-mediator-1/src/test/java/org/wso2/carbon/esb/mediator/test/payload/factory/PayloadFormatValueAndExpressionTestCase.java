@@ -32,7 +32,8 @@ import org.wso2.esb.integration.common.utils.ESBIntegrationTest;
  * This class can be used to nativesupportforjson 'Native Support for JSON' scenarios using
  * Payload format value and expression both
  */
-public class PayloadFormatValueAndExpressionTestCase extends ESBIntegrationTest {
+public class
+PayloadFormatValueAndExpressionTestCase extends ESBIntegrationTest {
 
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {

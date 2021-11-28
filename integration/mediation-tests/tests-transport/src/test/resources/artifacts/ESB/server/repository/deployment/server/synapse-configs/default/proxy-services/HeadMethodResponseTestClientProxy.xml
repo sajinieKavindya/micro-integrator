@@ -23,7 +23,7 @@
             <send>
                 <endpoint>
                     <http method="head"
-                          uri-template="http://localhost:8480/services/HeadMethodResponseTestProxy"/>
+                          uri-template="http://localhost:8280/services/HeadMethodResponseTestProxy"/>
                 </endpoint>
             </send>
         </inSequence>

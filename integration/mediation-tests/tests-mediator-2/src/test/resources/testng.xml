@@ -43,6 +43,7 @@
 <!--                    <exclude name=".*"/>-->
 <!--                </methods>-->
 <!--            </class>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.switchMediator.ESBJAVA1857TestCase"></class>-->
 <!--        </classes>-->
 <!--    </test>-->
 
@@ -59,10 +60,11 @@
 <!--    </test>-->
 
 <!--    <test name="FastXSLT-mediator-Test" preserve-order="true" verbose="2">-->
-<!--        <packages>-->
-<!--            <package name="org.wso2.carbon.esb.mediator.test.fastXslt"/>-->
-<!--        </packages>-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.fastXslt.FastXSLTTransformFileFromLocalFileUsingSample8TestCase"></class>-->
+<!--        </classes>-->
 <!--    </test>-->
+
 
 <!--    <test name="Loopback-mediator-Test" preserve-order="true" verbose="2">-->
 <!--        <packages>-->
@@ -95,12 +97,12 @@
 <!--        </classes>-->
 <!--    </test>-->
 
-    <test name="Message-Processor-Test" preserve-order="true" verbose="2">
-        <!--Disabled test due to the issue https://github.com/wso2/product-ei/issues/515-->
+<!--    <test name="Message-Processor-Test" preserve-order="true" verbose="2">-->
+<!--        &lt;!&ndash;Disabled test due to the issue https://github.com/wso2/product-ei/issues/515&ndash;&gt;-->
 <!--        <packages>-->
 <!--            <package name="org.wso2.carbon.esb.message.processor.test.forwarding"/>-->
 <!--        </packages>-->
-        <classes>
+<!--        <classes>-->
 <!--            <class name="org.wso2.carbon.esb.message.processor.test.MessageProcessorAdminTestCase">-->
 <!--                <methods>-->
 <!--                    <exclude name=".*"/>-->
@@ -111,12 +113,12 @@
 <!--                    <exclude name=".*"/>-->
 <!--                </methods>-->
 <!--            </class>-->
-            <class name="org.wso2.carbon.esb.message.processor.test.MessageProcessorWithFaultDeactivateSeqTestCase"/>
-        </classes>
-    </test>
+<!--            <class name="org.wso2.carbon.esb.message.processor.test.MessageProcessorWithFaultDeactivateSeqTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-<!--    <test name="Iterate-mediator-Test" preserve-order="true" verbose="2">-->
-<!--        <classes>-->
+    <test name="Iterate-mediator-Test" preserve-order="true" verbose="2">
+        <classes>
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.ESBJAVA2843IterateTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.IterateAnonymousEndpointsTest"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.IterateAttachPathTest"/>-->
@@ -135,7 +137,7 @@
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.IterateSOAPActionTest"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.IterateTargetSequenceTypeTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.IterateWithRegistriesAsTargetEndpointsTestCase"/>-->
-<!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.NullNameSpaceForAttachPathTestCase"/>-->
+            <class name="org.wso2.carbon.esb.mediator.test.iterate.NullNameSpaceForAttachPathTestCase"/>
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.NullNameSpaceForIterateExpressionTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.IterateIDAggregateIDMismatchTestCase"/>-->
 <!--            <class name="org.wso2.carbon.esb.mediator.test.iterate.InvalidTargetAddressTestCase"/>-->
@@ -151,13 +153,16 @@
 <!--                    <exclude name=".*" />-->
 <!--                </methods>-->
 <!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
+        </classes>
+    </test>
 
 <!--    <test name="Send-mediator-Test" preserve-order="true" verbose="2">-->
 <!--        <packages>-->
 <!--            <package name="org.wso2.carbon.esb.mediator.test.send"/>-->
 <!--        </packages>-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.send.SendIntegrationTestCase"></class>-->
+<!--        </classes>-->
 <!--    </test>-->
 
 <!--    <test name="Datamapper-mediator-Test" preserve-order="true" verbose="2">-->

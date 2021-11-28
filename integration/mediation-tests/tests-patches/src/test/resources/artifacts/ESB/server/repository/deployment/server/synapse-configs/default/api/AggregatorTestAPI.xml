@@ -10,17 +10,17 @@
             <clone>
                 <target>
                     <endpoint>
-                        <http uri-template="http://localhost:8480/correlateOnExpressionTest1"/>
+                        <http uri-template="http://localhost:8280/correlateOnExpressionTest1"/>
                     </endpoint>
                 </target>
                 <target>
                     <endpoint>
-                        <http uri-template="http://localhost:8480/correlateOnExpressionTest2"/>
+                        <http uri-template="http://localhost:8280/correlateOnExpressionTest2"/>
                     </endpoint>
                 </target>
                 <target>
                     <endpoint>
-                        <http uri-template="http://localhost:8480/correlateOnExpressionTest3"/>
+                        <http uri-template="http://localhost:8280/correlateOnExpressionTest3"/>
                     </endpoint>
                 </target>
             </clone>

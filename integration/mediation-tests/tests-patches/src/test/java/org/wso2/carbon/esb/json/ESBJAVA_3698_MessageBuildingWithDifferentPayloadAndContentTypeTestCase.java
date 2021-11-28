@@ -42,7 +42,7 @@ public class ESBJAVA_3698_MessageBuildingWithDifferentPayloadAndContentTypeTestC
     public void testAxisFaultWithXmlPayloadAndJSONContentType()
             throws ClientProtocolException, IOException, InterruptedException {
         carbonLogReader.start();
-        final HttpPost post = new HttpPost("http://localhost:8480/ESBJAVA3698jsonstockquote/test");
+        final HttpPost post = new HttpPost("http://localhost:8280/ESBJAVA3698jsonstockquote/test");
         post.addHeader("Content-Type", "application/json");
         post.addHeader("SOAPAction", "urn:getQuote");
         StringEntity se = new StringEntity(getPayload());

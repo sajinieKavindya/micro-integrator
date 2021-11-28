@@ -7,10 +7,10 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8480/v2"
+      "url": "http://localhost:8280/v2"
     },
     {
-      "url": "https://localhost:8443/v2"
+      "url": "https://localhost:8543/v2"
     }
   ],
   "paths": {

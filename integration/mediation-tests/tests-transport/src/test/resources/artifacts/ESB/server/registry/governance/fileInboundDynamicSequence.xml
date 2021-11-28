@@ -20,7 +20,7 @@
 <sequence xmlns="http://ws.apache.org/ns/synapse" name="fileInboundDynamicSequence">
     <send>
         <endpoint>
-            <address uri="http://localhost:8480/services/FileInboundDynamicSequenceTestProxy"/>
+            <address uri="http://localhost:8280/services/FileInboundDynamicSequenceTestProxy"/>
         </endpoint>
     </send>
 </sequence>

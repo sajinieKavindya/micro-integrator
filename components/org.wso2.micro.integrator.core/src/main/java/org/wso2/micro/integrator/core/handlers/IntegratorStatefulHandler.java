@@ -87,7 +87,7 @@ public class IntegratorStatefulHandler extends AbstractDispatcher {
                 // dispatchAndVerify need to call to find out the service and the operation.
                 dispatchAndVerify(msgctx);
                 if (!Boolean.TRUE.equals(msgctx.getProperty(BUILDER_INVOKED))) {
-                    RelayUtils.buildMessage(msgctx);
+//                    RelayUtils.buildMessage(msgctx);
                     msgctx.setProperty(BUILDER_INVOKED, Boolean.TRUE);
                 }
                 String type = null;
@@ -127,8 +127,6 @@ public class IntegratorStatefulHandler extends AbstractDispatcher {
                 }
             } catch (IOException e) {
                 throw new AxisFault("I/O  Exception occured while building the data service request", e);
-            } catch (XMLStreamException e) {
-                throw new AxisFault("Exception occured while building the data service request as an XML", e);
             }
         }
         return InvocationResponse.CONTINUE;

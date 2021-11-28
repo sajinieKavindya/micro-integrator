@@ -17,5 +17,5 @@
   -->
 
 <endpoint xmlns="http://ws.apache.org/ns/synapse" name="log-ep">
-    <address uri="http://localhost:8480/services/log-proxy"/>
+    <address uri="http://localhost:8280/services/log-proxy"/>
 </endpoint>
