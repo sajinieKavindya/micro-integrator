@@ -216,11 +216,19 @@
     <!-- ================================================= -->
 
     {% if transport.http.listener.enable == true %}
-    <transportReceiver name="http" class="{{transport.http.listener.class}}">
+    <transportReceiver name="httpold" class="{{transport.http.listener.class}}">
         {% for parameter_key,parameter_value in transport.http.listener.parameter.items() %}
         <parameter name="{{parameter_key}}" locked="false">{{parameter_value}}</parameter>
         {% endfor %}
     </transportReceiver>
+    {% endif %}
+
+    {% if transport.netty.listener.enable == true %}
+        <transportReceiver name="http" class="{{transport.netty.listener.class}}">
+            {% for parameter_key,parameter_value in transport.netty.listener.parameter.items() %}
+            <parameter name="{{parameter_key}}" locked="false">{{parameter_value}}</parameter>
+            {% endfor %}
+        </transportReceiver>
     {% endif %}
 
     {% if transport.http.listener.secured_enable == true %}
@@ -428,7 +436,7 @@
     <!-- ================================================= -->
 
     {% if transport.http.sender.enable == true %}
-    <transportSender name="http" class="{{transport.http.sender.class}}">
+    <transportSender name="httpold" class="{{transport.http.sender.class}}">
         <parameter name="non-blocking" locked="false">true</parameter>
         {% if transport.http.sender.non_proxy_hosts is defined %}
         <parameter name="http.nonProxyHosts" locked="false">{% for parameter_value in transport.http.sender.non_proxy_hosts %}{{parameter_value}}{% if loop.index < transport.http.sender.non_proxy_hosts|length %}|{% endif %}{% endfor %}</parameter>
@@ -458,6 +466,13 @@
         {% endif %}
     </transportSender>
     {% endif %}
+
+    {% if transport.netty.sender.enable == true %}
+        <transportSender name="http" class="{{transport.netty.sender.class}}">
+            <parameter name="non-blocking" locked="false">true</parameter>
+        </transportSender>
+    {% endif %}
+
     {% if transport.http.sender.secured_enable == true %}
     <transportSender name="https" class="{{transport.https.sender.class}}">
         <parameter name="non-blocking" locked="false">true</parameter>
