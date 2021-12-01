@@ -50,7 +50,7 @@ public class PropertyIntegrationNO_ENTITY_BODY_PropertyTest extends ESBIntegrati
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "text/plain");
-        String endpoint = "http://localhost:8480/services/Axis2ProxyService1";
+        String endpoint = "http://localhost:8280/services/Axis2ProxyService1";
         response = sendGet(endpoint, headers);
         String responsePayload = client.getResponsePayload(response);
 
@@ -64,7 +64,7 @@ public class PropertyIntegrationNO_ENTITY_BODY_PropertyTest extends ESBIntegrati
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "text/plain");
-        String endpoint = "http://localhost:8480/services/Axis2ProxyService2";
+        String endpoint = "http://localhost:8280/services/Axis2ProxyService2";
         response = sendGet(endpoint, headers);
         String responsePayload = client.getResponsePayload(response);
 

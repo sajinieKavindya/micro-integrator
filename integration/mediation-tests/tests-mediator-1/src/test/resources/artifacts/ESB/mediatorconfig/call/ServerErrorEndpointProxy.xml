@@ -10,7 +10,7 @@
             <call>
                 <endpoint>
                     <http method="GET"
-                          uri-template="http://localhost:8480/responsesample/internal_server_error"/>
+                          uri-template="http://localhost:8280/responsesample/internal_server_error"/>
                 </endpoint>
             </call>
             <loopback/>

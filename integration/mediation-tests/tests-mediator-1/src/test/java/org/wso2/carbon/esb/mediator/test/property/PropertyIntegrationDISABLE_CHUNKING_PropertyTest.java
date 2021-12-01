@@ -52,7 +52,7 @@ public class PropertyIntegrationDISABLE_CHUNKING_PropertyTest extends ESBIntegra
 
         }
         String response = wireServer.getCapturedMessage();
-        assertTrue(response.contains("Content-Length"), "Content-Length not found in out going message");
+        assertTrue(response.contains("Content-Length") || response.contains("content-length"), "Content-Length not found in out going message");
 
     }
 }

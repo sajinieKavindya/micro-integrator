@@ -35,7 +35,7 @@ public class ESBJAVA3546CAppProxyOnLoadTestCase extends ESBIntegrationTest {
 
         try {
             axis2Client
-                    .sendSimpleStockQuoteRequest("http://127.0.0.1:8480/services/samplePassThroughProxy", null, "IBM");
+                    .sendSimpleStockQuoteRequest("http://127.0.0.1:8280/services/samplePassThroughProxy", null, "IBM");
 
             trueResponseReceived = true;
         } catch (AxisFault axisFault) {
@@ -48,7 +48,7 @@ public class ESBJAVA3546CAppProxyOnLoadTestCase extends ESBIntegrationTest {
     @Test(groups = {
             "wso2.esb" }, description = "proxy service with startOnLoad=false deployed from car file but inactive", expectedExceptions = AxisFault.class)
     public void startOnLoadFalseProxyTest() throws Exception {
-        axis2Client.sendSimpleStockQuoteRequest("http://127.0.0.1:8480/services/InactiveProxy", null, "IBM");
+        axis2Client.sendSimpleStockQuoteRequest("http://127.0.0.1:8280/services/InactiveProxy", null, "IBM");
     }
 
     @AfterTest(alwaysRun = true)

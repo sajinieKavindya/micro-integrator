@@ -10,7 +10,7 @@
                   xmlns:ns2="http://org.apache.synapse/xsd" xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope"/>
         <call blocking="true">
             <endpoint>
-                <http uri-template="http://localhost:8480/nullValueTransportHeaderTestBackEnd"/>
+                <http uri-template="http://localhost:8280/nullValueTransportHeaderTestBackEnd"/>
             </endpoint>
         </call>
         <log level="full">

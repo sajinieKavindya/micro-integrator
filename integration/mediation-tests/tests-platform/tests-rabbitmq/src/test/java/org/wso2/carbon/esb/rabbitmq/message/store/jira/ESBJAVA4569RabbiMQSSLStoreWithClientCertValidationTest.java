@@ -56,7 +56,7 @@ import static org.testng.Assert.assertTrue;*/
  */
 /*
 public class ESBJAVA4569RabbiMQSSLStoreWithClientCertValidationTest extends ESBIntegrationTest {
-    private static String url = "http://localhost:8480/rabbitMQRestWithClientCert/store";
+    private static String url = "http://localhost:8280/rabbitMQRestWithClientCert/store";
     private final SimpleHttpClient httpClient = new SimpleHttpClient();
 
     private final Map<String, String> headers = new HashMap<String, String>(1);

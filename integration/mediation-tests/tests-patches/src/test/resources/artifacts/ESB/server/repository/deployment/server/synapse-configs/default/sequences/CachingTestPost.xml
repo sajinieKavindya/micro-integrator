@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence xmlns="http://ws.apache.org/ns/synapse" name="CachingTestPost" trace="enable">
-    <property name="TargetUri" value="http://localhost:8480/services/RespondProxy"/>
+    <property name="TargetUri" value="http://localhost:8280/services/RespondProxy"/>
     <header expression="get-property('TargetUri')" name="To" xmlns:ns="http://org.apache.synapse/xsd"/>
     <cache collector="false"
            hashGenerator="org.wso2.carbon.mediator.cache.digest.DOMHASHGenerator"

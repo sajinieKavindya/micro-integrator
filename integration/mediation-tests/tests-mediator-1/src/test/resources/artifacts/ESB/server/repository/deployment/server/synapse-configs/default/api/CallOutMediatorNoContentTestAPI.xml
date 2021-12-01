@@ -20,7 +20,7 @@
 <api xmlns="http://ws.apache.org/ns/synapse" name="CallOutMediatorNoContentTestAPI" context="/CallOutMediatorNoContentTestAPI">
     <resource methods="POST">
         <inSequence>
-            <callout serviceURL="http://localhost:8480/CallOutMediatorSC204NoContentTMockAPI">
+            <callout serviceURL="http://localhost:8280/CallOutMediatorSC204NoContentTMockAPI">
                 <source type="envelope"/>
             </callout>
             <respond/>

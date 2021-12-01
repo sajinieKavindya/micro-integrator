@@ -1,0 +1,364 @@
+diff --git a/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/pom.xml b/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/pom.xml
+index 7210e0669..87b91b657 100644
+--- a/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/pom.xml
++++ b/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/pom.xml
+@@ -113,5 +113,10 @@
+                 </exclusion>
+             </exclusions>
+         </dependency>
++        <dependency>
++            <groupId>org.wso2.transport.http</groupId>
++            <artifactId>org.wso2.transport.http.netty</artifactId>
++            <version>6.3.25</version>
++        </dependency>
+     </dependencies>
+ </project>
+diff --git a/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/src/main/java/org/wso2/micro/integrator/transport/handlers/PassThroughNHttpGetProcessor.java b/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/src/main/java/org/wso2/micro/integrator/transport/handlers/PassThroughNHttpGetProcessor.java
+index 478a5cce6..33e94c6ad 100644
+--- a/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/src/main/java/org/wso2/micro/integrator/transport/handlers/PassThroughNHttpGetProcessor.java
++++ b/components/mediation/extensions/org.wso2.micro.integrator.transport.handlers/src/main/java/org/wso2/micro/integrator/transport/handlers/PassThroughNHttpGetProcessor.java
+@@ -35,6 +35,7 @@ import org.apache.http.HttpResponse;
+ import org.apache.http.HttpStatus;
+ import org.apache.http.nio.NHttpServerConnection;
+ import org.apache.http.protocol.HTTP;
++import org.apache.synapse.transport.netty.BridgeConstants;
+ import org.apache.synapse.transport.nhttp.NHttpConfiguration;
+ import org.apache.synapse.transport.nhttp.NhttpConstants;
+ import org.apache.synapse.transport.passthru.HttpGetRequestProcessor;
+@@ -47,9 +48,14 @@ import org.wso2.micro.core.transports.CarbonHttpRequest;
+ import org.wso2.micro.core.transports.CarbonHttpResponse;
+ import org.wso2.micro.integrator.core.services.CarbonServerConfigurationService;
+ import org.wso2.micro.integrator.transport.handlers.utils.RequestProcessorDispatcherUtil;
++import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
++import org.wso2.transport.http.netty.message.HttpCarbonMessage;
++import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
++import org.wso2.transport.http.netty.message.PooledDataStreamerFactory;
+ 
+ import java.io.IOException;
+ import java.io.OutputStream;
++import java.net.InetSocketAddress;
+ import java.util.Enumeration;
+ import java.util.Hashtable;
+ import java.util.Iterator;
+@@ -193,6 +199,100 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
+         }
+     }
+ 
++    private void processWithGetProcessor(HttpCarbonMessage inboundCarbonMsg,
++                                         HttpCarbonMessage outboundCarbonMsg,
++                                         String requestUri,
++                                         String requestUrl,
++                                         String queryString,
++                                         String item,
++                                         OutputStream outputStream) throws Exception {
++        OverflowBlob temporaryData = new OverflowBlob(256, 4048, "_nhttp", ".dat");
++        try {
++            CarbonHttpRequest carbonHttpRequest = new CarbonHttpRequest(
++                    "GET", requestUri, requestUrl);
++
++//            String uri = request.getRequestLine().getUri();
++            String uri = (String) inboundCarbonMsg.getProperty("TO");
++            // setting the parameters for nhttp transport
++            int pos = uri.indexOf("?");
++            if (pos != -1) {
++                StringTokenizer st = new StringTokenizer(uri.substring(pos + 1), "&");
++                while (st.hasMoreTokens()) {
++                    String param = st.nextToken();
++                    pos = param.indexOf("=");
++                    if (pos != -1) {
++                        carbonHttpRequest.setParameter(
++                                param.substring(0, pos), param.substring(pos + 1));
++                    } else {
++                        carbonHttpRequest.setParameter(param, null);
++                    }
++                }
++            }
++
++            carbonHttpRequest.setContextPath(cfgCtx.getServiceContextPath());
++            carbonHttpRequest.setQueryString(queryString);
++
++            CarbonHttpResponse carbonHttpResponse = new CarbonHttpResponse(
++                    temporaryData.getOutputStream());
++
++            (getRequestProcessors.get(item)).process(carbonHttpRequest, carbonHttpResponse, cfgCtx);
++
++            // adding headers
++            Map<String, String> responseHeaderMap = carbonHttpResponse.getHeaders();
++            for (Object key : responseHeaderMap.keySet()) {
++                Object value = responseHeaderMap.get(key);
++//                response.addHeader(key.toString(), value.toString());
++                outboundCarbonMsg.setHeader(key.toString(), value.toString());
++            }
++
++            // setting status code
++//            HttpResponse response;
++//            response.setStatusCode(carbonHttpResponse.getStatusCode());
++            outboundCarbonMsg.setHttpStatusCode(carbonHttpResponse.getStatusCode());
++
++            // setting error codes
++            if (carbonHttpResponse.isError()) {
++                if (carbonHttpResponse.getStatusMessage() != null) {
++//                    response.setStatusLine(response.getProtocolVersion(),
++//                            carbonHttpResponse.getStatusCode(),
++//                            carbonHttpResponse.getStatusMessage());
++                } else {
++//                    response.setStatusLine(response.getProtocolVersion(),
++//                            carbonHttpResponse.getStatusCode());
++                }
++            }
++
++            if (carbonHttpResponse.isRedirect()) {
++//                response.addHeader("Location", carbonHttpResponse.getRedirect());
++//                response.setStatusLine(response.getProtocolVersion(), 302);
++                outboundCarbonMsg.setHeader("Location", carbonHttpResponse.getRedirect());
++            }
++
++//            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
++            outboundCarbonMsg.setProperty("conn", ProtocolState.WSDL_RESPONSE_DONE);
++
++
++            try{
++                temporaryData.writeTo(outputStream);
++            }catch (Exception e) {
++                e.printStackTrace();
++            }
++
++            try {
++                outputStream.flush();
++                outputStream.close();
++            } catch (Exception ignored) {}
++        } finally {
++            temporaryData.release();
++//            sourceHandler.commitResponseHideExceptions(conn, response);
++            try {
++                inboundCarbonMsg.respond(outboundCarbonMsg);
++            } catch (ServerConnectorException e) {
++                log.error("Error while responding to the client.", e);
++            }
++        }
++    }
++
+     public void init(ConfigurationContext configurationContext, SourceHandler sourceHandler)
+             throws AxisFault {
+         
+@@ -226,7 +326,7 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
+         if (!servicePath.startsWith("/")) {
+             servicePath = "/" + servicePath;
+         }
+-        String serviceName = getServiceName(request);
++        String serviceName = getServiceName(uri);
+ 
+         boolean loadBalancer = Boolean.parseBoolean(System.getProperty("wso2.loadbalancer", "false"));
+         // Handle browser request to get favicon while requesting for wsdl
+@@ -332,6 +432,157 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
+         }
+     }
+ 
++    public void process (HttpCarbonMessage inboundCarbonMsg, HttpCarbonMessage outboundCarbonMsg,
++                        MessageContext messageContext, boolean b) {
++
++        boolean isRequestHandled = false;
++
++        final HttpMessageDataStreamer httpMessageDataStreamer =
++                getHttpMessageDataStreamer(outboundCarbonMsg);
++        OutputStream outputStream = httpMessageDataStreamer.getOutputStream();
++
++        String uri = (String) inboundCarbonMsg.getProperty("TO");
++
++        String servicePath = cfgCtx.getServiceContextPath();
++        if (!servicePath.startsWith("/")) {
++            servicePath = "/" + servicePath;
++        }
++        String serviceName = getServiceName(uri);
++
++        boolean loadBalancer = Boolean.parseBoolean(System.getProperty("wso2.loadbalancer", "false"));
++        // Handle browser request to get favicon while requesting for wsdl
++        if (uri.equals("/favicon.ico")) {
++            outboundCarbonMsg.setHttpStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
++            outboundCarbonMsg.setHeader("Location", "http://wso2.org/favicon.ico");
++            outboundCarbonMsg.setProperty("conn", ProtocolState.WSDL_RESPONSE_DONE);
++//            response.setStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
++//            response.addHeader("Location", "http://wso2.org/favicon.ico");
++//            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
++            try {
++                outputStream.flush();
++                outputStream.close();
++            } catch (Exception ignore) {
++            }
++//            sourceHandler.commitResponseHideExceptions(conn, response);
++            try {
++                inboundCarbonMsg.respond(outboundCarbonMsg);
++            } catch (ServerConnectorException e) {
++                log.error("Error while responding to the client.", e);
++            }
++            isRequestHandled = true ;
++        } else if(uri.startsWith(servicePath) &&
++                (serviceName == null || serviceName.length() == 0)){
++            //check if service listing request is blocked
++            if (isServiceListBlocked(uri)) {
++                outboundCarbonMsg.setHttpStatusCode(HttpStatus.SC_FORBIDDEN);
++//                response.setStatusCode(HttpStatus.SC_FORBIDDEN);
++//                sourceHandler.commitResponseHideExceptions(conn, response);
++                try {
++                    inboundCarbonMsg.respond(outboundCarbonMsg);
++                } catch (ServerConnectorException e) {
++                    log.error("Error while responding to the client.", e);
++                }
++            } else {
++                generateServicesList(inboundCarbonMsg, outboundCarbonMsg, outputStream, servicePath);
++                messageContext.setProperty("WSDL_GEN_HANDLED", true);
++            }
++            try {
++                outputStream.flush();
++                outputStream.close();
++            } catch (IOException ignore) {
++            }
++            isRequestHandled = true ;
++        } else {
++            int pos = uri.indexOf('?');
++            if (pos != -1) {
++                String queryString = uri.substring(pos + 1);
++                String requestUri = uri.substring(0, pos);
++                String requestUrl = uri;
++                if (requestUri.indexOf("://") == -1) {
++//                    HttpInetConnection inetConn = (HttpInetConnection) conn;
++
++                    InetSocketAddress localAddress =
++                            (InetSocketAddress) inboundCarbonMsg.getProperty(
++                                    org.wso2.transport.http.netty.contract.Constants.LOCAL_ADDRESS);
++
++                    String hostName = "localhost";
++                    CarbonServerConfigurationService serverConfig = CarbonServerConfigurationService.getInstance();
++                    if (serverConfig.getFirstProperty("HostName") != null) {
++                        hostName = serverConfig.getFirstProperty("HostName");
++                    }
++
++                    requestUrl = "http://" +
++                            hostName + ":" + localAddress.getPort() + requestUri;
++                }
++
++                String contextPath = cfgCtx.getServiceContextPath();
++                int beginIndex = -1;
++                if (requestUri.indexOf(contextPath) != -1) {
++                    beginIndex = requestUri.indexOf(contextPath) + contextPath.length() + 1;
++                }
++
++                /**
++                 * This reverseProxyMode was introduce to avoid LB exposing it's own services when invoked through rest call.
++                 * For a soap call this works well. But for a rest call this does not work as intended. in LB it has to set system property "reverseProxyMode"
++                 *
++                 */
++                boolean reverseProxyMode = Boolean.parseBoolean(System.getProperty("reverseProxyMode"));
++                AxisService axisService = null;
++                if (!reverseProxyMode) {
++                    if (!(beginIndex < 0 || beginIndex > requestUri.length())) {
++                        serviceName = requestUri.substring(beginIndex);
++                        axisService = cfgCtx.getAxisConfiguration().getServiceForActivation(serviceName);
++                    }
++                }
++
++                if (queryString != null) {
++                    for (String item : getRequestProcessors.keySet()) {
++                        if (queryString.indexOf(item) == 0 &&
++                                (queryString.equals(item) ||
++                                        queryString.indexOf("&") == item.length() ||
++                                        queryString.indexOf("=") == item.length())) {
++                            //check for APIs since no axis2 service found
++                            if (axisService == null &&
++                                    !RequestProcessorDispatcherUtil.isDispatchToApiGetProcessor(requestUri, cfgCtx)) {
++                                continue;
++                            }
++
++                            try {
++                                processWithGetProcessor(inboundCarbonMsg, outboundCarbonMsg, requestUri,
++                                        requestUrl, queryString,
++                                        item, outputStream);
++                                messageContext.setProperty("WSDL_GEN_HANDLED", true);
++                            } catch (Exception e) {
++//                                handleBrowserException(response, conn, outputStream,
++//                                        "Error processing request", e);
++                                log.error("Error processing request", e);
++                            }
++                            isRequestHandled = true;
++                            break;
++                        }
++                    }
++                }
++            }
++        }
++
++        if (!isRequestHandled) {
++            //processGetAndDelete(request, response, messageContext, conn, outputStream, "GET", b);
++            messageContext.setProperty(PassThroughConstants.REST_GET_DELETE_INVOKE, true);
++        }
++    }
++
++    private HttpMessageDataStreamer getHttpMessageDataStreamer(HttpCarbonMessage outboundRequestMsg) {
++        final HttpMessageDataStreamer outboundMsgDataStreamer;
++        final PooledDataStreamerFactory pooledDataStreamerFactory = (PooledDataStreamerFactory)
++                outboundRequestMsg.getProperty(BridgeConstants.POOLED_BYTE_BUFFER_FACTORY);
++        if (pooledDataStreamerFactory != null) {
++            outboundMsgDataStreamer = pooledDataStreamerFactory.createHttpDataStreamer(outboundRequestMsg);
++        } else {
++            outboundMsgDataStreamer = new HttpMessageDataStreamer(outboundRequestMsg);
++        }
++        return outboundMsgDataStreamer;
++    }
++
+     /**
+      * Generates the services list.
+      *
+@@ -357,6 +608,30 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
+         }
+     }
+ 
++    protected void generateServicesList(HttpCarbonMessage inboundCarbonMsg, HttpCarbonMessage outboundCarbonMsg,
++                                        OutputStream os, String servicePath) {
++        try {
++            byte[] bytes = getServicesHTML(
++                    servicePath.endsWith("/") ? "" : servicePath + "/").getBytes();
++//            response.addHeader(CONTENT_TYPE, TEXT_HTML);
++            outboundCarbonMsg.setHeader(CONTENT_TYPE, TEXT_HTML);
++//            SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
++            outboundCarbonMsg.setProperty("conn", ProtocolState.WSDL_RESPONSE_DONE);
++//            sourceHandler.commitResponseHideExceptions(conn, response);
++            try {
++                inboundCarbonMsg.respond(outboundCarbonMsg);
++            } catch (ServerConnectorException e) {
++                log.error("Error while responding to the client.", e);
++            }
++            os.write(bytes);
++
++        } catch (IOException e) {
++//            handleBrowserException(response, conn, os,
++//                    "Error generating services list", e);
++            log.error("Error generating services list", e);
++        }
++    }
++
+     /**
+      * Returns the HTML text for the list of services deployed.
+      * This can be delegated to another Class as well
+@@ -490,11 +765,10 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
+     /**
+      * Returns the service name.
+      *
+-     * @param request HttpRequest
++     * @param uri HttpRequest uri
+      * @return service name as a String
+      */
+-    protected String getServiceName(HttpRequest request) {
+-        String uri = request.getRequestLine().getUri();
++    protected String getServiceName(String uri) {
+ 
+         String servicePath = cfgCtx.getServiceContextPath();
+         if (!servicePath.startsWith("/")) {
+@@ -512,7 +786,7 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
+             }
+         } else {
+             // this may be a custom URI
+-            String incomingURI = request.getRequestLine().getUri();
++            String incomingURI = uri;
+ 
+             Map serviceURIMap = (Map) cfgCtx.getProperty(NhttpConstants.EPR_TO_SERVICE_NAME_MAP);
+             if (serviceURIMap != null) {

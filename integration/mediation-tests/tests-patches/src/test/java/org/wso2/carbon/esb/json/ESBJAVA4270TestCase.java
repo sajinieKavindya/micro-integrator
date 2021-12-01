@@ -30,7 +30,7 @@ public class ESBJAVA4270TestCase extends ESBIntegrationTest {
 
     private final Map<String, String> headers = new HashMap<String, String>(1);
     private final SimpleHttpClient httpClient = new SimpleHttpClient();
-    private static String url = "http://localhost:8480/ESBJAVA4270stockquote/view?Name=MSFT";
+    private static String url = "http://localhost:8280/ESBJAVA4270stockquote/view?Name=MSFT";
 
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {

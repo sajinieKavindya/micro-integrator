@@ -47,6 +47,7 @@ import org.wso2.micro.core.transports.CarbonHttpRequest;
 import org.wso2.micro.core.transports.CarbonHttpResponse;
 import org.wso2.micro.integrator.core.services.CarbonServerConfigurationService;
 import org.wso2.micro.integrator.transport.handlers.utils.RequestProcessorDispatcherUtil;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,17 +66,21 @@ import javax.xml.namespace.QName;
  */
 public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
 
-	
-    private Map<String, org.wso2.micro.core.transports.HttpGetRequestProcessor> getRequestProcessors = new LinkedHashMap<>();
 
-    private ConfigurationContext cfgCtx;
+    protected Map<String, org.wso2.micro.core.transports.HttpGetRequestProcessor> getRequestProcessors = new LinkedHashMap<>();
+
+    protected ConfigurationContext cfgCtx;
     private SourceHandler sourceHandler;
     private static final QName GETPROC_QN = new QName(Constants.CARBON_SERVER_XML_NAMESPACE, "HttpGetRequestProcessors");
     private static final QName ITEM_QN = new QName(Constants.CARBON_SERVER_XML_NAMESPACE, "Item");
     private static final QName CLASS_QN = new QName(Constants.CARBON_SERVER_XML_NAMESPACE, "Class");
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String TEXT_HTML = "text/html";
+    protected static final String CONTENT_TYPE = "Content-Type";
+    protected static final String TEXT_HTML = "text/html";
+    protected static final String FAVICON_ICO = "/favicon.ico";
+    protected static final String FAVICON_ICO_URL = "http://wso2.org/favicon.ico";
+    protected static final String LOCALHOST = "localhost";
+    protected static final String HOST_NAME = "HostName";
 
     private static final Log log = LogFactory.getLog(PassThroughNHttpGetProcessor.class);
 
@@ -222,17 +227,14 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
 
         String uri = request.getRequestLine().getUri();
 
-        String servicePath = cfgCtx.getServiceContextPath();
-        if (!servicePath.startsWith("/")) {
-            servicePath = "/" + servicePath;
-        }
-        String serviceName = getServiceName(request);
+        String servicePath = getServicePath();
+        String serviceName = getServiceName(uri);
 
         boolean loadBalancer = Boolean.parseBoolean(System.getProperty("wso2.loadbalancer", "false"));
         // Handle browser request to get favicon while requesting for wsdl
-        if (uri.equals("/favicon.ico")) {
+        if (uri.equals(FAVICON_ICO)) {
             response.setStatusCode(HttpStatus.SC_MOVED_PERMANENTLY);
-            response.addHeader("Location", "http://wso2.org/favicon.ico");
+            response.addHeader("Location", FAVICON_ICO_URL);
             SourceContext.updateState(conn, ProtocolState.WSDL_RESPONSE_DONE);
             try {
                 outputStream.flush();
@@ -267,7 +269,7 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
                 if (requestUri.indexOf("://") == -1) {
                     HttpInetConnection inetConn = (HttpInetConnection) conn;
 
-                    String hostName = "localhost";
+                    String hostName = LOCALHOST;
                     CarbonServerConfigurationService serverConfig = CarbonServerConfigurationService.getInstance();
                     if (serverConfig.getFirstProperty("HostName") != null) {
                         hostName = serverConfig.getFirstProperty("HostName");
@@ -330,6 +332,11 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
             //processGetAndDelete(request, response, messageContext, conn, outputStream, "GET", b);
         	messageContext.setProperty(PassThroughConstants.REST_GET_DELETE_INVOKE, true);
         }
+    }
+
+    @Override
+    public void process(HttpCarbonMessage httpCarbonMessage, HttpCarbonMessage httpCarbonMessage1, MessageContext messageContext, boolean b) {
+        // do nothing
     }
 
     /**
@@ -490,16 +497,12 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
     /**
      * Returns the service name.
      *
-     * @param request HttpRequest
+     * @param uri HttpRequest uri
      * @return service name as a String
      */
-    protected String getServiceName(HttpRequest request) {
-        String uri = request.getRequestLine().getUri();
+    protected String getServiceName(String uri) {
 
-        String servicePath = cfgCtx.getServiceContextPath();
-        if (!servicePath.startsWith("/")) {
-            servicePath = "/" + servicePath;
-        }
+        String servicePath = getServicePath();
 
         String serviceName = null;
         if (uri.startsWith(servicePath)) {
@@ -507,18 +510,17 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
             if (serviceName.startsWith("/")) {
                 serviceName = serviceName.substring(1);
             }
-            if (serviceName.indexOf("?") != -1) {
+            if (serviceName.contains("?")) {
                 serviceName = serviceName.substring(0, serviceName.indexOf("?"));
             }
         } else {
             // this may be a custom URI
-            String incomingURI = request.getRequestLine().getUri();
 
             Map serviceURIMap = (Map) cfgCtx.getProperty(NhttpConstants.EPR_TO_SERVICE_NAME_MAP);
             if (serviceURIMap != null) {
                 Set keySet = serviceURIMap.keySet();
                 for (Object key : keySet) {
-                    if (incomingURI.toLowerCase().contains(((String) key).toLowerCase())) {
+                    if (uri.toLowerCase().contains(((String) key).toLowerCase())) {
                         return (String) serviceURIMap.get(key);
                     }
                 }
@@ -532,6 +534,14 @@ public class PassThroughNHttpGetProcessor implements HttpGetRequestProcessor {
             }
         }
         return serviceName;
+    }
+
+    protected String getServicePath() {
+        String servicePath = cfgCtx.getServiceContextPath();
+        if (!servicePath.startsWith("/")) {
+            servicePath = "/" + servicePath;
+        }
+        return servicePath;
     }
 
     public void handleException(String msg, Exception e) throws AxisFault {

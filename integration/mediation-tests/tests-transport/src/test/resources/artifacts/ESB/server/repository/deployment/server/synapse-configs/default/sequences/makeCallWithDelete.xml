@@ -7,7 +7,7 @@
         <property name="HTTP_METHOD" scope="axis2" type="STRING" value="DELETE"/>
         <call>
             <endpoint>
-                <address uri="http://localhost:8480/testbackend"/>
+                <address uri="http://localhost:8280/testbackend"/>
             </endpoint>
         </call>
         <log level="full"/>

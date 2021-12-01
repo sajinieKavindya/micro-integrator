@@ -26,7 +26,7 @@
                 </log>
                 <send>
                     <endpoint>
-                        <address uri="https://localhost:8443/services/CloneIntegrationEndpointsHttpsProxy"/>
+                        <address uri="https://localhost:8543/services/CloneIntegrationEndpointsHttpsProxy"/>
                     </endpoint>
                 </send>
             </sequence>
@@ -38,7 +38,7 @@
                 </log>
                 <send>
                     <endpoint>
-                        <address uri="https://localhost:8443/services/CloneIntegrationEndpointsHttpsProxy"/>
+                        <address uri="https://localhost:8543/services/CloneIntegrationEndpointsHttpsProxy"/>
                     </endpoint>
                 </send>
             </sequence>
@@ -50,7 +50,7 @@
                 </log>
                 <send>
                     <endpoint>
-                        <address uri="https://localhost:8443/services/CloneIntegrationEndpointsHttpsProxy"/>
+                        <address uri="https://localhost:8543/services/CloneIntegrationEndpointsHttpsProxy"/>
                     </endpoint>
                 </send>
             </sequence>
@@ -62,7 +62,7 @@
                 </log>
                 <send>
                     <endpoint>
-                        <address uri="https://localhost:8443/services/CloneIntegrationEndpointsHttpsProxy"/>
+                        <address uri="https://localhost:8543/services/CloneIntegrationEndpointsHttpsProxy"/>
                     </endpoint>
                 </send>
             </sequence>

@@ -31,7 +31,7 @@
                     <sequence>
                         <send>
                             <endpoint>
-                                <address uri="http://localhost:8480/no-content-response" />
+                                <address uri="http://localhost:8280/no-content-response" />
                             </endpoint>
                         </send>
                     </sequence>

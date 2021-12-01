@@ -67,7 +67,7 @@ public class PropertyIntegrationForceHttpContentLengthPropertyTestCase extends E
         // Execute request
         httpclient.execute(post);
 
-        assertTrue(wireServer.getCapturedMessage().contains("Content-Length"),
+        assertTrue(wireServer.getCapturedMessage().contains("Content-Length") || wireServer.getCapturedMessage().contains("content-length"),
                 "Content-Length not found in the out-going message");
     }
 
@@ -92,7 +92,7 @@ public class PropertyIntegrationForceHttpContentLengthPropertyTestCase extends E
         // Execute request
         httpclient.execute(post);
 
-        assertFalse(wireServer.getCapturedMessage().contains("Content-Length"),
+        assertFalse(wireServer.getCapturedMessage().contains("Content-Length") || wireServer.getCapturedMessage().contains("content-length"),
                 "Content-Length found in the out-going message");
     }
 

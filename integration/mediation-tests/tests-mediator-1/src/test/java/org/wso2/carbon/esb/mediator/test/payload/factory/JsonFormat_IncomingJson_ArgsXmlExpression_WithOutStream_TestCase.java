@@ -57,7 +57,7 @@ public class JsonFormat_IncomingJson_ArgsXmlExpression_WithOutStream_TestCase ex
                         + "    }\n" + "}";
 
         String contentType = "application/json";
-        String url = "http://localhost:8480/services/Dummy";
+        String url = "http://localhost:8280/services/Dummy";
         Reader data = new StringReader(payload);
         Writer writer = new StringWriter();
 

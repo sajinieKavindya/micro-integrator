@@ -4,7 +4,7 @@
     <target>
         <inSequence>
             <header scope="default">
-                <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing"><wsa:Address>http://localhost:8480/wsaddressing-support-test</wsa:Address></wsa:From>
+                <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing"><wsa:Address>http://localhost:8280/wsaddressing-support-test</wsa:Address></wsa:From>
             </header>
             <header scope="default">
                 <wsa:MessageID xmlns:wsa="http://www.w3.org/2005/08/addressing">urn:uuid:ef503c98-f6c7-4aa4-8e91-d76a2a7efaf4</wsa:MessageID>
@@ -15,7 +15,7 @@
             <property name="PRESERVE_WS_ADDRESSING" value="true"/>
             <send>
                 <endpoint>
-                    <address uri="http://localhost:8480/wsaddressing-support-test" format="soap11">
+                    <address uri="http://localhost:8280/wsaddressing-support-test" format="soap11">
                         <enableAddressing/>
                     </address>
                 </endpoint>

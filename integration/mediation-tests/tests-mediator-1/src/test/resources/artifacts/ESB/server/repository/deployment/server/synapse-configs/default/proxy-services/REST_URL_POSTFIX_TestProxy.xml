@@ -9,7 +9,7 @@
             <property name="REST_URL_POSTFIX" value="/testcontext" scope="axis2" type="STRING"/>
             <send>
                 <endpoint>
-                    <address uri="http://localhost:8480/postfixapi"/>
+                    <address uri="http://localhost:8280/postfixapi"/>
                 </endpoint>
             </send>
         </inSequence>

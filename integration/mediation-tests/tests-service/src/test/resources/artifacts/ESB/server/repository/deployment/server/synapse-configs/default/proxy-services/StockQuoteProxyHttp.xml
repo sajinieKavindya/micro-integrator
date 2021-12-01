@@ -1,7 +1,7 @@
 <proxy xmlns="http://ws.apache.org/ns/synapse" name="StockQuoteProxyHttp" transports="http" startOnLoad="true" trace="disable">
         <target>
             <endpoint>
-                <address uri="https://localhost:8443/services/StockQuoteProxyHttps"/>
+                <address uri="https://localhost:8543/services/StockQuoteProxyHttps"/>
             </endpoint>
             <outSequence>
                 <send/>

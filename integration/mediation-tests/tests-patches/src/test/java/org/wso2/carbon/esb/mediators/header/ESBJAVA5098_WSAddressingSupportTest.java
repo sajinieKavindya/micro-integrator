@@ -55,10 +55,10 @@ public class ESBJAVA5098_WSAddressingSupportTest extends ESBIntegrationTest {
 
         String expectedResponse = "<headerContent xmlns=\"http://ws.apache.org/ns/synapse\">"
                 + "<soapenv:Header xmlns:wsa=\"http://www.w3.org/2005/08/addressing\">"
-                + "<wsa:From><wsa:Address>http://localhost:8480/wsaddressing-support-test</wsa:Address></wsa:From>"
+                + "<wsa:From><wsa:Address>http://localhost:8280/wsaddressing-support-test</wsa:Address></wsa:From>"
                 + "<wsa:MessageID>urn:uuid:ef503c98-f6c7-4aa4-8e91-d76a2a7efaf4</wsa:MessageID>"
                 + "<wsa:Action>urn:anonOutInOpResponse</wsa:Action>"
-                + "<wsa:To>http://localhost:8480/wsaddressing-support-test</wsa:To>" + "</soapenv:Header>"
+                + "<wsa:To>http://localhost:8280/wsaddressing-support-test</wsa:To>" + "</soapenv:Header>"
                 + "</headerContent>";
 
         if (response.contains(expectedResponse)) {

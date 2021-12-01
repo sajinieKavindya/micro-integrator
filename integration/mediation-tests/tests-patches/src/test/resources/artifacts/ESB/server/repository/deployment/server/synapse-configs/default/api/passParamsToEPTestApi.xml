@@ -22,7 +22,7 @@
         <inSequence>
             <send>
                 <endpoint>
-                    <http method="GET" uri-template="http://localhost:8480/services/queryparamapi/select?queryParam={uri.var.query}"/>
+                    <http method="GET" uri-template="http://localhost:8280/services/queryparamapi/select?queryParam={uri.var.query}"/>
                 </endpoint>
             </send>
         </inSequence>

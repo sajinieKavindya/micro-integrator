@@ -39,8 +39,8 @@ public class ApiStatisticsTest extends ESBIntegrationTest {
     ThriftServer thriftServer;
     private ServerConfigurationManager serverConfigurationManager;
     public static final int MEDIATOR_ID_INDEX = 4;
-    String url = "http://127.0.0.1:8480/stockquote/view/IBM";
-    String postUrl = "http://127.0.0.1:8480/stockquote/order/";
+    String url = "http://127.0.0.1:8280/stockquote/view/IBM";
+    String postUrl = "http://127.0.0.1:8280/stockquote/order/";
     String payload = "<placeOrder xmlns=\"http://services.samples\">\n" + "  <order>\n" + "     <price>50</price>\n"
             + "     <quantity>10</quantity>\n" + "     <symbol>IBM</symbol>\n" + "  </order>\n" + "</placeOrder>";
     String contentType = "application/xml";

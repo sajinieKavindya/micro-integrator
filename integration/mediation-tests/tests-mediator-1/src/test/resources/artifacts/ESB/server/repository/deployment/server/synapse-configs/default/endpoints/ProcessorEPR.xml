@@ -1,3 +1,3 @@
 <endpoint xmlns="http://ws.apache.org/ns/synapse" name="ProcessorEPR">
-        <address uri="https://localhost:8443/services/testProcessor"/>
+        <address uri="https://localhost:8543/services/testProcessor"/>
     </endpoint>

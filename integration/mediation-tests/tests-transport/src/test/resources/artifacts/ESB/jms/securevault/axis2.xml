@@ -210,13 +210,18 @@
     <!--             Transport Ins (Listeners)             -->
     <!-- ================================================= -->
 
-    <transportReceiver name="http" class="org.apache.synapse.transport.passthru.PassThroughHttpListener">
-        <parameter name="port" locked="false">8280</parameter>
+    <transportReceiver name="httpold" class="org.apache.synapse.transport.passthru.PassThroughHttpListener">
+        <parameter name="port" locked="false">8281</parameter>
         <parameter name="non-blocking" locked="false">true</parameter>
         <!--parameter name="bind-address" locked="false">hostname or IP address</parameter-->
         <!--parameter name="WSDLEPRPrefix" locked="false">https://apachehost:port/somepath</parameter-->
           <parameter name="httpGetProcessor" locked="false">org.wso2.micro.integrator.transport.handlers.PassThroughNHttpGetProcessor</parameter>
         <!--<parameter name="priorityConfigFile" locked="false">location of priority configuration file</parameter>-->
+    </transportReceiver>
+
+    <transportReceiver name="http" class="org.apache.synapse.transport.netty.listener.Axis2HttpTransportListener">
+        <parameter name="port" locked="false">8280</parameter>
+        <parameter name="httpGetProcessor" locked="false">org.wso2.micro.integrator.transport.handlers.PassThroughNHttpGetProcessor</parameter>
     </transportReceiver>
 
     <transportReceiver name="https" class="org.apache.synapse.transport.passthru.PassThroughHttpSSLListener">
@@ -362,13 +367,18 @@
     <!--             Transport Outs (Senders)              -->
     <!-- ================================================= -->
 
-    <transportSender name="http" class="org.apache.synapse.transport.passthru.PassThroughHttpSender">
+    <transportSender name="httpold" class="org.apache.synapse.transport.passthru.PassThroughHttpSender">
         <parameter name="non-blocking" locked="false">true</parameter>
         <!--<parameter name="warnOnHTTP500" locked="false">*</parameter>-->
         <!--parameter name="http.proxyHost" locked="false">localhost</parameter-->
         <!--<parameter name="http.proxyPort" locked="false">3128</parameter>-->
         <!--<parameter name="http.nonProxyHosts" locked="false">localhost|moon|sun</parameter>-->
     </transportSender>
+
+    <transportSender name="http" class="org.apache.synapse.transport.netty.sender.Axis2HttpTransportSender">
+        <parameter name="non-blocking" locked="false">true</parameter>
+    </transportSender>
+
 
     <transportSender name="https" class="org.apache.synapse.transport.passthru.PassThroughHttpSSLSender">
         <parameter name="non-blocking" locked="false">true</parameter>

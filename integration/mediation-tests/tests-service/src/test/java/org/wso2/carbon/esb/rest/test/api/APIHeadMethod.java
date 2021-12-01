@@ -40,7 +40,7 @@ public class APIHeadMethod extends ESBIntegrationTest {
 
     @Test(groups = "wso2.esb", description = "API HTTP HEAD Method")
     public void apiHTTPHeadMethodTest() throws Exception {
-        String restURL = "http://localhost:8480/headTest";
+        String restURL = "http://localhost:8280/headTest";
         DefaultHttpClient httpclient = new DefaultHttpClient();
 
 

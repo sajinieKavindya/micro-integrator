@@ -37,7 +37,7 @@ public class ReadienssProbeTestCase extends ESBIntegrationTest {
 
     private ServerConfigurationManager serverConfigurationManager;
     private static final String FAULTY_CAPP_NAME = "invalidCompositeApplication_1.0.0.car";
-    private static final String READINESS_URL = "http://localhost:9391/healthz";
+    private static final String READINESS_URL = "http://localhost:9491/healthz";
 
     private SimpleHttpClient client;
     private Map<String, String> headers;

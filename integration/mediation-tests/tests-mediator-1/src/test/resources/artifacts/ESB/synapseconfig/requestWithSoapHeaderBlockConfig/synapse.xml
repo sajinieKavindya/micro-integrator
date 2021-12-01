@@ -119,7 +119,7 @@
         <parameter name="ScenarioID">scenario1</parameter>
     </proxy>
     <endpoint name="ProcessorEPR">
-        <address uri="https://localhost:8443/services/testProcessor"/>
+        <address uri="https://localhost:8543/services/testProcessor"/>
     </endpoint>
     <sequence name="eMurOutSequence">
         <log>

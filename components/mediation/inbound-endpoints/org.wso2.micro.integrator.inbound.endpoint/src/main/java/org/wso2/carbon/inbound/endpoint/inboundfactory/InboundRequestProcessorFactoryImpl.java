@@ -27,6 +27,8 @@ import org.wso2.carbon.inbound.endpoint.protocol.generic.GenericInboundListener;
 import org.wso2.carbon.inbound.endpoint.protocol.generic.GenericProcessor;
 import org.wso2.carbon.inbound.endpoint.protocol.http.InboundHttpListener;
 import org.wso2.carbon.inbound.endpoint.protocol.https.InboundHttpsListener;
+import org.wso2.carbon.inbound.endpoint.protocol.http_websocket.InboundHttpAndWebsocketListener;
+import org.wso2.carbon.inbound.endpoint.protocol.https_securewebsocket.InboundHttpsAndSecureWebsocketListener;
 import org.wso2.carbon.inbound.endpoint.protocol.kafka.KAFKAProcessor;
 import org.wso2.carbon.inbound.endpoint.protocol.mqtt.MqttListener;
 import org.wso2.carbon.inbound.endpoint.protocol.rabbitmq.RabbitMQListener;
@@ -42,7 +44,7 @@ import org.wso2.carbon.inbound.endpoint.protocol.jms.JMSProcessor;
  */
 public class InboundRequestProcessorFactoryImpl implements InboundRequestProcessorFactory {
 
-    public static enum Protocols {jms, file, http, https, hl7, kafka, mqtt, rabbitmq, ws, wss, grpc}
+    public static enum Protocols {jms, file, http, https, hl7, kafka, mqtt, rabbitmq, ws, wss, grpc, http_ws, https_wss}
 
     /**
      * return underlying Request Processor Implementation according to protocol
@@ -77,6 +79,10 @@ public class InboundRequestProcessorFactoryImpl implements InboundRequestProcess
                 inboundRequestProcessor = new RabbitMQListener(params);
             } else if (Protocols.grpc.toString().equals(protocol)) {
                 inboundRequestProcessor = new InboundGRPCListener(params);
+            } else if (Protocols.http_ws.toString().equals(protocol)) {
+                inboundRequestProcessor = new InboundHttpAndWebsocketListener(params);
+            } else if (Protocols.https_wss.toString().equals(protocol)) {
+                inboundRequestProcessor = new InboundHttpsAndSecureWebsocketListener(params);
             }
         } else if (params.getClassImpl() != null) {
             if (GenericInboundListener.isListeningInboundEndpoint(params)) {

@@ -19,7 +19,7 @@
 <api xmlns="http://ws.apache.org/ns/synapse" name="ESBJAVA4452TestAPI" context="/callouttest">
     <resource methods="POST">
         <inSequence>
-            <callout serviceURL="http://localhost:8480/mockresponse">
+            <callout serviceURL="http://localhost:8280/mockresponse">
                 <source type="envelope"/>
             </callout>
             <respond/>

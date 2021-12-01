@@ -148,7 +148,7 @@ public class ESBJAVA3751UriTemplateReservedCharacterEncodingTest extends ESBInte
         carbonLogReader.clearLogs();
         boolean isPercentEncoded = false;
         HttpResponse response = HttpRequestUtil.sendGetRequest(
-                getApiInvocationURL("services/client/special_case/http://localhost:8480/services/test_2/special_case"),
+                getApiInvocationURL("services/client/special_case/http://localhost:8280/services/test_2/special_case"),
                 null);
         isPercentEncoded = carbonLogReader.checkForLog("To: /services/test_2/special_case", DEFAULT_TIMEOUT);
         Assert.assertTrue(isPercentEncoded,

@@ -9,155 +9,155 @@
         <listener class-name="org.wso2.carbon.automation.engine.testlisteners.TestReportListener"/>
     </listeners>
 
-    <test name="DBLookup-mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.db.dblookup"/>
-        </packages>
-    </test>
-    <test name="Throttle-mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.throttle"/>
-        </packages>
-    </test>
+<!--    <test name="DBLookup-mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mediator.test.db.dblookup"/>-->
+<!--        </packages>-->
+<!--    </test>-->
+<!--    <test name="Throttle-mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mediator.test.throttle"/>-->
+<!--        </packages>-->
+<!--    </test>-->
 
-    <test name="Fault Mediator" preserve-order="true" verbose="2">
-        <classes>
-            <class name="org.wso2.carbon.esb.mediator.test.aggregate.NestedAggregatesTestCase"/>
-        </classes>
-    </test>
-    <test name="Aggregate-mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.aggregate"/>
-        </packages>
-        <classes>
-            <class name="org.wso2.carbon.esb.mediator.test.aggregate.NestedAggregatesTestCase">
-                <methods>
-                    <exclude name=".*" />
-                </methods>
-            </class>
+<!--    <test name="Fault Mediator" preserve-order="true" verbose="2">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.aggregate.NestedAggregatesTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="Aggregate-mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mediator.test.aggregate"/>-->
+<!--        </packages>-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.aggregate.ESBJAVA4792AggregateTimeoutTestCase">-->
+<!--                <methods>-->
+<!--                    <exclude name=".*" />-->
+<!--                </methods>-->
+<!--            </class>-->
             <!-- Removing due to https://github.com/wso2/micro-integrator/issues/486 -->
-            <class name="org.wso2.carbon.esb.mediator.test.aggregate.SoapHeaderBlocksTestCase">
-                <methods>
-                    <exclude name=".*" />
-                </methods>
-            </class>
-        </classes>
-    </test>
+<!--            <class name="org.wso2.carbon.esb.mediator.test.aggregate.SoapHeaderBlocksTestCase">-->
+<!--                <methods>-->
+<!--                    <exclude name=".*" />-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--        </classes>-->
+<!--    </test>-->
 
 
-    <test name="Cache-mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.cache"/>
-        </packages>
-        <classes>
-            <class name="org.wso2.carbon.esb.mediator.test.cache.LargeCacheTimeOutTestCase">
-                <methods>
-                    <exclude name=".*" />
-                </methods>
-            </class>
-        </classes>
-    </test>
+<!--    <test name="Cache-mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mediator.test.cache"/>-->
+<!--        </packages>-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.cache.LargeCacheTimeOutTestCase">-->
+<!--                <methods>-->
+<!--                    <exclude name=".*" />-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <test name="Call-Template-Mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.callTemplate"/>
-        </packages>
-    </test>
+<!--    <test name="Call-Template-Mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mediator.test.callTemplate"/>-->
+<!--        </packages>-->
+<!--    </test>-->
 
-    <test name="CallOut-mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.callOut"/>
-        </packages>
-        <classes>
-            <class name="org.wso2.carbon.esb.mediator.test.callOut.InboundOutboundPolicySecurityTestCase">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
-            <class name="org.wso2.carbon.esb.mediator.test.callOut.SecurityTestCase">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
-            <!-- Disable the testcase as config files are getting dynamically changed -->
-            <class name="org.wso2.carbon.esb.mediator.test.callOut.ValidPathAxis2XmlTestCase">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
-        </classes>
-    </test>
+<!--    <test name="CallOut-mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <packages>-->
+<!--            <package name="org.wso2.carbon.esb.mediator.test.callOut"/>-->
+<!--        </packages>-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.callOut.InboundOutboundPolicySecurityTestCase">-->
+<!--                <methods>-->
+<!--                    <exclude name=".*"/>-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.callOut.SecurityTestCase">-->
+<!--                <methods>-->
+<!--                    <exclude name=".*"/>-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--            &lt;!&ndash; Disable the testcase as config files are getting dynamically changed &ndash;&gt;-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.callOut.ValidPathAxis2XmlTestCase">-->
+<!--                <methods>-->
+<!--                    <exclude name=".*"/>-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--        </classes>-->
+<!--    </test>-->
 
 
-    <test name="Call-mediator-Test" preserve-order="true" verbose="2">
-        <classes>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorHttpStatusResponseTestCase"/>
-            <!--<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorAPIWithNamedSeqCase"/>-->
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingAPITestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingDirectEndpointTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingFilterTestCase"/>
-            <!--<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingInboundOutboundPolicySecurityTestCase"/>-->
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingIndirectEndpointTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingInTemplateTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingProxyWithNamedSeqCase"/>
-            <!--<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingSecurityTestCase"/>-->
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingSwitchTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingTransportHeaderTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingWSDLEndpointTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFailOverTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFaultHandlingTests"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFaultTriggerTestCase"/>
-            <!--<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInAPITestCase"/>-->
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInBothProxyInAndOutSequencesTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInCloneTargetSequencesTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInCloneTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInFaultSeqTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInFilterTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInIterateTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSequenceScenario2TestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSequenceTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterSwitchScenario2TestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterSwitchTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSwitchTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInTemplateTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorLoadBalanceFailoverTest"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorOutOnlyTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorProxyWithNamedSeqCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA4469CallMediatorWithOutOnlyTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA5216CallMediatorPerAPILogTest"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingFailoverTestCase"/>
-            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingLoadBalanceFailoverTest"/>
-            <!--This has been commented out until carbon kernel going to release with axis2 version 1.6.1-wso2v23.-->
-            <!--<class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA5217NoDefaultContentTypeTestCase"/>-->
+<!--    <test name="Call-mediator-Test" preserve-order="true" verbose="2">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorHttpStatusResponseTestCase"/>-->
+<!--            &lt;!&ndash;<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorAPIWithNamedSeqCase"/>&ndash;&gt;-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingAPITestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingDirectEndpointTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingFilterTestCase"/>-->
+<!--            &lt;!&ndash;<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingInboundOutboundPolicySecurityTestCase"/>&ndash;&gt;-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingIndirectEndpointTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingInTemplateTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingProxyWithNamedSeqCase"/>-->
+<!--            &lt;!&ndash;<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingSecurityTestCase"/>&ndash;&gt;-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingSwitchTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingTransportHeaderTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingWSDLEndpointTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFailOverTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFaultHandlingTests"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFaultTriggerTestCase"/>-->
+<!--            &lt;!&ndash;<class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInAPITestCase"/>&ndash;&gt;-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInBothProxyInAndOutSequencesTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInCloneTargetSequencesTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInCloneTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInFaultSeqTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInFilterTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInIterateTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSequenceScenario2TestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSequenceTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterSwitchScenario2TestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterSwitchTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInNestedFilterTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInSwitchTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInTemplateTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorLoadBalanceFailoverTest"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorOutOnlyTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorProxyWithNamedSeqCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA4469CallMediatorWithOutOnlyTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA5216CallMediatorPerAPILogTest"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingFailoverTestCase"/>-->
+<!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingLoadBalanceFailoverTest"/>-->
+<!--            &lt;!&ndash;This has been commented out until carbon kernel going to release with axis2 version 1.6.1-wso2v23.&ndash;&gt;-->
+<!--            &lt;!&ndash;<class name="org.wso2.carbon.esb.mediator.test.call.ESBJAVA5217NoDefaultContentTypeTestCase"/>&ndash;&gt;-->
 
-            <!--            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFailOverTestCase">
-                            <methods>
-                                <exclude name=".*" />
-                            </methods>
-                       </class>
-                            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInAPITestCase">
-                            <methods>
-                                <exclude name=".*" />
-                            </methods>
-                       </class>
-                            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorAPIWithNamedSeqCase">
-                            <methods>
-                                <exclude name=".*" />
-                            </methods>
-                       </class>
-                        <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingSecurityTestCase">
-                            <methods>
-                                <exclude name=".*" />
-                            </methods>
-                        </class>
-                        <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingInboundOutboundPolicySecurityTestCase">
-                            <methods>
-                                <exclude name=".*" />
-                            </methods>
-                        </class>&ndash;&gt;-->
-        </classes>
-    </test>
+<!--            &lt;!&ndash;            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorFailOverTestCase">-->
+<!--                            <methods>-->
+<!--                                <exclude name=".*" />-->
+<!--                            </methods>-->
+<!--                       </class>-->
+<!--                            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorInAPITestCase">-->
+<!--                            <methods>-->
+<!--                                <exclude name=".*" />-->
+<!--                            </methods>-->
+<!--                       </class>-->
+<!--                            <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorAPIWithNamedSeqCase">-->
+<!--                            <methods>-->
+<!--                                <exclude name=".*" />-->
+<!--                            </methods>-->
+<!--                       </class>-->
+<!--                        <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingSecurityTestCase">-->
+<!--                            <methods>-->
+<!--                                <exclude name=".*" />-->
+<!--                            </methods>-->
+<!--                        </class>-->
+<!--                        <class name="org.wso2.carbon.esb.mediator.test.call.CallMediatorBlockingInboundOutboundPolicySecurityTestCase">-->
+<!--                            <methods>-->
+<!--                                <exclude name=".*" />-->
+<!--                            </methods>-->
+<!--                        </class>&ndash;&gt;&ndash;&gt;-->
+<!--        </classes>-->
+<!--    </test>-->
 
     <test name="Clone-mediator-Test" preserve-order="true" verbose="2">
         <packages>
@@ -237,6 +237,8 @@
                     <exclude name=".*"/>
                 </methods>
             </class>
+            <class name="org.wso2.carbon.esb.mediator.test.fault.Soap12FaultStringExpressionTestCase"></class>
+            <class name="org.wso2.carbon.esb.mediator.test.fault.Soap11FaultStringExpressionTestCase"></class>
         </classes>
     </test>
 
@@ -326,4 +328,3 @@
     </test>
 
 </suite>
-

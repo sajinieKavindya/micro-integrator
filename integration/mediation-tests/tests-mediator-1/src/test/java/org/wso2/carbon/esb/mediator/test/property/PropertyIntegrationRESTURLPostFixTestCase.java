@@ -41,7 +41,7 @@ public class PropertyIntegrationRESTURLPostFixTestCase extends ESBIntegrationTes
         SimpleHttpClient client = new SimpleHttpClient();
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "text/plain");
-        String endpoint = "http://localhost:8480/services/REST_URL_POSTFIX_TestProxy";
+        String endpoint = "http://localhost:8280/services/REST_URL_POSTFIX_TestProxy";
 
         HttpResponse response = client.doGet(endpoint, headers);
         String responsePayload = client.getResponsePayload(response);

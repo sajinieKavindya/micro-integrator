@@ -56,8 +56,7 @@ public class ESBJAVA4631PreserveContentTypeHeaderTestCase extends ESBIntegration
         String proxyServiceUrl = getProxyServiceURLHttp("PreserveContentTypeHeaderTest");
 
         String requestPayload =
-                "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' >" + "<soapenv:Body>"
-                        + "</soapenv:Body></soapenv:Envelope> ";
+                "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' ><soapenv:Body></soapenv:Body></soapenv:Envelope>";
 
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Soapaction", "urn:mediate");
