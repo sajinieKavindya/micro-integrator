@@ -78,7 +78,7 @@ public class ESBJAVA4631PreserveHTTPHeadersTest extends ESBIntegrationTest {
         String[] wireResponseLines = wireResponse.split(System.lineSeparator());
         boolean isContentTypePresent = false;
         for (String line : wireResponseLines) {
-            if (line.contains("Content-Type")) {
+            if (line.contains("Content-Type") || line.contains("content-type")) {
                 isContentTypePresent = true;
                 //charset encoding is appended to content-type header even preserve the content-type header as it is
                 //This checks charset encoding is appended or not

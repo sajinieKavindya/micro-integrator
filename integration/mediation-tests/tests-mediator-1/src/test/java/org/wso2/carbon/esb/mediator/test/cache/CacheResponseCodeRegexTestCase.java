@@ -50,7 +50,7 @@ public class CacheResponseCodeRegexTestCase extends ESBIntegrationTest {
 
         Map<String, String> requestHeader = new HashMap<>();
         requestHeader.put("CODE", "202");
-        requestHeader.put("symbol", "RegexPattern");
+        requestHeader.put("symbol", "symbol");
 
         // Backend respond with 202 status code
         HttpResponse response1 = HttpRequestUtil.doGet((getApiInvocationURL("ResponseCodeRegex")), requestHeader);

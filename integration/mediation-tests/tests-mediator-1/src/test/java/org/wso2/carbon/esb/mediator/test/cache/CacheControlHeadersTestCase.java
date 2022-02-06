@@ -66,7 +66,7 @@ public class CacheControlHeadersTestCase extends ESBIntegrationTest {
      * returned with the response.
      */
     @SetEnvironment(executionEnvironments = { ExecutionEnvironment.STANDALONE })
-    @Test(groups = { "wso2.esb" }, description = "Testing with a large cache time out value for cache mediator")
+    @Test(groups = { "wso2.esb" }, description = "Testing with a large cache time out value for cache mediator", enabled = false)
     public void testNoStore() throws Exception {
         String apiName = "noStore";
         OMElement response;
@@ -110,7 +110,7 @@ public class CacheControlHeadersTestCase extends ESBIntegrationTest {
      * This test case checks whether an Age header is returned with the response.
      */
     @SetEnvironment(executionEnvironments = { ExecutionEnvironment.STANDALONE })
-    @Test(groups = { "wso2.esb" }, description = "Testing with a large cache time out value for cache mediator")
+    @Test(groups = { "wso2.esb" }, description = "Testing with a large cache time out value for cache mediator", enabled = false)
     public void testMaxAge() throws Exception {
         String apiName = "maxAge";
         OMElement response;
