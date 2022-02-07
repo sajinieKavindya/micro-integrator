@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.inbound.endpoint.protocol.http_websocket.management;
+package org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.management;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
@@ -29,7 +29,7 @@ import org.apache.synapse.transport.netty.api.config.SSLConfiguration;
 import org.wso2.carbon.inbound.endpoint.common.AbstractInboundEndpointManager;
 import org.wso2.carbon.inbound.endpoint.inboundfactory.InboundRequestProcessorFactoryImpl;
 import org.wso2.carbon.inbound.endpoint.osgi.service.ServiceReferenceHolder;
-import org.wso2.carbon.inbound.endpoint.protocol.http_websocket.InboundHttpWebSocketConstants;
+import org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.InboundHttpWebSocketConstants;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -54,7 +54,7 @@ public class HttpWebsocketEndpointManager extends AbstractInboundEndpointManager
             return true;
         }
         dataStore.registerListeningEndpoint(port, SUPER_TENANT_DOMAIN_NAME,
-                InboundRequestProcessorFactoryImpl.Protocols.http_ws.toString(), name, inboundParameters);
+                InboundRequestProcessorFactoryImpl.Protocols.httpws.toString(), name, inboundParameters);
         boolean start = startListener(port, name, inboundParameters);
 
         if (!start) {
@@ -70,7 +70,7 @@ public class HttpWebsocketEndpointManager extends AbstractInboundEndpointManager
             return true;
         }
         dataStore.registerListeningEndpoint(port, SUPER_TENANT_DOMAIN_NAME,
-                InboundRequestProcessorFactoryImpl.Protocols.https_wss.toString(), name, inboundParameters);
+                InboundRequestProcessorFactoryImpl.Protocols.httpswss.toString(), name, inboundParameters);
         boolean start = startSSLListener(port, name, inboundParameters);
 
         if (!start) {

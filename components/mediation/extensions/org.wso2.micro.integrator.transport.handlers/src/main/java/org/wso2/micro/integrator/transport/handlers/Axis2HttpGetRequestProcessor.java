@@ -31,6 +31,7 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.transport.netty.BridgeConstants;
 import org.apache.synapse.transport.netty.config.HttpGetRequestProcessor;
 import org.apache.synapse.transport.netty.config.NettyConfiguration;
+import org.apache.synapse.transport.netty.util.HttpUtils;
 import org.apache.synapse.transport.netty.util.RequestResponseUtils;
 import org.wso2.micro.core.transports.CarbonHttpRequest;
 import org.wso2.micro.core.transports.CarbonHttpResponse;
@@ -219,7 +220,7 @@ public class Axis2HttpGetRequestProcessor extends AbstractHttpGetRequestProcesso
             }
 
             try (OutputStream outputStream =
-                         RequestResponseUtils.getHttpMessageDataStreamer(outboundCarbonMsg).getOutputStream()) {
+                         HttpUtils.getHttpMessageDataStreamer(outboundCarbonMsg).getOutputStream()) {
                 temporaryData.writeTo(outputStream);
             } catch (Exception e) {
                 LOG.error("Error occurred while writing the response body to the client", e);
@@ -246,8 +247,7 @@ public class Axis2HttpGetRequestProcessor extends AbstractHttpGetRequestProcesso
             LOG.error("Error while submitting the response to the client.", e);
         }
 
-        try (OutputStream outputStream =
-                     RequestResponseUtils.getHttpMessageDataStreamer(outboundCarbonMsg).getOutputStream()) {
+        try (OutputStream outputStream = HttpUtils.getHttpMessageDataStreamer(outboundCarbonMsg).getOutputStream()) {
             outputStream.write(bytes);
         } catch (IOException e) {
             LOG.error("Error occurred while writing the response body to the client", e);

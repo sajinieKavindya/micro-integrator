@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,15 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.inbound.endpoint.protocol.https_securewebsocket;
+package org.wso2.carbon.inbound.endpoint.protocol.httpssecurewebsocket;
 
 import org.apache.synapse.inbound.InboundProcessorParams;
-import org.wso2.carbon.inbound.endpoint.protocol.http_websocket.InboundHttpAndWebsocketListener;
-import org.wso2.carbon.inbound.endpoint.protocol.http_websocket.management.HttpWebsocketEndpointManager;
+import org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.InboundHttpWebsocketListener;
+import org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.management.HttpWebsocketEndpointManager;
 
-public class InboundHttpsAndSecureWebsocketListener extends InboundHttpAndWebsocketListener {
+public class InboundHttpsSecureWebsocketListener extends InboundHttpWebsocketListener {
 
-    public InboundHttpsAndSecureWebsocketListener(InboundProcessorParams params) {
+    public InboundHttpsSecureWebsocketListener(InboundProcessorParams params) {
 
         super(params);
     }

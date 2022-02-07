@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,26 +15,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.inbound.endpoint.protocol.http_websocket;
+package org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.inbound.InboundProcessorParams;
 import org.apache.synapse.inbound.InboundRequestProcessor;
-import org.wso2.carbon.inbound.endpoint.persistence.PersistenceUtils;
-import org.wso2.carbon.inbound.endpoint.protocol.http_websocket.management.HttpWebsocketEndpointManager;
-import org.wso2.carbon.inbound.endpoint.protocol.websocket.management.WebsocketEndpointManager;
+import org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.management.HttpWebsocketEndpointManager;
 
-public class InboundHttpAndWebsocketListener implements InboundRequestProcessor {
+public class InboundHttpWebsocketListener implements InboundRequestProcessor {
 
-    private static final Log LOGGER = LogFactory.getLog(InboundHttpAndWebsocketListener.class);
+    private static final Log LOGGER = LogFactory.getLog(InboundHttpWebsocketListener.class);
 
     protected final String name;
     protected int port;
     protected InboundProcessorParams processorParams;
 
-    public InboundHttpAndWebsocketListener(InboundProcessorParams params) {
+    public InboundHttpWebsocketListener(InboundProcessorParams params) {
 
         processorParams = params;
         String portParam = params.getProperties()

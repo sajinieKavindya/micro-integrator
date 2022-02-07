@@ -27,7 +27,6 @@ import org.wso2.carbon.inbound.endpoint.persistence.PersistenceUtils;
 import org.wso2.carbon.inbound.endpoint.protocol.generic.GenericInboundListener;
 import org.wso2.carbon.inbound.endpoint.protocol.http.InboundHttpConstants;
 import org.wso2.carbon.inbound.endpoint.protocol.http.management.HTTPEndpointManager;
-import org.wso2.carbon.inbound.endpoint.protocol.http_websocket.management.HttpWebsocketEndpointManager;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.management.WebsocketEndpointManager;
 import org.wso2.carbon.inbound.endpoint.internal.http.api.ConfigurationLoader;
 import org.wso2.carbon.inbound.endpoint.protocol.hl7.management.HL7EndpointManager;
@@ -91,16 +90,6 @@ public class EndpointListenerLoader {
                 HL7EndpointManager.getInstance().
                         startListener(port, inboundEndpointInfoDTO.getEndpointName(),
                                       inboundEndpointInfoDTO.getInboundParams());
-            } else if (inboundEndpointInfoDTO.getProtocol()
-                    .equals(InboundRequestProcessorFactoryImpl.Protocols.http_ws.toString())) {
-                HttpWebsocketEndpointManager.getInstance().
-                        startListener(port, inboundEndpointInfoDTO.getEndpointName(),
-                                inboundEndpointInfoDTO.getInboundParams());
-            } else if (inboundEndpointInfoDTO.getProtocol()
-                    .equals(InboundRequestProcessorFactoryImpl.Protocols.https_wss.toString())) {
-                HttpWebsocketEndpointManager.getInstance().
-                        startSSLListener(port, inboundEndpointInfoDTO.getEndpointName(),
-                                inboundEndpointInfoDTO.getInboundParams());
             } else {
                 // Check for custom-listening-InboundEndpoints
                 InboundProcessorParams inboundParams = inboundEndpointInfoDTO.getInboundParams();
