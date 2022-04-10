@@ -32,6 +32,7 @@
 
     <modules>
         <module>org.wso2.micro.integrator.websocket.transport</module>
+        <module>org.wso2.micro.integrator.websocket</module>
     </modules>
 
 </project>

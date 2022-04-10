@@ -27,6 +27,12 @@ import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.apache.commons.logging.Log;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketBinaryMessage;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketCloseMessage;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketControlMessage;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketControlSignal;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketMessage;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketTextMessage;
 
 import java.util.Map;
 
@@ -104,7 +110,7 @@ public class WebsocketLogUtil {
      *                         if it is not required provide null
      * @param isInbound        true if the frame is inbound, false if it is outbound
      */
-    private static void printWebSocketFrame(Log log, WebSocketFrame frame, String channelContextId,
+    public static void printWebSocketFrame(Log log, WebSocketFrame frame, String channelContextId,
                                             String customMsg, boolean isInbound) {
 
         String logStatement = getDirectionString(isInbound) + channelContextId;
@@ -128,6 +134,33 @@ public class WebsocketLogUtil {
 
     }
 
+    public static void printWebSocketFrame(Log log, WebSocketMessage message, String channelContextId,
+                                           String customMsg, boolean isInbound) {
+
+        String logStatement = getDirectionString(isInbound) + channelContextId;
+        if (message instanceof WebSocketControlMessage) {
+            WebSocketControlMessage controlMessage = (WebSocketControlMessage) message;
+            if (controlMessage.getControlSignal() == WebSocketControlSignal.PING) {
+                logStatement += " Ping frame";
+            } else if (controlMessage.getControlSignal() == WebSocketControlSignal.PONG) {
+                logStatement += " Pong frame";
+            }
+        } else if (message instanceof WebSocketCloseMessage) {
+            logStatement += " Close frame";
+        } else if (message instanceof WebSocketBinaryMessage) {
+            logStatement += " Binary frame";
+        } else if (message instanceof WebSocketTextMessage) {
+            logStatement += " " + ((WebSocketTextMessage) message).getText();
+        }
+
+        //specifically for logging close websocket frames with error status
+        if (customMsg != null) {
+            logStatement += " " + customMsg;
+        }
+        log.debug(logStatement);
+
+    }
+
     /**
      * Print specific debug logs with the {@link ChannelHandlerContext} context.
      *
@@ -137,6 +170,10 @@ public class WebsocketLogUtil {
      */
     public static void printSpecificLog(Log log, ChannelHandlerContext ctx, String message) {
         log.debug(" " + message + " on Context id : " + ctx.channel().toString());
+    }
+
+    public static void printSpecificLog(Log log, String channelId, String message) {
+        log.debug(" " + message + " on Context id : " + channelId);
     }
 
     private static String resolveContextId(ChannelHandlerContext ctx) {

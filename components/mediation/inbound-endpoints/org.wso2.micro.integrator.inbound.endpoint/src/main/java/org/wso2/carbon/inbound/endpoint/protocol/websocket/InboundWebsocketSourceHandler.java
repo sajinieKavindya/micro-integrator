@@ -328,8 +328,9 @@ public class InboundWebsocketSourceHandler extends ChannelInboundHandlerAdapter 
                     }
                     injectForMediation(synCtx, endpoint);
                     return;
-                } else if ((frame instanceof TextWebSocketFrame) && ((handshaker.selectedSubprotocol() == null) || (
-                        handshaker.selectedSubprotocol() != null && !handshaker.selectedSubprotocol()
+                } else if ((frame instanceof TextWebSocketFrame) && (
+                        (handshaker.selectedSubprotocol() == null)
+                                || (handshaker.selectedSubprotocol() != null && !handshaker.selectedSubprotocol()
                                 .contains(InboundWebsocketConstants.SYNAPSE_SUBPROTOCOL_PREFIX)))) {
                     String contentType = handshaker.selectedSubprotocol();
                     if (contentType == null && defaultContentType != null) {

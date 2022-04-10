@@ -44,11 +44,15 @@ public class InboundWebsocketConstants {
     public static final String WEBSOCKET_SOURCE_HANDLER_CONTEXT = "websocket.source.handler.context";
     public static final String WEBSOCKET_SOURCE_CHANNEL_IDENTIFIER = "websocket.source.channel.identifier";
 
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
     public static final String WEBSOCKET_BINARY_FRAME_PRESENT = "websocket.binary.frame.present";
     public static final String WEBSOCKET_BINARY_FRAME = "websocket.binary.frame";
+    public static final String WEBSOCKET_BINARY_MESSAGE = "websocket.binary.message";
 
     public static final String WEBSOCKET_TEXT_FRAME_PRESENT = "websocket.text.frame.present";
     public static final String WEBSOCKET_TEXT_FRAME = "websocket.text.frame";
+    public static final String WEBSOCKET_TEXT_MESSAGE = "websocket.text.message";
 
     public static final String WEBSOCKET_CLIENT_SIDE_BROADCAST_LEVEL = "ws.client.side.broadcast.level";
     public static final String WEBSOCKET_USE_PORT_OFFSET = "ws.use.port.offset";
