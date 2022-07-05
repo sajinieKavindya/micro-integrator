@@ -87,6 +87,7 @@ public class WebSocketListener extends AbstractWebSocketListener {
             return;
         }
 
+        // need to parameterize this
         int idleTimeoutInSeconds = 3;
         ServerHandshakeFuture future = webSocketHandshaker
                 .handshake(getNegotiableSubProtocols(subProtocols), idleTimeoutInSeconds * 1000);

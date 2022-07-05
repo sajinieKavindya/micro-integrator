@@ -118,21 +118,7 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                             OMOutputFormat format = BaseUtils.getOMOutputFormat(axis2MsgCtx);
                             byte[] message = messageFormatter.getBytes(axis2MsgCtx, format);
                             frame = new BinaryWebSocketFrame(Unpooled.copiedBuffer(message));
-<<<<<<< Updated upstream
-                            InboundWebsocketChannelContext ctx = sourceHandler.getChannelHandlerContext();
-                            int clientBroadcastLevel = sourceHandler.getClientBroadcastLevel();
-                            String subscriberPath = sourceHandler.getSubscriberPath();
-                            WebsocketSubscriberPathManager pathManager = WebsocketSubscriberPathManager.getInstance();
-                            if (log.isDebugEnabled()) {
-                                WebsocketLogUtil.printWebSocketFrame(log, frame,
-                                        ctx.getChannelHandlerContext(), false);
-                            }
-                            handleSendBack(frame, ctx, clientBroadcastLevel, subscriberPath, pathManager);
-=======
-
-
                             sendBack(frame);
->>>>>>> Stashed changes
                             return;
                         }
                     } catch (XMLStreamException ex) {
@@ -141,20 +127,7 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                         log.error("Failed for format message to specified output format", ex);
                     }
                 }
-<<<<<<< Updated upstream
-                InboundWebsocketChannelContext ctx = sourceHandler.getChannelHandlerContext();
-                int clientBroadcastLevel = sourceHandler.getClientBroadcastLevel();
-                String subscriberPath = sourceHandler.getSubscriberPath();
-                WebsocketSubscriberPathManager pathManager = WebsocketSubscriberPathManager.getInstance();
-                if (log.isDebugEnabled()) {
-                    WebsocketLogUtil.printWebSocketFrame(log, frame, ctx.getChannelHandlerContext(),
-                            false);
-                }
-                handleSendBack(frame, ctx, clientBroadcastLevel, subscriberPath, pathManager);
-=======
-
                 sendBack(frame);
->>>>>>> Stashed changes
             } else if (msgContext.getProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT) != null
                     && msgContext.getProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT).equals(true)) {
                 TextWebSocketFrame frame = (TextWebSocketFrame) msgContext
@@ -171,19 +144,7 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                                     .setProperty(InboundWebsocketConstants.MESSAGE_TYPE, backendMessageType);
                             frame = new TextWebSocketFrame(
                                     messageContextToText(((Axis2MessageContext) msgContext).getAxis2MessageContext()));
-<<<<<<< Updated upstream
-                            InboundWebsocketChannelContext ctx = sourceHandler.getChannelHandlerContext();
-                            int clientBroadcastLevel = sourceHandler.getClientBroadcastLevel();
-                            String subscriberPath = sourceHandler.getSubscriberPath();
-                            WebsocketSubscriberPathManager pathManager = WebsocketSubscriberPathManager.getInstance();
-                            if (log.isDebugEnabled()) {
-                                WebsocketLogUtil.printWebSocketFrame(log, frame,
-                                        ctx.getChannelHandlerContext(), false);
-                            }
-                            handleSendBack(frame, ctx, clientBroadcastLevel, subscriberPath, pathManager);
-=======
                             sendBack(frame);
->>>>>>> Stashed changes
                             return;
                         }
                     } catch (XMLStreamException ex) {
@@ -192,19 +153,7 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                         log.error("Failed for format message to specified output format", ex);
                     }
                 }
-<<<<<<< Updated upstream
-                InboundWebsocketChannelContext ctx = sourceHandler.getChannelHandlerContext();
-                int clientBroadcastLevel = sourceHandler.getClientBroadcastLevel();
-                String subscriberPath = sourceHandler.getSubscriberPath();
-                WebsocketSubscriberPathManager pathManager = WebsocketSubscriberPathManager.getInstance();
-                if (log.isDebugEnabled()) {
-                    WebsocketLogUtil.printWebSocketFrame(log, frame, ctx.getChannelHandlerContext(),
-                            false);
-                }
-                handleSendBack(frame, ctx, clientBroadcastLevel, subscriberPath, pathManager);
-=======
                 sendBack(frame);
->>>>>>> Stashed changes
             } else {
                 try {
                     Object wsCloseFrameStatusCode = msgContext
@@ -232,19 +181,7 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                     RelayUtils.buildMessage(((Axis2MessageContext) msgContext).getAxis2MessageContext(), false);
                     TextWebSocketFrame frame = new TextWebSocketFrame(
                             messageContextToText(((Axis2MessageContext) msgContext).getAxis2MessageContext()));
-<<<<<<< Updated upstream
-                    InboundWebsocketChannelContext ctx = sourceHandler.getChannelHandlerContext();
-                    int clientBroadcastLevel = sourceHandler.getClientBroadcastLevel();
-                    String subscriberPath = sourceHandler.getSubscriberPath();
-                    WebsocketSubscriberPathManager pathManager = WebsocketSubscriberPathManager.getInstance();
-                    if (log.isDebugEnabled()) {
-                        WebsocketLogUtil.printWebSocketFrame(log, frame,
-                                sourceHandler.getChannelHandlerContext().getChannelHandlerContext(), false);
-                    }
-                    handleSendBack(frame, ctx, clientBroadcastLevel, subscriberPath, pathManager);
-=======
                     sendBack(frame);
->>>>>>> Stashed changes
                 } catch (IOException ex) {
                     log.error("Failed for format message to specified output format", ex);
                 } catch (XMLStreamException e) {

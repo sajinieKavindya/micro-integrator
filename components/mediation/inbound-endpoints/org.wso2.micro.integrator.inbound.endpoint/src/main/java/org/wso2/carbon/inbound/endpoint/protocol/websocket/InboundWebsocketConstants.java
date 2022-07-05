@@ -46,6 +46,18 @@ public class InboundWebsocketConstants {
 
     public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
 
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
+    public static final String WEBSOCKET_SOURCE_CONNECTION = "websocket.source.connection";
+
     public static final String WEBSOCKET_BINARY_FRAME_PRESENT = "websocket.binary.frame.present";
     public static final String WEBSOCKET_BINARY_FRAME = "websocket.binary.frame";
     public static final String WEBSOCKET_BINARY_MESSAGE = "websocket.binary.message";
