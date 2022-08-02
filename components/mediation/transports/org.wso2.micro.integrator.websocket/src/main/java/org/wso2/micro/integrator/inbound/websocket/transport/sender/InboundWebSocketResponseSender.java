@@ -16,12 +16,10 @@
  * under the License.
  */
 
-package org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket;
+package org.wso2.micro.integrator.inbound.websocket.transport.sender;
 
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.apache.axiom.om.OMOutputFormat;
@@ -38,27 +36,28 @@ import org.apache.synapse.inbound.InboundResponseSender;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.management.HttpWebsocketEndpointManager;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
-import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketSourceHandler;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.WebsocketLogUtil;
+import org.wso2.micro.integrator.inbound.websocket.transport.utils.WebSocketConstants;
+import org.wso2.micro.integrator.inbound.websocket.transport.utils.WebSocketUtil;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketConnection;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import javax.xml.stream.XMLStreamException;
 
-public class InboundWebsocketResponseSender implements InboundResponseSender {
+public class InboundWebSocketResponseSender implements InboundResponseSender {
 
-    private static final Log LOG = LogFactory.getLog(InboundWebsocketResponseSender.class);
+    private static final Log LOG = LogFactory.getLog(InboundWebSocketResponseSender.class);
 
     WebSocketConnection webSocketConnection;
     private String tenantDomain;
 
-    public InboundWebsocketResponseSender(String tenantDomain, WebSocketConnection webSocketConnection) {
+    public InboundWebSocketResponseSender(String tenantDomain, WebSocketConnection webSocketConnection) {
         this.tenantDomain = tenantDomain;
-//        this.webSocketConnection = webSocketConnection;
+        this.webSocketConnection = webSocketConnection;
     }
 
     @Override
@@ -82,10 +81,13 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                     WebsocketLogUtil.printWebSocketFrame(LOG, closeWebSocketFrame,
                             webSocketConnection.getChannelId(), customErrorMessage, false);
                 }
-                terminateConnection(errorCode, errorMessage);
+                WebSocketUtil.terminateConnection(webSocketConnection, errorCode, errorMessage, tenantDomain);
             }
 
-            if (isPropertyTrue(msgContext, InboundWebsocketConstants.SOURCE_HANDSHAKE_PRESENT)) {
+            Object isTCPTransport = ((Axis2MessageContext) msgContext).getAxis2MessageContext()
+                    .getProperty(InboundWebsocketConstants.IS_TCP_TRANSPORT);
+
+            if (isPropertyTrue(msgContext, WebSocketConstants.WEBSOCKET_SOURCE_HANDSHAKE_PRESENT)) {
                 return;
             } else if (isPropertyTrue(msgContext, InboundWebsocketConstants.WEBSOCKET_TARGET_HANDSHAKE_PRESENT)) {
 
@@ -126,7 +128,8 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
                             WebsocketLogUtil.printWebSocketFrame(LOG, closeWebSocketFrame,
                                     webSocketConnection.getChannelId(), null, false);
                         }
-                        terminateConnection(statusCode, wsCloseFrameReasonText);
+                        WebSocketUtil.terminateConnection(webSocketConnection, statusCode, wsCloseFrameReasonText,
+                                tenantDomain);
                         return;
                     }
                     org.apache.axis2.context.MessageContext axis2MsgCtx =
@@ -244,13 +247,7 @@ public class InboundWebsocketResponseSender implements InboundResponseSender {
         return frame.text();
     }
 
-    private void terminateConnection(int statusCode, String reason) {
-        webSocketConnection.terminateConnection(statusCode, reason);
-        String endpointName = HttpWebsocketEndpointManager.getInstance().getEndpointName(webSocketConnection.getPort(),
-                tenantDomain);
-//        WebsocketSubscriberPathManager.getInstance()
-//                .removeChannelContext(endpointName, subscriberPath.getPath(), wrappedContext);
-    }
+
 
 //    private void sendBackToClient(WebSocketConnection webSocketConnection, WebSocketFrame frame) {
 ////        InboundWebsocketChannelContext ctx = sourceHandler.getChannelHandlerContext();

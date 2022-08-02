@@ -37,6 +37,8 @@ import org.apache.axis2.util.MessageProcessorSelector;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.Resource;
 import org.apache.synapse.inbound.InboundEndpointConstants;
 import org.apache.synapse.inbound.InboundResponseSender;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
@@ -102,11 +104,15 @@ public class WebsocketTransportSender extends AbstractTransportSender {
         if (msgCtx.getProperty(WebsocketConstants.WEBSOCKET_OUTFLOW_DISPATCH_SEQUENCE) != null) {
             responceDispatchSequence = (String) msgCtx
                     .getProperty(WebsocketConstants.WEBSOCKET_OUTFLOW_DISPATCH_SEQUENCE);
+        } else {
+            responceDispatchSequence = ((Resource) msgCtx.getProperty("resource")).getOutSequenceKey();
         }
 
         if (msgCtx.getProperty(WebsocketConstants.WEBSOCKET_OUTFLOW_DISPATCH_FAULT_SEQUENCE) != null) {
             responceErrorSequence = (String) msgCtx
                     .getProperty(WebsocketConstants.WEBSOCKET_OUTFLOW_DISPATCH_FAULT_SEQUENCE);
+        } else {
+            responceErrorSequence = ((Resource) msgCtx.getProperty("resource")).getFaultSequenceKey();
         }
 
         if (msgCtx.getProperty(WebsocketConstants.CONTENT_TYPE) != null) {

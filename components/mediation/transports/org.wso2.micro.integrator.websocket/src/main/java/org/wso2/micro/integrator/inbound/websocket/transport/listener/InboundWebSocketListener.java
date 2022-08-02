@@ -1,4 +1,4 @@
-package org.wso2.sample;
+package org.wso2.micro.integrator.inbound.websocket.transport.listener;
 
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
@@ -39,11 +39,10 @@ import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConst
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.SubprotocolBuilderUtil;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.WebsocketLogUtil;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.management.WebsocketEndpointManager;
-import org.wso2.transport.http.netty.contract.websocket.ServerHandshakeFuture;
+import org.wso2.micro.integrator.inbound.websocket.transport.utils.WebSocketConstants;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketBinaryMessage;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketCloseMessage;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketConnection;
-import org.wso2.transport.http.netty.contract.websocket.WebSocketConnectorListener;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketControlMessage;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketControlSignal;
 import org.wso2.transport.http.netty.contract.websocket.WebSocketHandshaker;
@@ -59,57 +58,27 @@ import java.util.Objects;
 import static org.wso2.carbon.inbound.endpoint.common.Constants.SUPER_TENANT_DOMAIN_NAME;
 import static org.wso2.carbon.inbound.endpoint.common.Constants.TENANT_DOMAIN;
 
-public class WebSocketListener extends AbstractWebSocketListener {
+public class InboundWebSocketListener extends AbstractWebSocketListener {
 
-    @Override
-    public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-
-    }
-
-    @Override
-    public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-
-    }
-
-    @Override
-    public void onMessage(WebSocketControlMessage webSocketControlMessage) {
-
-    }
-
-    @Override
-    public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
-
-    }
-
-    @Override
-    public void onClose(WebSocketConnection webSocketConnection) {
-
-    }
-
-    @Override
-    public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
-
-    }
-
-    @Override
-    public void onIdleTimeout(WebSocketControlMessage webSocketControlMessage) {
-
-    }
-
-    private static final Log LOG = LogFactory.getLog(WebSocketListener.class);
+    private static final Log LOG = LogFactory.getLog(InboundWebSocketListener.class);
 
     private String defaultContentType;
 
     private final String tenantDomain = SUPER_TENANT_DOMAIN_NAME;
     private String requestUri;
-    private static List<String> contentTypes = new ArrayList<>();
-    private static List<String> subProtocols = new ArrayList<>();
+//    private static List<String> contentTypes = new ArrayList<>();
+//    private static List<String> subProtocols = new ArrayList<>();
+    List<MessagingHandler> messagingHandlers = new ArrayList<>();
+//
+//    static {
+//        contentTypes.add("application/xml");
+//        contentTypes.add("application/json");
+//        contentTypes.add("text/xml");
+//        addContentTypesToSubProtocolArray(subProtocols, contentTypes);
+//    }
 
-    static {
-        contentTypes.add("application/xml");
-        contentTypes.add("application/json");
-        contentTypes.add("text/xml");
-        addContentTypesToSubProtocolArray(subProtocols, contentTypes);
+    public void ack() {
+        System.out.println("Message received from Mediation level!");
     }
 
     @Override
@@ -117,149 +86,149 @@ public class WebSocketListener extends AbstractWebSocketListener {
 
         org.apache.axis2.context.MessageContext axis2Context =  createAxis2MessageContext();
 
-        if (!invokeMessagingHandlersForHandshakeRequest(axis2Context, webSocketHandshaker)) {
+        boolean continueFlow = invokeMessagingHandlersForHandshakeRequest(axis2Context, webSocketHandshaker);
+        if (!continueFlow) {
             return;
         }
 
-        int idleTimeoutInSeconds = 3;
-        ServerHandshakeFuture future = webSocketHandshaker
-                .handshake(getNegotiableSubProtocols(subProtocols), idleTimeoutInSeconds * 1000);
-//        future.setHandshakeListener(new UpgradeListener(axis2Context, tenantDomain,
-//                webSocketHandshaker.getHttpCarbonRequest()));
+        WebSocketEventDispatcher.dispatchUpgrade(webSocketHandshaker, axis2Context, tenantDomain);
+
         defaultContentType = "";
         requestUri = webSocketHandshaker.getTarget();
 
     }
-//
-//    @Override
-//    public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-//
-//        if (LOG.isDebugEnabled()) {
-////            WebsocketLogUtil.printWebSocketFrame(LOG, webSocketTextMessage, webSocketTextMessage.getWebSocketConnection().getChannelId(), null, true);
-//        }
-//
-//    }
-//
-//    @Override
-//    public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-//
-//        if (LOG.isDebugEnabled()) {
-//            WebsocketLogUtil.printWebSocketFrame(LOG, webSocketBinaryMessage,
-//                    webSocketBinaryMessage.getWebSocketConnection().getChannelId(), null, true);
-//        }
-//
-//        String negotiatedSubProtocol = webSocketBinaryMessage.getWebSocketConnection().getNegotiatedSubProtocol();
-//        if (!continueWithSelectedSubProtocol(negotiatedSubProtocol)) {
-//            return;
-//        }
-//
-//        String contentType = negotiatedSubProtocol;
-//        if (contentType == null && defaultContentType != null) {
-//            contentType = defaultContentType;
-//        }
-//
-//        org.apache.axis2.context.MessageContext axis2MsgCtx =  createAxis2MessageContext();
-//
-//        if (!invokeMessagingHandlersForWebSocketFrame(axis2MsgCtx, webSocketBinaryMessage)) {
-//            return;
-//        }
-//
-//        int port = webSocketBinaryMessage.getWebSocketConnection().getPort();
-//        String endpointName = WebsocketEndpointManager.getInstance().getEndpointName(port, tenantDomain);
-//
-//        try {
-//            MessageContext synCtx = getSynapseMessageContext(axis2MsgCtx);
-//            InboundEndpoint endpoint = synCtx.getConfiguration().getInboundEndpoint(endpointName);
-//
-//            if (endpoint == null) {
-//                LOG.error("Cannot find deployed inbound endpoint " + endpointName + "for process request");
-//                return;
-//            }
-//
-//            handleWebsocketBinaryFrame(webSocketBinaryMessage, synCtx, port, contentType);
-//
-//        } catch (Exception e) {
-//            LOG.error("Exception occurred while injecting websocket frames to the Synapse engine", e);
-//        }
-//    }
-//
-//    @Override
-//    public void onMessage(WebSocketControlMessage webSocketControlMessage) {
-//        if (webSocketControlMessage.getControlSignal() == WebSocketControlSignal.PING) {
-//            webSocketControlMessage.getWebSocketConnection().pong(webSocketControlMessage.getByteBuffer());
-//        } else if (webSocketControlMessage.getControlSignal() == WebSocketControlSignal.PONG) {
-//            //
-//        }
-//
-//    }
-//
-//    @Override
-//    public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
-//        terminateConnection(webSocketCloseMessage.getWebSocketConnection());
-//        if (LOG.isDebugEnabled()) {
-//            WebsocketLogUtil.printSpecificLog(LOG, webSocketCloseMessage.getWebSocketConnection().getChannelId(),
-//                    "Websocket channel is terminated successfully.");
-//        }
-//    }
-//
-//    @Override
-//    public void onClose(WebSocketConnection webSocketConnection) {
-//
-//    }
-//
-//    @Override
-//    public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
-//
-//    }
-//
-//    @Override
-//    public void onIdleTimeout(WebSocketControlMessage webSocketControlMessage) {
-//
-//    }
-//
+
+    @Override
+    public void onMessage(WebSocketTextMessage webSocketTextMessage) {
+
+        if (LOG.isDebugEnabled()) {
+            WebsocketLogUtil.printWebSocketFrame(LOG, webSocketTextMessage, webSocketTextMessage.getWebSocketConnection().getChannelId(), null, true);
+        }
+
+        WebSocketEventDispatcher.dispatchOnText(webSocketTextMessage);
+
+    }
+
+    @Override
+    public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
+
+        if (LOG.isDebugEnabled()) {
+            WebsocketLogUtil.printWebSocketFrame(LOG, webSocketBinaryMessage,
+                    webSocketBinaryMessage.getWebSocketConnection().getChannelId(), null, true);
+        }
+
+        String negotiatedSubProtocol = webSocketBinaryMessage.getWebSocketConnection().getNegotiatedSubProtocol();
+        if (!continueWithSelectedSubProtocol(negotiatedSubProtocol)) {
+            return;
+        }
+
+        String contentType = negotiatedSubProtocol;
+        if (contentType == null && defaultContentType != null) {
+            contentType = defaultContentType;
+        }
+
+        org.apache.axis2.context.MessageContext axis2MsgCtx =  createAxis2MessageContext();
+
+        if (!invokeMessagingHandlersForWebSocketFrame(axis2MsgCtx, webSocketBinaryMessage)) {
+            return;
+        }
+
+        int port = webSocketBinaryMessage.getWebSocketConnection().getPort();
+        String endpointName = WebsocketEndpointManager.getInstance().getEndpointName(port, tenantDomain);
+
+        try {
+            MessageContext synCtx = getSynapseMessageContext(axis2MsgCtx);
+            InboundEndpoint endpoint = synCtx.getConfiguration().getInboundEndpoint(endpointName);
+
+            if (endpoint == null) {
+                LOG.error("Cannot find deployed inbound endpoint " + endpointName + "for process request");
+                return;
+            }
+
+            handleWebsocketBinaryFrame(webSocketBinaryMessage, synCtx, port, contentType);
+
+        } catch (Exception e) {
+            LOG.error("Exception occurred while injecting websocket frames to the Synapse engine", e);
+        }
+    }
+
+    @Override
+    public void onMessage(WebSocketControlMessage webSocketControlMessage) {
+        if (webSocketControlMessage.getControlSignal() == WebSocketControlSignal.PING) {
+            WebSocketEventDispatcher.dispatchOnPing(webSocketControlMessage);
+        } else if (webSocketControlMessage.getControlSignal() == WebSocketControlSignal.PONG) {
+            // TODO: log pong message
+        }
+
+    }
+
+    @Override
+    public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
+        if (LOG.isDebugEnabled()) {
+            WebsocketLogUtil.printSpecificLog(LOG, webSocketCloseMessage.getWebSocketConnection().getChannelId(),
+                    "Websocket channel is terminated successfully.");
+        }
+        WebSocketEventDispatcher.dispatchOnClose(webSocketCloseMessage);
+    }
+
+    @Override
+    public void onClose(WebSocketConnection webSocketConnection) {
+        WebSocketEventDispatcher.dispatchOnClose(webSocketConnection);
+    }
+
+    @Override
+    public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
+        WebSocketEventDispatcher.dispatchOnError(webSocketConnection, throwable);
+    }
+
+    @Override
+    public void onIdleTimeout(WebSocketControlMessage webSocketControlMessage) {
+        WebSocketEventDispatcher.dispatchOnIdleTimeout(webSocketControlMessage);
+    }
+
     private boolean invokeMessagingHandlersForHandshakeRequest(org.apache.axis2.context.MessageContext axis2MsgCtx,
                                                                WebSocketHandshaker webSocketHandshaker) {
-//        if (Objects.isNull(messagingHandlers) || messagingHandlers.isEmpty()) {
-//            return true;
-//        }
-//        MessageInfo message = new MessageInfo(webSocketHandshaker.getHttpCarbonRequest(), Protocol.WS,
-//                new ConnectionId(webSocketHandshaker.getChannelId()));
-//        axis2MsgCtx.setProperty(MessagingHandlerConstants.HANDLER_MESSAGE_CONTEXT, message);
-//
-//        for (MessagingHandler handler: messagingHandlers) {
-//            HandlerResponse response = handler.handleRequest(axis2MsgCtx);
-//            if (Objects.nonNull(response) && response.isError()) {
-//                LOG.error("Handle WebSocket handshake request failed at {handler name}. "
-//                        + response.getErrorResponseString());
-//                webSocketHandshaker.cancelHandshake(response.getErrorCode(), response.getErrorMessage());
-//                return false;
-//            }
-//        }
+        if (Objects.isNull(messagingHandlers) || messagingHandlers.isEmpty()) {
+            return true;
+        }
+        MessageInfo message = new MessageInfo(webSocketHandshaker.getHttpCarbonRequest(), Protocol.WS,
+                new ConnectionId(webSocketHandshaker.getChannelId()));
+        axis2MsgCtx.setProperty(MessagingHandlerConstants.HANDLER_MESSAGE_CONTEXT, message);
+
+        for (MessagingHandler handler: messagingHandlers) {
+            HandlerResponse response = handler.handleRequest(axis2MsgCtx);
+            if (Objects.nonNull(response) && response.isError()) {
+                LOG.error("Handle WebSocket handshake request failed at {handler name}. "
+                        + response.getErrorResponseString());
+                webSocketHandshaker.cancelHandshake(response.getErrorCode(), response.getErrorMessage());
+                return false;
+            }
+        }
         return true;
     }
 
     private boolean invokeMessagingHandlersForWebSocketFrame(org.apache.axis2.context.MessageContext axis2MsgCtx,
                                                              WebSocketMessage webSocketMessage) {
-//        if (Objects.isNull(messagingHandlers) || messagingHandlers.isEmpty()) {
-//            return true;
-//        }
-//        MessageInfo message = new MessageInfo(webSocketMessage, Protocol.WS,
-//                new ConnectionId(webSocketMessage.getWebSocketConnection().getChannelId()));
-//        axis2MsgCtx.setProperty(MessagingHandlerConstants.HANDLER_MESSAGE_CONTEXT, message);
-//
-//        for (MessagingHandler handler: messagingHandlers) {
-//            HandlerResponse response = handler.handleRequest(axis2MsgCtx);
-//            if (Objects.isNull(response) || !response.isError()) {
-//                continue;
-//            }
-//            if (response.isCloseConnection()) {
-//                webSocketMessage.getWebSocketConnection().terminateConnection(response.getErrorCode(),
-//                        response.getErrorMessage());
-//            } else {
-//                webSocketMessage.getWebSocketConnection().pushText(response.getErrorResponseString());
-//            }
-//            return false;
-//        }
+        if (Objects.isNull(messagingHandlers) || messagingHandlers.isEmpty()) {
+            return true;
+        }
+        MessageInfo message = new MessageInfo(webSocketMessage, Protocol.WS,
+                new ConnectionId(webSocketMessage.getWebSocketConnection().getChannelId()));
+        axis2MsgCtx.setProperty(MessagingHandlerConstants.HANDLER_MESSAGE_CONTEXT, message);
+
+        for (MessagingHandler handler: messagingHandlers) {
+            HandlerResponse response = handler.handleRequest(axis2MsgCtx);
+            if (Objects.isNull(response) || !response.isError()) {
+                continue;
+            }
+            if (response.isCloseConnection()) {
+                webSocketMessage.getWebSocketConnection().terminateConnection(response.getErrorCode(),
+                        response.getErrorMessage());
+            } else {
+                webSocketMessage.getWebSocketConnection().pushText(response.getErrorResponseString());
+            }
+            return false;
+        }
         return true;
     }
 
@@ -274,7 +243,7 @@ public class WebSocketListener extends AbstractWebSocketListener {
         return axis2MsgCtx;
     }
 
-    public MessageContext getSynapseMessageContext(org.apache.axis2.context.MessageContext axis2MsgCtx) throws AxisFault {
+    public org.apache.synapse.MessageContext getSynapseMessageContext(org.apache.axis2.context.MessageContext axis2MsgCtx) throws AxisFault {
         MessageContext synCtx = createSynapseMessageContext(axis2MsgCtx);
         synCtx.setProperty(SynapseConstants.IS_INBOUND, true);
         ((Axis2MessageContext) synCtx).getAxis2MessageContext().setProperty(SynapseConstants.IS_INBOUND, true);
@@ -303,7 +272,7 @@ public class WebSocketListener extends AbstractWebSocketListener {
         return synCtx;
     }
 
-    private static MessageContext createSynapseMessageContext(org.apache.axis2.context.MessageContext axis2MsgCtx) throws AxisFault {
+    private static org.apache.synapse.MessageContext createSynapseMessageContext(org.apache.axis2.context.MessageContext axis2MsgCtx) throws AxisFault {
         ServiceContext svcCtx = new ServiceContext();
         OperationContext opCtx = new OperationContext(new InOutAxisOperation(), svcCtx);
         axis2MsgCtx.setServiceContext(svcCtx);
@@ -319,7 +288,7 @@ public class WebSocketListener extends AbstractWebSocketListener {
 
     protected void handleWebsocketBinaryFrame(WebSocketBinaryMessage webSocketBinaryMessage, MessageContext synCtx,
                                               int port, String contentType) throws AxisFault {
-        String endpointName = HttpWebsocketEndpointManager.getInstance().getEndpointName(port, tenantDomain);
+        String endpointName = WebsocketEndpointManager.getInstance().getEndpointName(port, tenantDomain);
 
         InboundEndpoint endpoint = synCtx.getConfiguration().getInboundEndpoint(endpointName);
 
@@ -352,33 +321,21 @@ public class WebSocketListener extends AbstractWebSocketListener {
 
     }
 
-    public static String[] getNegotiableSubProtocols(List<String> subProtocols) {
-        String[] subProtocolArray = new String[subProtocols.size()];
-        return subProtocols.toArray(subProtocolArray);
+    private void terminateConnection(WebSocketConnection webSocketConnection) {
+        webSocketConnection.terminateConnection();
+        String endpointName = HttpWebsocketEndpointManager.getInstance().getEndpointName(webSocketConnection.getPort(),
+                tenantDomain);
+//        WebsocketSubscriberPathManager.getInstance()
+//                .removeChannelContext(endpointName, subscriberPath.getPath(), wrappedContext);
     }
 
-    public static void addContentTypesToSubProtocolArray(List<String> subProtocols, List<String> contentTypes) {
+    private boolean continueWithSelectedSubProtocol(String negotiatedSubProtocol) {
 
-        for (String contentType: contentTypes) {
-            subProtocols.add("synapse(contentType='" + contentType + "')");
-        }
+        return Objects.nonNull(negotiatedSubProtocol) && negotiatedSubProtocol
+                .contains(InboundWebsocketConstants.SYNAPSE_SUBPROTOCOL_PREFIX);
     }
-//
-//    private void terminateConnection(WebSocketConnection webSocketConnection) {
-//        webSocketConnection.terminateConnection();
-//        String endpointName = HttpWebsocketEndpointManager.getInstance().getEndpointName(webSocketConnection.getPort(),
-//                tenantDomain);
-////        WebsocketSubscriberPathManager.getInstance()
-////                .removeChannelContext(endpointName, subscriberPath.getPath(), wrappedContext);
-//    }
-//
-//    private boolean continueWithSelectedSubProtocol(String negotiatedSubProtocol) {
-//
-//        return Objects.nonNull(negotiatedSubProtocol) && negotiatedSubProtocol
-//                .contains(InboundWebsocketConstants.SYNAPSE_SUBPROTOCOL_PREFIX);
-//    }
-//
-    private void injectForMediation(MessageContext synCtx, InboundEndpoint endpoint,
+
+    private void injectForMediation(org.apache.synapse.MessageContext synCtx, InboundEndpoint endpoint,
                                     WebSocketConnection webSocketConnection) {
 //        SequenceMediator faultSequence = getFaultSequence(synCtx, endpoint);
 //        MediatorFaultHandler mediatorFaultHandler = new MediatorFaultHandler(faultSequence);
@@ -416,9 +373,9 @@ public class WebSocketListener extends AbstractWebSocketListener {
 
     private String getScheme(WebSocketConnection webSocketConnection) {
         if (webSocketConnection.isSecure()) {
-            return InboundWebsocketConstants.WSS;
+            return WebSocketConstants.HTTPSWSS;
         }
-        return InboundWebsocketConstants.WS;
+        return WebSocketConstants.HTTPWS;
     }
 
     protected void handleWebsocketPassThroughTextFrame(WebSocketTextMessage webSocketTextMessage, MessageContext synCtx,
@@ -435,8 +392,8 @@ public class WebSocketListener extends AbstractWebSocketListener {
             }
             synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, Boolean.TRUE);
             axis2MsgCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, Boolean.TRUE);
-            synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_MESSAGE, webSocketTextMessage.getText());
-            axis2MsgCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_MESSAGE, webSocketTextMessage.getText());
+            synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME, webSocketTextMessage.getText());
+            axis2MsgCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME, webSocketTextMessage.getText());
 
             Builder builder = BuilderUtil.getBuilderFromSelector(contentType, axis2MsgCtx);
             if (builder != null) {

@@ -241,6 +241,7 @@ public class InboundWebsocketSourceHandler extends ChannelInboundHandlerAdapter 
         ((Axis2MessageContext) synCtx).getAxis2MessageContext()
                 .setProperty(InboundWebsocketConstants.CLIENT_ID, ctx.channel().hashCode());
         injectForMediation(synCtx, endpoint);
+        log.info("end of handle handshake method");
 
     }
 
@@ -336,18 +337,20 @@ public class InboundWebsocketSourceHandler extends ChannelInboundHandlerAdapter 
                     if (contentType == null && defaultContentType != null) {
                         contentType = defaultContentType;
                     }
+                    contentType = "application/json";
                     handleWebsocketPassthroughTextFrame(frame, synCtx);
                     org.apache.axis2.context.MessageContext axis2MsgCtx = ((org.apache.synapse.core.axis2.Axis2MessageContext) synCtx)
                             .getAxis2MessageContext();
 
                     Builder builder = BuilderUtil.getBuilderFromSelector(contentType, axis2MsgCtx);
                     if (builder != null) {
-                        if (builder != null && InboundWebsocketConstants.TEXT_BUILDER_IMPLEMENTATION
-                                .equals(builder.getClass().getName())) {
-                            synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, true);
-                        } else {
-                            synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, false);
-                        }
+//                        if (builder != null && InboundWebsocketConstants.TEXT_BUILDER_IMPLEMENTATION
+//                                .equals(builder.getClass().getName())) {
+//                            synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, true);
+//                        } else {
+//                            synCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, false);
+//                        }
+                        axis2MsgCtx.setProperty(InboundWebsocketConstants.WEBSOCKET_TEXT_FRAME_PRESENT, false);
                         InputStream in = new AutoCloseInputStream(
                                 new ByteArrayInputStream(((TextWebSocketFrame) frame).duplicate().text().getBytes()));
                         OMElement documentElement = builder.processDocument(in, contentType, axis2MsgCtx);

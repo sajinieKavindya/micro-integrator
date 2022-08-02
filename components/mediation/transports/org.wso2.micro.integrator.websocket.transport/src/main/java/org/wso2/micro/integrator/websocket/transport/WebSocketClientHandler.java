@@ -64,6 +64,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
     private ChannelPromise handshakeFuture;
     private static final Log log = LogFactory.getLog(WebSocketClientHandler.class);
     private String dispatchSequence;
+    private SequenceMediator outDispatchSequenceMediator;
     private String dispatchErrorSequence;
     private ChannelHandlerContext ctx;
     private InboundResponseSender responseSender;

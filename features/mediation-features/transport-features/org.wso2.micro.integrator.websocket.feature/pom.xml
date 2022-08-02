@@ -36,6 +36,10 @@
             <artifactId>org.wso2.micro.integrator.websocket.transport</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.ei</groupId>
+            <artifactId>org.wso2.micro.integrator.websocket</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-common</artifactId>
         </dependency>
@@ -88,6 +92,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.ei:org.wso2.micro.integrator.websocket.transport</bundleDef>
+                                <bundleDef>org.wso2.ei:org.wso2.micro.integrator.websocket</bundleDef>
                                 <bundleDef>io.netty:netty-common:compatible:${netty.version}</bundleDef>
                                 <bundleDef>io.netty:netty-transport:compatible:${netty.version}</bundleDef>
                                 <bundleDef>io.netty:netty-codec-http:compatible:${netty.version}</bundleDef>

@@ -55,7 +55,7 @@ public class WebsocketConnectionFactory {
     private static final Log log = LogFactory.getLog(WebsocketConnectionFactory.class);
 
     private final TransportOutDescription transportOut;
-    private ConcurrentHashMap<String, ConcurrentHashMap<String, WebSocketClientHandler>> channelHandlerPool = new ConcurrentHashMap<String, ConcurrentHashMap<String, WebSocketClientHandler>>();
+    private static ConcurrentHashMap<String, ConcurrentHashMap<String, WebSocketClientHandler>> channelHandlerPool = new ConcurrentHashMap<String, ConcurrentHashMap<String, WebSocketClientHandler>>();
 
     public WebsocketConnectionFactory(TransportOutDescription transportOut) throws AxisFault {
         this.transportOut = transportOut;
