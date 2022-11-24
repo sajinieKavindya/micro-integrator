@@ -1,0 +1,213 @@
+diff --git a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/backend/test/HTTPCoreBackendTest.java b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/backend/test/HTTPCoreBackendTest.java
+index 9a50d62d6..6745644e2 100644
+--- a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/backend/test/HTTPCoreBackendTest.java
++++ b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/backend/test/HTTPCoreBackendTest.java
+@@ -167,6 +167,10 @@ public abstract class HTTPCoreBackendTest extends ESBIntegrationTest {
+ 
+         for (BackendServer server : backendServerList) {
+             server.shutdown();
++
++            Awaitility.await().pollInterval(100, TimeUnit.MILLISECONDS).
++                    atMost(15, TimeUnit.SECONDS).
++                    until(hasServerStopped(server));
+         }
+     }
+ 
+@@ -298,6 +302,17 @@ public abstract class HTTPCoreBackendTest extends ESBIntegrationTest {
+         }
+     }
+ 
++    private Callable<Boolean> hasServerStopped(BackendServer server) {
++
++        return new Callable<Boolean>() {
++            @Override
++            public Boolean call() throws Exception {
++
++                return server == null || !server.isAlive();
++            }
++        };
++    }
++
+     private Callable<Boolean> hasThreadStarted(final Thread thread) {
+ 
+         return thread::isAlive;
+diff --git a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/ClientSendsInvalidChunksTestCase.java b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/ClientSendsInvalidChunksTestCase.java
+index b9e9d68b0..b8eacc8ca 100644
+--- a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/ClientSendsInvalidChunksTestCase.java
++++ b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/ClientSendsInvalidChunksTestCase.java
+@@ -17,11 +17,13 @@
+ 
+ package org.wso2.micro.integrator.http.client.test;
+ 
++import org.testng.Assert;
+ import org.testng.annotations.Test;
+ import org.wso2.micro.integrator.http.utils.Constants;
+ import org.wso2.micro.integrator.http.utils.HttpRequestWithExpectedHTTPSC;
+ import org.wso2.micro.integrator.http.utils.RequestMethods;
+ 
++import java.io.BufferedReader;
+ import java.io.ByteArrayInputStream;
+ import java.io.InputStream;
+ import java.io.PrintStream;
+@@ -65,4 +67,16 @@ public class ClientSendsInvalidChunksTestCase extends HTTPCoreClientTest {
+         printWriter.print("0" + Constants.CRLF);
+         printWriter.flush();
+     }
++
++    @Override
++    protected void readHTTPResponse(BufferedReader reader, HttpRequestWithExpectedHTTPSC httpRequest) throws Exception {
++
++        // When a entity enclosing request (POST) is sent, HTTPCore will close the client connection due to the
++        // Malformed Chunk exception. Since the body is not processed by HTTPCore for GET request, the client will be
++        // receiving a response.
++        if (httpRequest.getMethod() == RequestMethods.GET) {
++            Assert.assertTrue(reader.readLine().contains(httpRequest.getExpectedHTTPSC()),
++                    "A " + httpRequest.getExpectedHTTPSC() + " HTTP Status");
++        }
++    }
+ }
+diff --git a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/HTTPCoreClientTest.java b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/HTTPCoreClientTest.java
+index ba8f4def3..c562c5a02 100644
+--- a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/HTTPCoreClientTest.java
++++ b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/HTTPCoreClientTest.java
+@@ -120,13 +120,13 @@ public abstract class HTTPCoreClientTest extends ESBIntegrationTest {
+      * Reads the response and assert the HTTP status code.
+      *
+      * @param reader         The BufferedReader returned by the socket
+-     * @param expectedHTTPSC The expected HTTP status code
++     * @param httpRequest The mock HTTP request with the expected HTTP status code
+      * @throws Exception If an error occurs while reading the response
+      */
+-    protected void readHTTPResponse(BufferedReader reader, String expectedHTTPSC) throws Exception {
++    protected void readHTTPResponse(BufferedReader reader, HttpRequestWithExpectedHTTPSC httpRequest) throws Exception {
+ 
+-        Assert.assertTrue(getResponseAsString(reader).contains(expectedHTTPSC),
+-                "A " + expectedHTTPSC + " HTTP Status");
++        Assert.assertTrue(getResponseAsString(reader).contains(httpRequest.getExpectedHTTPSC()),
++                "A " + httpRequest.getExpectedHTTPSC() + " HTTP Status");
+     }
+ 
+     /**
+@@ -181,7 +181,7 @@ public abstract class HTTPCoreClientTest extends ESBIntegrationTest {
+                 protected void readResponse(BufferedReader bufferedReader, HttpRequestWithExpectedHTTPSC httpRequest)
+                         throws Exception {
+ 
+-                    readHTTPResponse(bufferedReader, httpRequest.getExpectedHTTPSC());
++                    readHTTPResponse(bufferedReader, httpRequest);
+                 }
+             };
+         }
+@@ -197,7 +197,7 @@ public abstract class HTTPCoreClientTest extends ESBIntegrationTest {
+             protected void readResponse(BufferedReader bufferedReader, HttpRequestWithExpectedHTTPSC httpRequest)
+                     throws Exception {
+ 
+-                readHTTPResponse(bufferedReader, httpRequest.getExpectedHTTPSC());
++                readHTTPResponse(bufferedReader, httpRequest);
+             }
+         };
+     }
+diff --git a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/SlowReadingClientTestCase.java b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/SlowReadingClientTestCase.java
+index 3d0d236e6..18f809841 100644
+--- a/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/SlowReadingClientTestCase.java
++++ b/integration/mediation-tests/tests-http/src/test/java/org/wso2/micro/integrator/http/client/test/SlowReadingClientTestCase.java
+@@ -43,12 +43,12 @@ public class SlowReadingClientTestCase extends HTTPCoreClientTest {
+     }
+ 
+     @Override
+-    protected void readHTTPResponse(BufferedReader reader, String expectedHTTPSC) throws Exception {
++    protected void readHTTPResponse(BufferedReader reader, HttpRequestWithExpectedHTTPSC httpRequest) throws Exception {
+ 
+         String line;
+         boolean responseHasExpectedHTTPSC = false;
+         while ((line = reader.readLine()) != null) {
+-            if (line.contains(expectedHTTPSC)) {
++            if (line.contains(httpRequest.getExpectedHTTPSC())) {
+                 responseHasExpectedHTTPSC = true;
+             }
+             Thread.sleep(500);
+@@ -57,7 +57,7 @@ public class SlowReadingClientTestCase extends HTTPCoreClientTest {
+             }
+         }
+ 
+-        Assert.assertTrue(responseHasExpectedHTTPSC, "A " + expectedHTTPSC + " HTTP Status");
++        Assert.assertTrue(responseHasExpectedHTTPSC, "A " + httpRequest.getExpectedHTTPSC() + " HTTP Status");
+     }
+ 
+     @Override
+diff --git a/integration/mediation-tests/tests-http/src/test/resources/helper/cpu_usage.sh b/integration/mediation-tests/tests-http/src/test/resources/helper/cpu_usage.sh
+index 46ad8a267..7caf6b24a 100644
+--- a/integration/mediation-tests/tests-http/src/test/resources/helper/cpu_usage.sh
++++ b/integration/mediation-tests/tests-http/src/test/resources/helper/cpu_usage.sh
+@@ -2,9 +2,9 @@
+ PID=`cat $1`
+ LOG_FILE="$2"
+ 
+-top -b -d 1 -p $PID | awk \
++top -i 1 -pid $PID | awk \
+     -v pid="$PID" -v cpuLog="$LOG_FILE" '
+     $1+0>0 {printf "%d\n", \
+-            $9 > cpuLog
++            $3 > cpuLog
+             fflush(cpuLog)
+             close(cpuLog)}'
+diff --git a/integration/mediation-tests/tests-http/src/test/resources/testng.xml b/integration/mediation-tests/tests-http/src/test/resources/testng.xml
+index a33d68d44..7516a4dab 100644
+--- a/integration/mediation-tests/tests-http/src/test/resources/testng.xml
++++ b/integration/mediation-tests/tests-http/src/test/resources/testng.xml
+@@ -9,15 +9,18 @@
+         <listener class-name="org.wso2.carbon.automation.engine.testlisteners.TestTransformerListener"/>
+     </listeners>
+ 
+-    <test name="HttpCore-Client-Tests" preserve-order="true" verbose="2">
+-        <packages>
+-            <package name="org.wso2.micro.integrator.http.client.test.*"/>
+-        </packages>
+-    </test>
++<!--    <test name="HttpCore-Client-Tests" preserve-order="true" verbose="2">-->
++<!--        <packages>-->
++<!--            <package name="org.wso2.micro.integrator.http.client.test.*"/>-->
++<!--        </packages>-->
++<!--    </test>-->
+     <test name="HttpCore-Backend-Tests" preserve-order="true" verbose="2">
+-        <packages>
+-            <package name="org.wso2.micro.integrator.http.backend.test.*"/>
+-        </packages>
++<!--        <packages>-->
++<!--            <package name="org.wso2.micro.integrator.http.backend.test.*"/>-->
++<!--        </packages>-->
++        <classes>
++            <class name="org.wso2.micro.integrator.http.backend.test.ContentTypeAndBodyMismatchBackendTestCase"></class>
++        </classes>
+     </test>
+ </suite>
+ 
+diff --git a/integration/tests-common/integration-test-utils/src/main/java/org/wso2/esb/integration/common/utils/CPUMonitor.java b/integration/tests-common/integration-test-utils/src/main/java/org/wso2/esb/integration/common/utils/CPUMonitor.java
+index b6b5f15e3..583115e3e 100644
+--- a/integration/tests-common/integration-test-utils/src/main/java/org/wso2/esb/integration/common/utils/CPUMonitor.java
++++ b/integration/tests-common/integration-test-utils/src/main/java/org/wso2/esb/integration/common/utils/CPUMonitor.java
+@@ -63,11 +63,15 @@ public class CPUMonitor {
+         log.info("Starting the CPU Monitor...");
+ 
+         File file = new File(CPU_LOGGER_SH_PATH);
+-        file.setExecutable(true);
++        boolean isScriptExecutable = file.setExecutable(true);
++
++        if (!isScriptExecutable) {
++            throw new IOException("Error setting execution permission to " + CPU_LOGGER_SH_PATH);
++        }
+         process = new ProcessBuilder(CPU_LOGGER_SH_PATH, CARBON_PID_PATH, CPU_USAGE_FILE_PATH).start();
+ 
+         Awaitility.await().pollInterval(10, TimeUnit.MILLISECONDS).
+-                atMost(5, TimeUnit.SECONDS).
++                atMost(60, TimeUnit.SECONDS).
+                 until(isRunning());
+     }
+ 
+@@ -79,6 +83,7 @@ public class CPUMonitor {
+         try (BufferedReader br = new BufferedReader(new FileReader(CPU_USAGE_FILE_PATH))) {
+             String line;
+             if ((line = br.readLine()) != null) {
++                log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CPU usage: " + line);
+                 return Integer.parseInt(line);
+             }
+         }
