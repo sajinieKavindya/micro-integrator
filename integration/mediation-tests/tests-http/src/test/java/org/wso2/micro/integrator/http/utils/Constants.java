@@ -32,8 +32,8 @@ public class Constants {
                     "resources" + File.separator +
                     "security" + File.separator + "wso2carbon.jks";
 
-    public static final int HTTP_BACKEND_PORT = 7000;
-    public static final int HTTPS_BACKEND_PORT = 7443;
+    public static final int HTTP_BACKEND_PORT = 7077;
+    public static final int HTTPS_BACKEND_PORT = 7473;
     public static final String HTTP_VERSION = "HTTP/1.1";
     public static final String HTTPCORE_BE_API_CONTEXT = "httpcore-backend-test";
 

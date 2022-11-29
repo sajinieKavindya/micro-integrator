@@ -72,7 +72,7 @@ public class CPUMonitor {
         process = new ProcessBuilder(CPU_LOGGER_SH_PATH, CARBON_PID_PATH, CPU_USAGE_FILE_PATH).start();
 
         Awaitility.await().pollInterval(10, TimeUnit.MILLISECONDS).
-                atMost(30, TimeUnit.SECONDS).
+                atMost(60, TimeUnit.SECONDS).
                 until(isRunning());
     }
 
@@ -84,6 +84,7 @@ public class CPUMonitor {
         try (BufferedReader br = new BufferedReader(new FileReader(CPU_USAGE_FILE_PATH))) {
             String line;
             if ((line = br.readLine()) != null) {
+                log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CPU usage: " + line);
                 return Integer.parseInt(line);
             }
         }

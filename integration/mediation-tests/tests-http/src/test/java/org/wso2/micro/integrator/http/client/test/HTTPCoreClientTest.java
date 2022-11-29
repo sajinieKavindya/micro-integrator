@@ -119,7 +119,7 @@ public abstract class HTTPCoreClientTest extends ESBIntegrationTest {
     /**
      * Reads the response and assert the HTTP status code.
      *
-     * @param reader      The BufferedReader returned by the socket
+     * @param reader         The BufferedReader returned by the socket
      * @param httpRequest The mock HTTP request with the expected HTTP status code
      * @throws Exception If an error occurs while reading the response
      */
