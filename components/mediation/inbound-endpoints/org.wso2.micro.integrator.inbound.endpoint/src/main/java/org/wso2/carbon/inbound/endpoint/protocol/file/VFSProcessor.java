@@ -39,6 +39,7 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     private String injectingSeq;
     private String onErrorSeq;
     private boolean sequential;
+    private boolean isSuspend;
 
     public VFSProcessor(InboundProcessorParams params) {
         this.name = params.getName();
@@ -62,25 +63,28 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
         this.injectingSeq = params.getInjectingSeq();
         this.onErrorSeq = params.getOnErrorSeq();
         this.synapseEnvironment = params.getSynapseEnvironment();
+        this.isSuspend = params.isSuspend();
     }
 
     /**
      * This will be called at the time of synapse artifact deployment.
      */
     public void init() {
-        log.info("Inbound file listener " + name + " starting ...");
+        log.info("Initializing Inbound file listener " + name + ".");
         fileScanner = new FilePollingConsumer(vfsProperties, name, synapseEnvironment, interval);
         fileScanner.registerHandler(
                 new FileInjectHandler(injectingSeq, onErrorSeq, sequential, synapseEnvironment, vfsProperties));
-        start();
+        if (!isSuspend) {
+            start();
+        }
     }
 
     /**
      * Register/start the schedule service
      */
-    public void start() {
+    public boolean start() {
         InboundTask task = new FileTask(fileScanner, interval);
-        start(task, ENDPOINT_POSTFIX);
+        return start(task, ENDPOINT_POSTFIX);
     }
 
     public String getName() {
@@ -105,6 +109,15 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
         if (removeTask) {
             destroy();
             fileScanner.destroy();
+        }
+    }
+
+    @Override
+    public boolean activate() {
+        if (!isOneTimeTriggered) {
+            return start();
+        } else {
+            return super.activate();
         }
     }
 }

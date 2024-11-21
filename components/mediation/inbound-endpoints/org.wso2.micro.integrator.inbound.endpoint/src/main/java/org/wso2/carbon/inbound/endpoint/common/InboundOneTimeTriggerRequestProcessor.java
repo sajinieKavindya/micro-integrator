@@ -134,4 +134,16 @@ public abstract class InboundOneTimeTriggerRequestProcessor implements InboundRe
             }
         }
     }
+
+    @Override
+    public boolean activate() {
+
+        return false;
+    }
+
+    @Override
+    public boolean deactivate() {
+
+        return false;
+    }
 }

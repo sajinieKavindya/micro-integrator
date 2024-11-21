@@ -31,6 +31,7 @@ public class InboundHttpWebsocketListener implements InboundRequestProcessor {
     protected final String name;
     protected int port;
     protected InboundProcessorParams processorParams;
+    protected boolean isSuspend;
 
     public InboundHttpWebsocketListener(InboundProcessorParams params) {
 
@@ -43,18 +44,33 @@ public class InboundHttpWebsocketListener implements InboundRequestProcessor {
             handleException("Validation failed for the port parameter " + portParam, e);
         }
         name = params.getName();
+        isSuspend = params.isSuspend();
     }
 
     @Override
     public void init() {
 
-        HttpWebsocketEndpointManager.getInstance().startEndpoint(port, name, processorParams);
+        if (!isSuspend) {
+            HttpWebsocketEndpointManager.getInstance().startEndpoint(port, name, processorParams);
+        }
     }
 
     @Override
     public void destroy() {
 
         HttpWebsocketEndpointManager.getInstance().closeEndpoint(port);
+    }
+
+    @Override
+    public boolean activate() {
+
+        return false;
+    }
+
+    @Override
+    public boolean deactivate() {
+
+        return false;
     }
 
     protected void handleException(String msg, Exception e) {

@@ -38,6 +38,7 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
     private String onErrorSeq;
     private String classImpl;
     private boolean sequential;
+    private boolean isSuspend;
     private static final Log log = LogFactory.getLog(GenericEventBasedListener.class);
 
     private static final String ENDPOINT_POSTFIX = "CLASS" + COMMON_ENDPOINT_POSTFIX;
@@ -71,6 +72,7 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
         this.onErrorSeq = params.getOnErrorSeq();
         this.synapseEnvironment = params.getSynapseEnvironment();
         this.classImpl = params.getClassImpl();
+        this.isSuspend = params.isSuspend();
     }
 
     public void init() {
@@ -92,7 +94,9 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
         } catch (Exception e) {
             handleException("Unable to create the consumer", e);
         }
-        start();
+        if (!isSuspend) {
+            start();
+        }
     }
 
     private void handleException(String msg, Exception ex) {

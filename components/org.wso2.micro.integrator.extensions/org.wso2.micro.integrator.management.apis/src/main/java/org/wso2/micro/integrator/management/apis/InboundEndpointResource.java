@@ -30,6 +30,7 @@ import org.apache.synapse.inbound.InboundEndpoint;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.inbound.endpoint.internal.http.api.APIResource;
+import org.wso2.micro.core.util.AuditLogger;
 
 import java.io.IOException;
 
@@ -41,7 +42,11 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.wso2.micro.integrator.management.apis.Constants.ACTIVE_STATUS;
+import static org.wso2.micro.integrator.management.apis.Constants.INACTIVE_STATUS;
+import static org.wso2.micro.integrator.management.apis.Constants.NAME;
 import static org.wso2.micro.integrator.management.apis.Constants.SEARCH_KEY;
+import static org.wso2.micro.integrator.management.apis.Constants.STATUS;
 import static org.wso2.micro.integrator.management.apis.Constants.SYNAPSE_CONFIGURATION;
 
 public class InboundEndpointResource extends APIResource {
@@ -116,9 +121,14 @@ public class InboundEndpointResource extends APIResource {
                     }
                     JSONObject info = new JSONObject();
                     info.put(INBOUND_ENDPOINT_NAME, inboundName);
-                    response = Utils.handleTracing(performedBy, Constants.AUDIT_LOG_TYPE_INBOUND_ENDPOINT_TRACE,
-                                                   Constants.INBOUND_ENDPOINTS, info,
-                                                   inboundEndpoint.getAspectConfiguration(), inboundName, axisMsgCtx);
+                    if (payload.has(STATUS)) {
+                        response = changeInboundEndpointStatus(performedBy, info, msgCtx, payload);
+                    } else {
+                        response = Utils.handleTracing(performedBy, Constants.AUDIT_LOG_TYPE_INBOUND_ENDPOINT_TRACE,
+                                Constants.INBOUND_ENDPOINTS, info,
+                                inboundEndpoint.getAspectConfiguration(), inboundName, axisMsgCtx);
+                    }
+
                 } else {
                     response = Utils.createJsonError("Specified inbound endpoint ('" + inboundName + "') not found",
                             axisMsgCtx, Constants.BAD_REQUEST);
@@ -215,5 +225,37 @@ public class InboundEndpointResource extends APIResource {
             parameterListObject.put(paramObject);
         }
         return inboundObject;
+    }
+
+    private JSONObject changeInboundEndpointStatus(String performedBy, JSONObject info, MessageContext messageContext,
+                                             JsonObject payload) {
+        SynapseConfiguration synapseConfiguration = messageContext.getConfiguration();
+        String name = payload.get(NAME).getAsString();
+        String status = payload.get(STATUS).getAsString();
+
+        InboundEndpoint inboundEndpoint = synapseConfiguration.getInboundEndpoint(name);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        JSONObject jsonResponse = new JSONObject();
+        if (inboundEndpoint == null) {
+            return Utils.createJsonError("Inbound Endpoint could not be found",
+                    axis2MessageContext, Constants.NOT_FOUND);
+        }
+
+        if (INACTIVE_STATUS.equalsIgnoreCase(status)) {
+            inboundEndpoint.deactivate();
+            jsonResponse.put(Constants.MESSAGE_JSON_ATTRIBUTE, name + " : is deactivated");
+            AuditLogger.logAuditMessage(performedBy, Constants.AUDIT_LOG_TYPE_MESSAGE_PROCESSOR,
+                    Constants.AUDIT_LOG_ACTION_DISABLED, info);
+        } else if (ACTIVE_STATUS.equalsIgnoreCase(status)) {
+            inboundEndpoint.activate();
+            jsonResponse.put(Constants.MESSAGE_JSON_ATTRIBUTE, name + " : is activated");
+            AuditLogger.logAuditMessage(performedBy, Constants.AUDIT_LOG_TYPE_MESSAGE_PROCESSOR,
+                    Constants.AUDIT_LOG_ACTION_ENABLE, info);
+        } else {
+            jsonResponse = Utils.createJsonError("Provided state is not valid", axis2MessageContext, Constants.BAD_REQUEST);
+        }
+
+        return jsonResponse;
     }
 }

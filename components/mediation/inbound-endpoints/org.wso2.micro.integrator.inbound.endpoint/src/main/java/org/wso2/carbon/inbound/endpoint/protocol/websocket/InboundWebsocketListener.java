@@ -62,6 +62,16 @@ public class InboundWebsocketListener implements InboundRequestProcessor {
         WebsocketEndpointManager.getInstance().closeEndpoint(offsetPort);
     }
 
+    @Override
+    public boolean activate() {
+        return false;
+    }
+
+    @Override
+    public boolean deactivate() {
+        return false;
+    }
+
     protected void handleException(String msg, Exception e) {
         log.error(msg, e);
         throw new SynapseException(msg, e);

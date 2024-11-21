@@ -32,6 +32,7 @@ public class InboundRunner implements Runnable {
     private long interval;
 
     private volatile boolean execute = true;
+    private volatile boolean isPaused = false;
     private volatile boolean init = false;
     // Following will be used to calculate the sleeping interval
     private long lastRuntime;
@@ -43,6 +44,7 @@ public class InboundRunner implements Runnable {
     private static final String CLUSTERING_PATTERN = "clusteringPattern";
     private static final String CLUSTERING_PATTERN_WORKER_MANAGER = "WorkerManager";
     private static final Log log = LogFactory.getLog(InboundRunner.class);
+    private final Object lock = new Object();
 
     public InboundRunner(InboundTask task, long interval, String tenantDomain, boolean mgrOverride) {
         this.task = task;
@@ -51,12 +53,39 @@ public class InboundRunner implements Runnable {
         this.runOnManagerOverride = mgrOverride;
     }
 
+    // Method to pause the thread
+    public void pause() {
+        synchronized (lock) {
+            isPaused = true;
+        }
+    }
+
+    // Method to resume the thread
+    public void resume() {
+        synchronized (lock) {
+            isPaused = false;
+            lock.notifyAll(); // Wake up the thread
+        }
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
     /**
      * Exit the running while loop and terminate the thread
      */
-    protected void terminate() {
-        execute = false;
+    public void terminate() {
+        synchronized (lock) {
+            execute = false;
+            isPaused = false; // Ensure the thread is not stuck in pause
+            lock.notifyAll(); // Wake up the thread to exit
+        }
     }
+
+//    protected void terminate() {
+//        execute = false;
+//    }
 
     @Override
     public void run() {
@@ -66,6 +95,20 @@ public class InboundRunner implements Runnable {
         // Run the poll cycles
         while (execute) {
             log.debug("Executing the Inbound Endpoint.");
+
+            synchronized (lock) {
+                while (isPaused && execute) {
+                    try {
+                        lock.wait(); // Pause the thread
+                    } catch (InterruptedException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Inbound thread got interrupted while paused, but continuing...");
+                        }
+                    }
+                }
+            }
+            if (!execute) break; // Exit right away if the thread is terminated
+
             lastRuntime = getTime();
             try {
                 task.taskExecute();

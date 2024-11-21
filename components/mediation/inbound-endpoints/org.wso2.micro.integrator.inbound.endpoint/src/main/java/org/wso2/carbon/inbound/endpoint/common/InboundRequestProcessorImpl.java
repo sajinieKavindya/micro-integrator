@@ -30,7 +30,6 @@ import org.wso2.micro.integrator.mediation.ntask.NTaskTaskManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,8 +42,10 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
     protected long interval;
     protected String name;
     protected boolean coordination;
+    protected boolean isOneTimeTriggered = false;
 
     private List<StartUpController> startUpControllersList = new ArrayList<>();
+    private List<InboundRunner> inboundRunnersList = new ArrayList<>();
     private HashMap<Thread, InboundRunner> inboundRunnersThreadsMap = new HashMap<>();
     private static final Log log = LogFactory.getLog(InboundRequestProcessorImpl.class);
     private InboundEndpointsDataStore dataStore;
@@ -62,7 +63,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
      * @param task
      * @param endpointPostfix
      */
-    protected void start(InboundTask task, String endpointPostfix) {
+    protected boolean start(InboundTask task, String endpointPostfix) {
         log.info("Starting the inbound endpoint " + name + ", with coordination " + coordination + ". Interval : "
                          + interval + ". Type : " + endpointPostfix);
         if (coordination) {
@@ -78,6 +79,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
                 taskDescription.setIntervalInMs(true);
                 taskDescription.addResource(TaskDescription.INSTANCE, task);
                 taskDescription.addResource(TaskDescription.CLASSNAME, task.getClass().getName());
+                taskDescription.setTaskImplClassName(task.getClass().getName());
                 StartUpController startUpController = new StartUpController();
                 startUpController.setTaskDescription(taskDescription);
                 startUpController.init(synapseEnvironment);
@@ -93,18 +95,41 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             } catch (Exception e) {
                 log.error("Error starting the inbound endpoint " + name + ". Unable to schedule the task. " + e
                         .getLocalizedMessage(), e);
+                return false;
             }
         } else {
 
-            startInboundRunnerThread(task, Constants.SUPER_TENANT_DOMAIN_NAME, false);
+            startInboundRunner(task, Constants.SUPER_TENANT_DOMAIN_NAME, false);
         }
+        isOneTimeTriggered = true;
+        return true;
     }
 
-    private void startInboundRunnerThread(InboundTask task, String tenantDomain, boolean mgrOverride) {
+    private void startInboundRunner(InboundTask task, String tenantDomain, boolean mgrOverride) {
         InboundRunner inboundRunner = new InboundRunner(task, interval, tenantDomain, mgrOverride);
+        startInboundRunnerThread(inboundRunner);
+    }
+
+    private void startInboundRunnerThread(InboundRunner inboundRunner) {
         Thread runningThread = new Thread(inboundRunner);
         inboundRunnersThreadsMap.put(runningThread, inboundRunner);
         runningThread.start();
+    }
+
+    private void terminateInboundRunnerThreads() {
+        for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
+            Thread thread = (Thread) ((Map.Entry) threadInboundRunnerEntry).getKey();
+            InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
+
+            inboundRunner.terminate();
+            thread.interrupt();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                thread.interrupt();
+                log.error("Error while stopping the inbound thread.");
+            }
+        }
     }
 
     /**
@@ -121,23 +146,48 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             startUpControllersList.clear();
         } else if (!inboundRunnersThreadsMap.isEmpty()) {
 
-            Iterator itr = inboundRunnersThreadsMap.entrySet().iterator();
-            while (itr.hasNext()) {
-                Map.Entry entry = (Map.Entry) itr.next();
-                Thread thread = (Thread) entry.getKey();
-                InboundRunner inboundRunner = (InboundRunner) entry.getValue();
-
-                inboundRunner.terminate();
-                thread.interrupt();
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    thread.interrupt();
-                    log.error("Error while stopping the inbound thread.");
-                }
-            }
+            terminateInboundRunnerThreads();
             inboundRunnersThreadsMap.clear();
         }
     }
 
+    @Override
+    public boolean activate() {
+        log.info("Activating the Inbound Endpoint " + name + ".");
+
+        boolean isSuccessfullyActivated = true;
+        if (!startUpControllersList.isEmpty()) {
+            for (StartUpController sc : startUpControllersList) {
+                if (!sc.activateTask()) {
+                    isSuccessfullyActivated = false;
+                }
+            }
+        } else if (!inboundRunnersThreadsMap.isEmpty()) {
+            for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
+                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
+                inboundRunner.resume();
+            }
+        }
+        return isSuccessfullyActivated;
+    }
+
+    @Override
+    public boolean deactivate() {
+        log.info("Deactivating the Inbound Endpoint " + name + ".");
+
+        boolean isSuccessfullyDeactivated = true;
+        if (!startUpControllersList.isEmpty()) {
+            for (StartUpController sc : startUpControllersList) {
+                if (!sc.deactivateTask()) {
+                    isSuccessfullyDeactivated = false;
+                }
+            }
+        } else if (!inboundRunnersThreadsMap.isEmpty()) {
+            for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
+                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
+                inboundRunner.pause();
+            }
+        }
+        return isSuccessfullyDeactivated;
+    }
 }

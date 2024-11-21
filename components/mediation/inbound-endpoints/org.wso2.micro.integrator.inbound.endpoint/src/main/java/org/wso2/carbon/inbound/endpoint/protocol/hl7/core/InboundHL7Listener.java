@@ -67,4 +67,15 @@ public class InboundHL7Listener implements InboundRequestProcessor {
         HL7EndpointManager.getInstance().closeEndpoint(port);
     }
 
+    @Override
+    public boolean activate() {
+
+        return false;
+    }
+
+    @Override
+    public boolean deactivate() {
+
+        return false;
+    }
 }
