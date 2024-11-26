@@ -146,4 +146,10 @@ public abstract class InboundOneTimeTriggerRequestProcessor implements InboundRe
 
         return false;
     }
+
+    @Override
+    public boolean isDeactivated() {
+
+        return false;
+    }
 }

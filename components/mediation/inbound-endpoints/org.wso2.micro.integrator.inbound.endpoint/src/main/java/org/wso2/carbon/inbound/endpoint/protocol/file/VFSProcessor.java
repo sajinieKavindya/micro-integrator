@@ -70,21 +70,20 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
      * This will be called at the time of synapse artifact deployment.
      */
     public void init() {
-        log.info("Initializing Inbound file listener " + name + ".");
+        log.info("Inbound file listener [" + name + "] is initializing"
+                + (this.isSuspend ? " but will remain in suspended mode..." : "..."));
         fileScanner = new FilePollingConsumer(vfsProperties, name, synapseEnvironment, interval);
         fileScanner.registerHandler(
                 new FileInjectHandler(injectingSeq, onErrorSeq, sequential, synapseEnvironment, vfsProperties));
-        if (!isSuspend) {
-            start();
-        }
+        start(this.isSuspend);
     }
 
     /**
      * Register/start the schedule service
      */
-    public boolean start() {
+    public boolean start(boolean startInPausedMode) {
         InboundTask task = new FileTask(fileScanner, interval);
-        return start(task, ENDPOINT_POSTFIX);
+        return start(task, ENDPOINT_POSTFIX, startInPausedMode);
     }
 
     public String getName() {
@@ -111,13 +110,13 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
             fileScanner.destroy();
         }
     }
-
-    @Override
-    public boolean activate() {
-        if (!isOneTimeTriggered) {
-            return start();
-        } else {
-            return super.activate();
-        }
-    }
+//
+//    @Override
+//    public boolean activate() {
+//        if (!isStartedOnce) {
+//            return start();
+//        } else {
+//            return super.activate();
+//        }
+//    }
 }

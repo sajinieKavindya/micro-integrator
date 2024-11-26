@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.util.MiscellaneousUtil;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.inbound.InboundEndpoint;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.task.TaskDescription;
 import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
@@ -153,6 +154,10 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         return false;
     }
 
+    public TaskDescription getTaskDescription(String taskName) {
+        return synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(taskName);
+    }
+
     /**
      * Schedules the coordinated tasks.
      *
@@ -167,12 +172,21 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
                     scheduleTask(taskName);
                 } else {
                     resumeLocalTask(taskName);
+                    TaskDescription taskDescription =
+                            synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(taskName);
                     if (MiscellaneousUtil.isTaskOfMessageProcessor(taskName)) {
                         String messageProcessorName = MiscellaneousUtil.getMessageProcessorName(taskName);
                         MessageProcessor messageProcessor = synapseEnvironment.getSynapseConfiguration()
                                 .getMessageProcessors().get(messageProcessorName);
                         if (messageProcessor != null) {
                             messageProcessor.resumeRemotely();
+                        }
+                    } else if (taskDescription.getProperty(TaskUtils.TASK_OWNER_PROPERTY) == TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT) {
+                        String inboundEndpointName = (String) taskDescription.getProperty(TaskUtils.TASK_OWNER_NAME);
+                        InboundEndpoint inboundEndpoint = synapseEnvironment.getSynapseConfiguration()
+                                .getInboundEndpoint(inboundEndpointName);
+                        if (inboundEndpoint != null) {
+                            inboundEndpoint.resumeRemotely();
                         }
                     }
                 }
@@ -290,13 +304,13 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
     public boolean isDeactivated(String taskName) throws TaskException {
 
         if (deployedCoordinatedTasks.contains(taskName)) {
-            boolean isDeactivated = !CoordinatedTask.States.RUNNING.equals(getCoordinatedTaskState(taskName));
+            boolean isDeactivated = !CoordinatedTask.States.RUNNING.equals( getCoordinatedTaskState(taskName));
             if (log.isDebugEnabled()) {
                 log.debug("Task [" + taskName + "] is " + (isDeactivated ? "" : "not") + " in deactivated state.");
             }
             return isDeactivated;
         }
-        return getTaskState(taskName).equals(TaskState.PAUSED);
+        return !(getTaskState(taskName).equals(TaskState.NORMAL) || getTaskState(taskName).equals(TaskState.BLOCKED));
     }
 
     private CoordinatedTask.States getCoordinatedTaskState(String taskName) {

@@ -45,6 +45,12 @@ public class TaskUtils {
 
     public static final String TASK_STATE_PROPERTY = "TASK_STATE_PROPERTY";
 
+    public static final String TASK_OWNER_PROPERTY = "taskOwner";
+
+    public static final String TASK_OWNER_NAME = "taskOwnerName";
+
+    public static final String TASK_BELONGS_TO_INBOUND_ENDPOINT = "InboundEndpoint";
+
     private static SecretResolver secretResolver;
 
     public static Document convertToDocument(File file) throws TaskException {

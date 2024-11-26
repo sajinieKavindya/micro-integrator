@@ -73,6 +73,12 @@ public class InboundHttpWebsocketListener implements InboundRequestProcessor {
         return false;
     }
 
+    @Override
+    public boolean isDeactivated() {
+
+        return false;
+    }
+
     protected void handleException(String msg, Exception e) {
 
         LOGGER.error(msg, e);

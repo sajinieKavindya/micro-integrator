@@ -86,6 +86,12 @@ public class InboundGRPCListener implements InboundRequestProcessor {
         return false;
     }
 
+    @Override
+    public boolean isDeactivated() {
+
+        return false;
+    }
+
     public void start() throws IOException {
         if (server != null) {
             throw new IllegalStateException("gRPC Listener Server already started");

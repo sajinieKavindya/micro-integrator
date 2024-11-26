@@ -201,6 +201,7 @@ public class InboundEndpointResource extends APIResource {
         inboundObject.put("protocol", inboundEndpoint.getProtocol());
         inboundObject.put("sequence", inboundEndpoint.getInjectingSeq());
         inboundObject.put("error", inboundEndpoint.getOnErrorSeq());
+        inboundObject.put("status", getInboundEndpointState(inboundEndpoint));
 
         String statisticState = inboundEndpoint.getAspectConfiguration().isStatisticsEnable() ? Constants.ENABLED : Constants.DISABLED;
         inboundObject.put(Constants.STATS, statisticState);
@@ -225,6 +226,13 @@ public class InboundEndpointResource extends APIResource {
             parameterListObject.put(paramObject);
         }
         return inboundObject;
+    }
+
+    private String getInboundEndpointState(InboundEndpoint inboundEndpoint) {
+        if (inboundEndpoint.isDeactivated()) {
+            return INACTIVE_STATUS;
+        }
+        return ACTIVE_STATUS;
     }
 
     private JSONObject changeInboundEndpointStatus(String performedBy, JSONObject info, MessageContext messageContext,

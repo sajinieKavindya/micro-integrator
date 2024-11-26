@@ -22,7 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.util.MiscellaneousUtil;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.inbound.InboundEndpoint;
 import org.apache.synapse.message.processor.MessageProcessor;
+import org.apache.synapse.task.TaskDescription;
 import org.wso2.micro.integrator.coordination.ClusterCoordinator;
 import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
 import org.wso2.micro.integrator.ntask.common.TaskException;
@@ -32,13 +34,13 @@ import org.wso2.micro.integrator.ntask.coordination.task.CoordinatedTask;
 import org.wso2.micro.integrator.ntask.coordination.task.resolver.TaskLocationResolver;
 import org.wso2.micro.integrator.ntask.coordination.task.store.TaskStore;
 import org.wso2.micro.integrator.ntask.coordination.task.store.cleaner.TaskStoreCleaner;
+import org.wso2.micro.integrator.ntask.core.TaskUtils;
 import org.wso2.micro.integrator.ntask.core.impl.standalone.ScheduledTaskManager;
 import org.wso2.micro.integrator.ntask.core.internal.DataHolder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,6 +165,7 @@ public class CoordinatedTaskScheduler implements Runnable {
             }
         });
         cleanUpMessageProcessors(pausedTasks);
+        updateInboundEndpointState(pausedTasks);
         taskStore.updateTaskState(pausedTasks, CoordinatedTask.States.PAUSED);
     }
 
@@ -265,6 +268,27 @@ public class CoordinatedTaskScheduler implements Runnable {
                         messageProcessor.cleanUpDeactivatedProcessors();
                     }
                     completedProcessors.add(messageProcessorName);
+                }
+            }
+        });
+    }
+
+    private void updateInboundEndpointState(List<String> pausedTasks) {
+        Set<String> completedInboundEndpoints = new HashSet();
+        SynapseEnvironment synapseEnvironment = MicroIntegratorBaseUtils.getSynapseEnvironment();
+        pausedTasks.forEach(task -> {
+            TaskDescription taskDescription =
+                    synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(task);
+            if (taskDescription.getProperty(TaskUtils.TASK_OWNER_PROPERTY) == TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT) {
+                String inboundEndpointName = (String) taskDescription.getProperty(TaskUtils.TASK_OWNER_NAME);
+
+                if (!completedInboundEndpoints.contains(inboundEndpointName)) {
+                    InboundEndpoint inboundEndpoint = synapseEnvironment.getSynapseConfiguration()
+                            .getInboundEndpoint(inboundEndpointName);
+                    if (inboundEndpoint != null) {
+                        inboundEndpoint.pauseRemotely();
+                    }
+                    completedInboundEndpoints.add(inboundEndpointName);
                 }
             }
         });

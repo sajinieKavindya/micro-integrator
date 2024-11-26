@@ -27,6 +27,7 @@ import org.apache.synapse.task.TaskManager;
 import org.wso2.carbon.inbound.endpoint.persistence.InboundEndpointsDataStore;
 import org.wso2.carbon.inbound.endpoint.protocol.jms.JMSTask;
 import org.wso2.micro.integrator.mediation.ntask.NTaskTaskManager;
+import org.wso2.micro.integrator.ntask.core.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
     protected long interval;
     protected String name;
     protected boolean coordination;
-    protected boolean isOneTimeTriggered = false;
+    protected boolean isStartedOnce = false;
 
     private List<StartUpController> startUpControllersList = new ArrayList<>();
     private List<InboundRunner> inboundRunnersList = new ArrayList<>();
@@ -64,8 +65,20 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
      * @param endpointPostfix
      */
     protected boolean start(InboundTask task, String endpointPostfix) {
-        log.info("Starting the inbound endpoint " + name + ", with coordination " + coordination + ". Interval : "
-                         + interval + ". Type : " + endpointPostfix);
+        return this.start(task, endpointPostfix, false);
+    }
+
+    /**
+     * Based on the coordination option schedule the task with NTASK or run as a
+     * background thread
+     *
+     * @param task
+     * @param endpointPostfix
+     * @param startInPausedMode
+     */
+    protected boolean start(InboundTask task, String endpointPostfix, boolean startInPausedMode) {
+        log.info("Starting the inbound endpoint [" + name + "] " + (startInPausedMode ? "in suspended mode" : "") + ", "
+                + "with coordination " + coordination + ". Interval : " + interval + ". Type : " + endpointPostfix);
         if (coordination) {
             try {
                 TaskDescription taskDescription = new TaskDescription();
@@ -80,9 +93,11 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
                 taskDescription.addResource(TaskDescription.INSTANCE, task);
                 taskDescription.addResource(TaskDescription.CLASSNAME, task.getClass().getName());
                 taskDescription.setTaskImplClassName(task.getClass().getName());
+                taskDescription.addProperty(TaskUtils.TASK_OWNER_PROPERTY, TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT);
+                taskDescription.addProperty(TaskUtils.TASK_OWNER_NAME, name);
                 StartUpController startUpController = new StartUpController();
                 startUpController.setTaskDescription(taskDescription);
-                startUpController.init(synapseEnvironment);
+                startUpController.init(synapseEnvironment, !startInPausedMode);
                 startUpControllersList.add(startUpController);
                 //register a listener to be notified when the local jms task is deleted
                 if (task instanceof JMSTask) {
@@ -99,18 +114,14 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             }
         } else {
 
-            startInboundRunner(task, Constants.SUPER_TENANT_DOMAIN_NAME, false);
+            startInboundRunner(task, Constants.SUPER_TENANT_DOMAIN_NAME, false, startInPausedMode);
         }
-        isOneTimeTriggered = true;
+        isStartedOnce = true;
         return true;
     }
 
-    private void startInboundRunner(InboundTask task, String tenantDomain, boolean mgrOverride) {
-        InboundRunner inboundRunner = new InboundRunner(task, interval, tenantDomain, mgrOverride);
-        startInboundRunnerThread(inboundRunner);
-    }
-
-    private void startInboundRunnerThread(InboundRunner inboundRunner) {
+    private void startInboundRunner(InboundTask task, String tenantDomain, boolean mgrOverride, boolean startInPausedMode) {
+        InboundRunner inboundRunner = new InboundRunner(task, interval, tenantDomain, mgrOverride, startInPausedMode);
         Thread runningThread = new Thread(inboundRunner);
         inboundRunnersThreadsMap.put(runningThread, inboundRunner);
         runningThread.start();
@@ -189,5 +200,24 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             }
         }
         return isSuccessfullyDeactivated;
+    }
+
+    @Override
+    public boolean isDeactivated() {
+        if (!startUpControllersList.isEmpty()) {
+            for (StartUpController sc : startUpControllersList) {
+                if (sc.isTaskActive()) {
+                    return false;
+                }
+            }
+        } else if (!inboundRunnersThreadsMap.isEmpty()) {
+            for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
+                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
+                if (!inboundRunner.isPaused()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

@@ -32,7 +32,7 @@ public class InboundRunner implements Runnable {
     private long interval;
 
     private volatile boolean execute = true;
-    private volatile boolean isPaused = false;
+    private volatile boolean isPaused;
     private volatile boolean init = false;
     // Following will be used to calculate the sleeping interval
     private long lastRuntime;
@@ -46,21 +46,35 @@ public class InboundRunner implements Runnable {
     private static final Log log = LogFactory.getLog(InboundRunner.class);
     private final Object lock = new Object();
 
-    public InboundRunner(InboundTask task, long interval, String tenantDomain, boolean mgrOverride) {
+    public InboundRunner(InboundTask task, long interval, String tenantDomain, boolean mgrOverride, boolean startInPausedMode) {
         this.task = task;
         this.interval = interval;
         this.tenantDomain = tenantDomain;
         this.runOnManagerOverride = mgrOverride;
+        this.isPaused = startInPausedMode;
     }
 
-    // Method to pause the thread
+    /**
+     * Pauses the execution of the thread.
+     * <p>
+     * This method sets the {@code isPaused} flag to {@code true}, indicating that
+     * the thread should pause its execution. Threads can check this flag and
+     * enter a wait state if necessary.
+     * </p>
+     */
     public void pause() {
         synchronized (lock) {
             isPaused = true;
         }
     }
 
-    // Method to resume the thread
+    /**
+     * Resumes the execution of a paused thread.
+     * <p>
+     * This method sets the {@code isPaused} flag to {@code false} and notifies
+     * all threads waiting on the {@code lock} object, allowing the thread to continue execution.
+     * </p>
+     */
     public void resume() {
         synchronized (lock) {
             isPaused = false;
@@ -83,10 +97,6 @@ public class InboundRunner implements Runnable {
         }
     }
 
-//    protected void terminate() {
-//        execute = false;
-//    }
-
     @Override
     public void run() {
         log.debug("Starting the Inbound Endpoint.");
@@ -94,8 +104,6 @@ public class InboundRunner implements Runnable {
         log.debug("Configuration context loaded. Running the Inbound Endpoint.");
         // Run the poll cycles
         while (execute) {
-            log.debug("Executing the Inbound Endpoint.");
-
             synchronized (lock) {
                 while (isPaused && execute) {
                     try {
@@ -109,6 +117,9 @@ public class InboundRunner implements Runnable {
             }
             if (!execute) break; // Exit right away if the thread is terminated
 
+            if (log.isDebugEnabled()) {
+                log.debug("Executing the Inbound Endpoint.");
+            }
             lastRuntime = getTime();
             try {
                 task.taskExecute();
