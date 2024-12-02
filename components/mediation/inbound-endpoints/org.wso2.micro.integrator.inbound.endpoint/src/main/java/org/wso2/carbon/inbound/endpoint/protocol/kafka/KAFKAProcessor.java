@@ -99,7 +99,9 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
             log.error("Error initializing message listener " + e.getMessage(), e);
             throw new SynapseException("Error initializing message listener", e);
         }
-        start();
+        if (readyToStart()) {
+            start();
+        }
     }
 
     /**
@@ -111,7 +113,12 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
     }
 
     public void update() {
-        // This will not be called for inbound endpoints
+        start();
+        log.info("starting the file inbound endpoint ..................");
+        if (this.startInPausedMode) {
+            log.info("stopping the file inbound endpoint ..................");
+            deactivate();
+        }
     }
 
     public String getName() {

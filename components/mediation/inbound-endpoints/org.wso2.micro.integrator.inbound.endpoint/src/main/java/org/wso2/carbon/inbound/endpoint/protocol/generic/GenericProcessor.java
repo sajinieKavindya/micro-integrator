@@ -98,7 +98,9 @@ public class GenericProcessor extends InboundRequestProcessorImpl implements Tas
         } catch (Exception e) {
             handleException("Unable to create the consumer", e);
         }
-        start();
+        if (readyToStart()) {
+            start();
+        }
     }
 
     private void handleException(String msg, Exception ex) {
@@ -136,6 +138,11 @@ public class GenericProcessor extends InboundRequestProcessorImpl implements Tas
 
     public void update() {
         start();
+        log.info("starting the file inbound endpoint ..................");
+        if (this.startInPausedMode) {
+            log.info("stopping the file inbound endpoint ..................");
+            deactivate();
+        }
     }
 
 }

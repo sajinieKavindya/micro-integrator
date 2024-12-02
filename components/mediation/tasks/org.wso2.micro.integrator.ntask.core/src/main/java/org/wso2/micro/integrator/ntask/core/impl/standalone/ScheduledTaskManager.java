@@ -24,12 +24,14 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.inbound.InboundEndpoint;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.task.TaskDescription;
+import org.apache.synapse.task.TaskManagerObserver;
 import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
 import org.wso2.micro.integrator.ntask.common.TaskException;
 import org.wso2.micro.integrator.ntask.coordination.TaskCoordinationException;
 import org.wso2.micro.integrator.ntask.coordination.task.CoordinatedTask;
 import org.wso2.micro.integrator.ntask.coordination.task.store.TaskStore;
 import org.wso2.micro.integrator.ntask.core.TaskInfo;
+import org.wso2.micro.integrator.ntask.core.TaskManager;
 import org.wso2.micro.integrator.ntask.core.TaskRepository;
 import org.wso2.micro.integrator.ntask.core.TaskUtils;
 import org.wso2.micro.integrator.ntask.core.impl.AbstractQuartzTaskManager;
@@ -39,6 +41,7 @@ import org.wso2.micro.integrator.ntask.core.internal.TasksDSComponent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class is responsible for handling / scheduling all tasks in Micro Integrator.
@@ -57,6 +60,8 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
     private List<String> additionFailedTasks = new ArrayList<>();
 
     private List<String> locallyRunningCoordinatedTasks = new ArrayList<>();
+
+    private final List<TaskManagerObserver> observers = new ArrayList<>();
 
     private SynapseEnvironment synapseEnvironment = null;
     private TaskStore taskStore;
@@ -169,26 +174,11 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         try {
             if (taskStore.updateTaskState(taskName, CoordinatedTask.States.RUNNING, localNodeId)) {
                 if (!isPreviouslyScheduled(taskName, getTenantTaskGroup())) {
+                    TaskUtils.setTaskPaused(getTaskRepository(), taskName, false);
                     scheduleTask(taskName);
                 } else {
                     resumeLocalTask(taskName);
-                    TaskDescription taskDescription =
-                            synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(taskName);
-                    if (MiscellaneousUtil.isTaskOfMessageProcessor(taskName)) {
-                        String messageProcessorName = MiscellaneousUtil.getMessageProcessorName(taskName);
-                        MessageProcessor messageProcessor = synapseEnvironment.getSynapseConfiguration()
-                                .getMessageProcessors().get(messageProcessorName);
-                        if (messageProcessor != null) {
-                            messageProcessor.resumeRemotely();
-                        }
-                    } else if (taskDescription.getProperty(TaskUtils.TASK_OWNER_PROPERTY) == TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT) {
-                        String inboundEndpointName = (String) taskDescription.getProperty(TaskUtils.TASK_OWNER_NAME);
-                        InboundEndpoint inboundEndpoint = synapseEnvironment.getSynapseConfiguration()
-                                .getInboundEndpoint(inboundEndpointName);
-                        if (inboundEndpoint != null) {
-                            inboundEndpoint.resumeRemotely();
-                        }
-                    }
+                    notifyOnResume(taskName);
                 }
                 locallyRunningCoordinatedTasks.add(taskName);
             } else {
@@ -199,6 +189,28 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
             throw new TaskException(
                     "Exception occurred while updating the state of the task : " + taskName + " to :" + " "
                             + CoordinatedTask.States.RUNNING, TaskException.Code.DATABASE_ERROR, e);
+        }
+    }
+
+    private void notifyOnResume(String taskName) {
+        if (MiscellaneousUtil.isTaskOfMessageProcessor(taskName)) {
+            String messageProcessorName = MiscellaneousUtil.getMessageProcessorName(taskName);
+            MessageProcessor messageProcessor = synapseEnvironment.getSynapseConfiguration()
+                    .getMessageProcessors().get(messageProcessorName);
+            if (messageProcessor != null) {
+                messageProcessor.resumeRemotely();
+            }
+            return;
+        }
+        TaskDescription taskDescription =
+                synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(taskName);
+        if (taskDescription.getProperty(TaskUtils.TASK_OWNER_PROPERTY)
+                == TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT) {
+            InboundEndpoint inboundEndpoint = synapseEnvironment.getSynapseConfiguration()
+                    .getInboundEndpoint((String) taskDescription.getProperty(TaskUtils.TASK_OWNER_NAME));
+            if (Objects.nonNull(inboundEndpoint)) {
+                inboundEndpoint.updateInboundEndpointState(false);
+            }
         }
     }
 
@@ -245,6 +257,10 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
                     "Task type: '" + this.getTaskType() + "' is not registered in the current task node",
                     TaskException.Code.TASK_NODE_NOT_AVAILABLE);
         }
+    }
+
+    private void updateObserversOnStateChange() {
+
     }
 
     @Override
@@ -311,6 +327,19 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
             return isDeactivated;
         }
         return !(getTaskState(taskName).equals(TaskState.NORMAL) || getTaskState(taskName).equals(TaskState.BLOCKED));
+    }
+
+    @Override
+    public boolean isTaskRunning(String taskName) throws TaskException {
+
+        if (deployedCoordinatedTasks.contains(taskName)) {
+            boolean isRunning = CoordinatedTask.States.RUNNING.equals( getCoordinatedTaskState(taskName));
+            if (log.isDebugEnabled()) {
+                log.debug("Task [" + taskName + "] is " + (isRunning ? "" : "not") + " in running state.");
+            }
+            return isRunning;
+        }
+        return getTaskState(taskName).equals(TaskState.NORMAL);
     }
 
     private CoordinatedTask.States getCoordinatedTaskState(String taskName) {

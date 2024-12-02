@@ -624,8 +624,7 @@ public class NTaskTaskManager implements TaskManager, TaskServiceObserver, Serve
                 return false;
             }
             try {
-                return taskManager.getTaskState(taskName)
-                                  .equals(org.wso2.micro.integrator.ntask.core.TaskManager.TaskState.NORMAL);
+                return taskManager.isTaskRunning(taskName);
             } catch (Exception e) {
                 logger.error("Cannot return task status [" + taskName + "]. Error: " +
                                      e.getLocalizedMessage(), e);

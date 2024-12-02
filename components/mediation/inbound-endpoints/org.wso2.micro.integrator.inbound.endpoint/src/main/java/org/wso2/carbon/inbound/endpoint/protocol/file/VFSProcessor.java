@@ -39,7 +39,6 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     private String injectingSeq;
     private String onErrorSeq;
     private boolean sequential;
-    private boolean isSuspend;
 
     public VFSProcessor(InboundProcessorParams params) {
         this.name = params.getName();
@@ -63,27 +62,28 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
         this.injectingSeq = params.getInjectingSeq();
         this.onErrorSeq = params.getOnErrorSeq();
         this.synapseEnvironment = params.getSynapseEnvironment();
-        this.isSuspend = params.isSuspend();
+        this.startInPausedMode = params.isSuspend();
     }
 
     /**
      * This will be called at the time of synapse artifact deployment.
      */
     public void init() {
-        log.info("Inbound file listener [" + name + "] is initializing"
-                + (this.isSuspend ? " but will remain in suspended mode..." : "..."));
+        log.info("Initializing Inbound file listener " + name + ".");
         fileScanner = new FilePollingConsumer(vfsProperties, name, synapseEnvironment, interval);
         fileScanner.registerHandler(
                 new FileInjectHandler(injectingSeq, onErrorSeq, sequential, synapseEnvironment, vfsProperties));
-        start(this.isSuspend);
+        if (readyToStart()) {
+            start();
+        }
     }
 
     /**
      * Register/start the schedule service
      */
-    public boolean start(boolean startInPausedMode) {
+    public boolean start() {
         InboundTask task = new FileTask(fileScanner, interval);
-        return start(task, ENDPOINT_POSTFIX, startInPausedMode);
+        return start(task, ENDPOINT_POSTFIX);
     }
 
     public String getName() {
@@ -95,7 +95,12 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     }
 
     public void update() {
-        // This will not be called for inbound endpoints
+        start();
+        log.info("starting the file inbound endpoint ..................");
+        if (this.startInPausedMode) {
+            log.info("stopping the file inbound endpoint ..................");
+            deactivate();
+        }
     }
 
     /**
@@ -110,13 +115,4 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
             fileScanner.destroy();
         }
     }
-//
-//    @Override
-//    public boolean activate() {
-//        if (!isStartedOnce) {
-//            return start();
-//        } else {
-//            return super.activate();
-//        }
-//    }
 }

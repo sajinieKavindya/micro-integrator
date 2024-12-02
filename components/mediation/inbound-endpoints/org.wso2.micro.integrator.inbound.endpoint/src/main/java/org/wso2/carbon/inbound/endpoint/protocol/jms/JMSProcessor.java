@@ -85,6 +85,12 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
      */
     public void init() {
         log.info("Initializing inbound JMS listener for inbound endpoint " + name);
+        if (readyToStart()) {
+            start();
+        }
+    }
+
+    private void start() {
         for (int consumers = 0; consumers < concurrentConsumers; consumers++) {
             JMSPollingConsumer jmsPollingConsumer = new JMSPollingConsumer(jmsProperties, interval, name);
             jmsPollingConsumer.registerHandler(
@@ -121,10 +127,6 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
         this.name = name;
     }
 
-    public void update() {
-        // This will not be called for inbound endpoints
-    }
-
     /**
      * Remove inbound endpoints.
      *
@@ -134,6 +136,15 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
     public void destroy(boolean removeTask) {
         if (removeTask) {
             destroy();
+        }
+    }
+
+    public void update() {
+        start();
+        log.info("starting the file inbound endpoint ..................");
+        if (this.startInPausedMode) {
+            log.info("stopping the file inbound endpoint ..................");
+            deactivate();
         }
     }
 }

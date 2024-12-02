@@ -122,7 +122,7 @@ public class InboundEndpointResource extends APIResource {
                     JSONObject info = new JSONObject();
                     info.put(INBOUND_ENDPOINT_NAME, inboundName);
                     if (payload.has(STATUS)) {
-                        response = changeInboundEndpointStatus(performedBy, info, msgCtx, payload);
+                        response = handleStatusUpdate(performedBy, info, msgCtx, payload);
                     } else {
                         response = Utils.handleTracing(performedBy, Constants.AUDIT_LOG_TYPE_INBOUND_ENDPOINT_TRACE,
                                 Constants.INBOUND_ENDPOINTS, info,
@@ -162,6 +162,7 @@ public class InboundEndpointResource extends APIResource {
 
             inboundObject.put(Constants.NAME, inboundEndpoint.getName());
             inboundObject.put("protocol", inboundEndpoint.getProtocol());
+            inboundObject.put(Constants.STATUS, getInboundEndpointState(inboundEndpoint));
 
             jsonBody.getJSONArray(Constants.LIST).put(inboundObject);
         }
@@ -201,7 +202,7 @@ public class InboundEndpointResource extends APIResource {
         inboundObject.put("protocol", inboundEndpoint.getProtocol());
         inboundObject.put("sequence", inboundEndpoint.getInjectingSeq());
         inboundObject.put("error", inboundEndpoint.getOnErrorSeq());
-        inboundObject.put("status", getInboundEndpointState(inboundEndpoint));
+        inboundObject.put(Constants.STATUS, getInboundEndpointState(inboundEndpoint));
 
         String statisticState = inboundEndpoint.getAspectConfiguration().isStatisticsEnable() ? Constants.ENABLED : Constants.DISABLED;
         inboundObject.put(Constants.STATS, statisticState);
@@ -228,6 +229,14 @@ public class InboundEndpointResource extends APIResource {
         return inboundObject;
     }
 
+    /**
+     * Determines the current state of the specified inbound endpoint.
+     *
+     * @param inboundEndpoint The {@link InboundEndpoint} instance whose state is to be retrieved.
+     * @return A {@link String} representing the state of the inbound endpoint:
+     *         - {@code INACTIVE_STATUS} if the inbound endpoint is deactivated.
+     *         - {@code ACTIVE_STATUS} otherwise.
+     */
     private String getInboundEndpointState(InboundEndpoint inboundEndpoint) {
         if (inboundEndpoint.isDeactivated()) {
             return INACTIVE_STATUS;
@@ -235,8 +244,20 @@ public class InboundEndpointResource extends APIResource {
         return ACTIVE_STATUS;
     }
 
-    private JSONObject changeInboundEndpointStatus(String performedBy, JSONObject info, MessageContext messageContext,
-                                             JsonObject payload) {
+    /**
+     * Handles the activation or deactivation of an inbound endpoint based on the provided status.
+     *
+     * @param performedBy    The user performing the operation, used for audit logging.
+     * @param info           A JSON object containing additional audit information.
+     * @param messageContext The current Synapse {@link MessageContext} for accessing the configuration.
+     * @param payload        A {@link JsonObject} containing the inbound endpoint name and desired status.
+     *
+     * @return A {@link JSONObject} indicating the result of the operation. If successful, contains
+     *         a confirmation message. If unsuccessful, contains an error message with appropriate
+     *         HTTP error codes.
+     */
+    private JSONObject handleStatusUpdate(String performedBy, JSONObject info, MessageContext messageContext,
+                                          JsonObject payload) {
         SynapseConfiguration synapseConfiguration = messageContext.getConfiguration();
         String name = payload.get(NAME).getAsString();
         String status = payload.get(STATUS).getAsString();
@@ -251,15 +272,25 @@ public class InboundEndpointResource extends APIResource {
         }
 
         if (INACTIVE_STATUS.equalsIgnoreCase(status)) {
-            inboundEndpoint.deactivate();
-            jsonResponse.put(Constants.MESSAGE_JSON_ATTRIBUTE, name + " : is deactivated");
-            AuditLogger.logAuditMessage(performedBy, Constants.AUDIT_LOG_TYPE_MESSAGE_PROCESSOR,
-                    Constants.AUDIT_LOG_ACTION_DISABLED, info);
+            boolean success = inboundEndpoint.deactivate();
+            if (success) {
+                jsonResponse.put(Constants.MESSAGE_JSON_ATTRIBUTE, name + " : is deactivated");
+                AuditLogger.logAuditMessage(performedBy, Constants.AUDIT_LOG_TYPE_INBOUND_ENDPOINT,
+                        Constants.AUDIT_LOG_ACTION_DISABLED, info);
+            } else {
+                jsonResponse = Utils.createJsonError("Failed to deactivate the inbound endpoint : " + name,
+                        axis2MessageContext, Constants.INTERNAL_SERVER_ERROR);
+            }
         } else if (ACTIVE_STATUS.equalsIgnoreCase(status)) {
-            inboundEndpoint.activate();
-            jsonResponse.put(Constants.MESSAGE_JSON_ATTRIBUTE, name + " : is activated");
-            AuditLogger.logAuditMessage(performedBy, Constants.AUDIT_LOG_TYPE_MESSAGE_PROCESSOR,
-                    Constants.AUDIT_LOG_ACTION_ENABLE, info);
+            boolean success = inboundEndpoint.activate();
+            if (success) {
+                jsonResponse.put(Constants.MESSAGE_JSON_ATTRIBUTE, name + " : is activated");
+                AuditLogger.logAuditMessage(performedBy, Constants.AUDIT_LOG_TYPE_MESSAGE_PROCESSOR,
+                        Constants.AUDIT_LOG_ACTION_ENABLE, info);
+            } else {
+                jsonResponse = Utils.createJsonError("Failed to activate the inbound endpoint : " + name,
+                        axis2MessageContext, Constants.INTERNAL_SERVER_ERROR);
+            }
         } else {
             jsonResponse = Utils.createJsonError("Provided state is not valid", axis2MessageContext, Constants.BAD_REQUEST);
         }

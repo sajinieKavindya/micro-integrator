@@ -94,9 +94,7 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
         } catch (Exception e) {
             handleException("Unable to create the consumer", e);
         }
-        if (!isSuspend) {
-            start();
-        }
+        start();
     }
 
     private void handleException(String msg, Exception ex) {

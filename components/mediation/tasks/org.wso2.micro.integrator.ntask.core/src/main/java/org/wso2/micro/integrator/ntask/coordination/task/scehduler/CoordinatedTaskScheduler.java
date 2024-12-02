@@ -25,6 +25,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.inbound.InboundEndpoint;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.task.TaskDescription;
+import org.apache.synapse.task.TaskDescriptionRepository;
 import org.wso2.micro.integrator.coordination.ClusterCoordinator;
 import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
 import org.wso2.micro.integrator.ntask.common.TaskException;
@@ -164,8 +165,7 @@ public class CoordinatedTaskScheduler implements Runnable {
                                  + "in this node or an invalid entry, hence ignoring it.");
             }
         });
-        cleanUpMessageProcessors(pausedTasks);
-        updateInboundEndpointState(pausedTasks);
+        notifyOnPause(pausedTasks);
         taskStore.updateTaskState(pausedTasks, CoordinatedTask.States.PAUSED);
     }
 
@@ -254,41 +254,35 @@ public class CoordinatedTaskScheduler implements Runnable {
         taskStore.updateAssignmentAndState(tasksToBeUpdated);
     }
 
-    private void cleanUpMessageProcessors(List<String> pausedTasks) {
-
+    private void notifyOnPause(List<String> pausedTasks) {
         Set<String> completedProcessors = new HashSet();
+        Set<String> completedInboundEndpoints = new HashSet();
+        SynapseEnvironment synapseEnvironment = MicroIntegratorBaseUtils.getSynapseEnvironment();
+        TaskDescriptionRepository taskRepo = synapseEnvironment.getTaskManager().getTaskDescriptionRepository();
         pausedTasks.forEach(task -> {
             if (MiscellaneousUtil.isTaskOfMessageProcessor(task)) {
                 String messageProcessorName = MiscellaneousUtil.getMessageProcessorName(task);
                 if (!completedProcessors.contains(messageProcessorName)) {
-                    SynapseEnvironment synapseEnvironment = MicroIntegratorBaseUtils.getSynapseEnvironment();
-                    MessageProcessor messageProcessor = synapseEnvironment.getSynapseConfiguration().getMessageProcessors().
-                            get(messageProcessorName);
+                    MessageProcessor messageProcessor = synapseEnvironment.getSynapseConfiguration()
+                            .getMessageProcessors().get(messageProcessorName);
                     if (messageProcessor != null) {
                         messageProcessor.cleanUpDeactivatedProcessors();
                     }
                     completedProcessors.add(messageProcessorName);
                 }
-            }
-        });
-    }
+            } else {
+                TaskDescription taskDescription = taskRepo.getTaskDescription(task);
+                if (taskDescription.getProperty(TaskUtils.TASK_OWNER_PROPERTY) == TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT) {
+                    String inboundEndpointName = (String) taskDescription.getProperty(TaskUtils.TASK_OWNER_NAME);
 
-    private void updateInboundEndpointState(List<String> pausedTasks) {
-        Set<String> completedInboundEndpoints = new HashSet();
-        SynapseEnvironment synapseEnvironment = MicroIntegratorBaseUtils.getSynapseEnvironment();
-        pausedTasks.forEach(task -> {
-            TaskDescription taskDescription =
-                    synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(task);
-            if (taskDescription.getProperty(TaskUtils.TASK_OWNER_PROPERTY) == TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT) {
-                String inboundEndpointName = (String) taskDescription.getProperty(TaskUtils.TASK_OWNER_NAME);
-
-                if (!completedInboundEndpoints.contains(inboundEndpointName)) {
-                    InboundEndpoint inboundEndpoint = synapseEnvironment.getSynapseConfiguration()
-                            .getInboundEndpoint(inboundEndpointName);
-                    if (inboundEndpoint != null) {
-                        inboundEndpoint.pauseRemotely();
+                    if (!completedInboundEndpoints.contains(inboundEndpointName)) {
+                        InboundEndpoint inboundEndpoint = synapseEnvironment.getSynapseConfiguration()
+                                .getInboundEndpoint(inboundEndpointName);
+                        if (inboundEndpoint != null) {
+                            inboundEndpoint.updateInboundEndpointState(true);
+                        }
+                        completedInboundEndpoints.add(inboundEndpointName);
                     }
-                    completedInboundEndpoints.add(inboundEndpointName);
                 }
             }
         });
