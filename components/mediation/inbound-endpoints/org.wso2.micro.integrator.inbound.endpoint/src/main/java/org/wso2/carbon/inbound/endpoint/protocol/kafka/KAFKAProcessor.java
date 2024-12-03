@@ -113,10 +113,15 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
     }
 
     public void update() {
+        /*
+         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
+         * initially. Even though the Inbound Endpoint is explicitly deactivated
+         * initially, we need to have a Task to handle subsequent updates.
+         */
         start();
-        log.info("starting the file inbound endpoint ..................");
+
+        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
         if (this.startInPausedMode) {
-            log.info("stopping the file inbound endpoint ..................");
             deactivate();
         }
     }
@@ -132,15 +137,18 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
     @Override
     public void destroy() {
         try {
-            if (pollingConsumer != null && pollingConsumer.messageListener != null
-                    && pollingConsumer.messageListener.consumerConnector != null) {
-                pollingConsumer.messageListener.consumerConnector.shutdown();
-                log.info("Shutdown the kafka consumer connector");
-            }
+            pollingConsumer.destroy();
+            log.info("Shutdown the kafka consumer connector");
         } catch (Exception e) {
             log.error("Error while shutdown the consumer connector" + e.getMessage(), e);
         }
         super.destroy();
+    }
+
+    @Override
+    public boolean deactivate() {
+        pollingConsumer.destroy();
+        return super.deactivate();
     }
 
     /**

@@ -38,7 +38,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
     private GRPCInjectHandler injectHandler;
     private static final Log log = LogFactory.getLog(InboundGRPCListener.class.getName());
     private Server server;
-    private boolean isSuspend;
+    private boolean startInPausedMode;
 
     public InboundGRPCListener(InboundProcessorParams params) {
         String injectingSeq = params.getInjectingSeq();
@@ -53,14 +53,12 @@ public class InboundGRPCListener implements InboundRequestProcessor {
             port = InboundGRPCConstants.DEFAULT_INBOUND_ENDPOINT_GRPC_PORT;
         }
         injectHandler = new GRPCInjectHandler(injectingSeq, onErrorSeq, false, synapseEnvironment);
-        isSuspend = params.isSuspend();
+        startInPausedMode = params.startInPausedMode();
     }
 
     public void init() {
         try {
-            if (!isSuspend) {
-                this.start();
-            }
+            this.start();
         } catch (IOException e) {
             throw new SynapseException("IOException when starting gRPC server: " + e.getMessage(), e);
         }

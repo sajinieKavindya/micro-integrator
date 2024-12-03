@@ -62,7 +62,7 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
         this.injectingSeq = params.getInjectingSeq();
         this.onErrorSeq = params.getOnErrorSeq();
         this.synapseEnvironment = params.getSynapseEnvironment();
-        this.startInPausedMode = params.isSuspend();
+        this.startInPausedMode = params.startInPausedMode();
     }
 
     /**
@@ -81,9 +81,9 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     /**
      * Register/start the schedule service
      */
-    public boolean start() {
+    public void start() {
         InboundTask task = new FileTask(fileScanner, interval);
-        return start(task, ENDPOINT_POSTFIX);
+        start(task, ENDPOINT_POSTFIX);
     }
 
     public String getName() {
@@ -95,12 +95,29 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     }
 
     public void update() {
+        /*
+         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
+         * initially. Even though the Inbound Endpoint is explicitly deactivated
+         * initially, we need to have a Task to handle subsequent updates.
+         */
         start();
-        log.info("starting the file inbound endpoint ..................");
+
+        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
         if (this.startInPausedMode) {
-            log.info("stopping the file inbound endpoint ..................");
             deactivate();
         }
+    }
+
+    @Override
+    public boolean deactivate() {
+        fileScanner.close();
+        return super.deactivate();
+    }
+
+    @Override
+    public boolean activate() {
+        fileScanner.start();
+        return super.activate();
     }
 
     /**

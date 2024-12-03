@@ -44,7 +44,7 @@ public class InboundHttpListener implements InboundRequestProcessor {
     private String name;
     private int port;
     private InboundProcessorParams processorParams;
-    private boolean isSuspend;
+    private boolean startInPausedMode;
 
     public InboundHttpListener(InboundProcessorParams params) {
         processorParams = params;
@@ -59,7 +59,7 @@ public class InboundHttpListener implements InboundRequestProcessor {
             handleException("Please provide port number as integer  instead of  port  " + portParam, e);
         }
         name = params.getName();
-        isSuspend = params.isSuspend();
+        startInPausedMode = params.startInPausedMode();
     }
 
     @Override
@@ -69,9 +69,8 @@ public class InboundHttpListener implements InboundRequestProcessor {
                              + "hence undeploying inbound endpoint");
             throw new SynapseException("Port " + port + " used by inbound endpoint " + name + " is already used by "
                                                + "another application.");
-        } else if (!isSuspend){
-            HTTPEndpointManager.getInstance().startEndpoint(port, name, processorParams);
         }
+        HTTPEndpointManager.getInstance().startEndpoint(port, name, processorParams);
     }
 
     @Override

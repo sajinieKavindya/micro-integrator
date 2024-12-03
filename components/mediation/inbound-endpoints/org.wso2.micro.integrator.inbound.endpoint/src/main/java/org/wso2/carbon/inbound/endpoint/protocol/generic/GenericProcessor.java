@@ -137,10 +137,15 @@ public class GenericProcessor extends InboundRequestProcessorImpl implements Tas
     }
 
     public void update() {
+        /*
+         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
+         * initially. Even though the Inbound Endpoint is explicitly deactivated
+         * initially, we need to have a Task to handle subsequent updates.
+         */
         start();
-        log.info("starting the file inbound endpoint ..................");
+
+        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
         if (this.startInPausedMode) {
-            log.info("stopping the file inbound endpoint ..................");
             deactivate();
         }
     }

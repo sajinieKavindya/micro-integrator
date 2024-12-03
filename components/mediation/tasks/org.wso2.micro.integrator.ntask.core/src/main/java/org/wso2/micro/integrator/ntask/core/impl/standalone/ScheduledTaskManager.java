@@ -24,14 +24,12 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.inbound.InboundEndpoint;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.task.TaskDescription;
-import org.apache.synapse.task.TaskManagerObserver;
 import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
 import org.wso2.micro.integrator.ntask.common.TaskException;
 import org.wso2.micro.integrator.ntask.coordination.TaskCoordinationException;
 import org.wso2.micro.integrator.ntask.coordination.task.CoordinatedTask;
 import org.wso2.micro.integrator.ntask.coordination.task.store.TaskStore;
 import org.wso2.micro.integrator.ntask.core.TaskInfo;
-import org.wso2.micro.integrator.ntask.core.TaskManager;
 import org.wso2.micro.integrator.ntask.core.TaskRepository;
 import org.wso2.micro.integrator.ntask.core.TaskUtils;
 import org.wso2.micro.integrator.ntask.core.impl.AbstractQuartzTaskManager;
@@ -60,8 +58,6 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
     private List<String> additionFailedTasks = new ArrayList<>();
 
     private List<String> locallyRunningCoordinatedTasks = new ArrayList<>();
-
-    private final List<TaskManagerObserver> observers = new ArrayList<>();
 
     private SynapseEnvironment synapseEnvironment = null;
     private TaskStore taskStore;
@@ -159,10 +155,6 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         return false;
     }
 
-    public TaskDescription getTaskDescription(String taskName) {
-        return synapseEnvironment.getTaskManager().getTaskDescriptionRepository().getTaskDescription(taskName);
-    }
-
     /**
      * Schedules the coordinated tasks.
      *
@@ -192,6 +184,16 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         }
     }
 
+    /**
+     * Notifies the relevant components to resume operations associated with the specified task.
+     *
+     * <p>This method checks whether the given task is associated with a Message Processor or
+     * an Inbound Endpoint and triggers the necessary action to resume the respective component.
+     * If the task belongs to a Message Processor, the associated Message Processor is resumed
+     * remotely. If the task belongs to an Inbound Endpoint, its state is updated to active.
+     *
+     * @param taskName the name of the task to be resumed
+     */
     private void notifyOnResume(String taskName) {
         if (MiscellaneousUtil.isTaskOfMessageProcessor(taskName)) {
             String messageProcessorName = MiscellaneousUtil.getMessageProcessorName(taskName);
@@ -259,9 +261,6 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         }
     }
 
-    private void updateObserversOnStateChange() {
-
-    }
 
     @Override
     public boolean deleteTask(String taskName) throws TaskException {

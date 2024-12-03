@@ -58,12 +58,27 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
         dataStore = InboundEndpointsDataStore.getInstance();
     }
 
+    /**
+     * Checks whether the task is ready to start based on coordination and initialization status of the task manager.
+     * <p>
+     * If coordination is not enabled, the method returns {@code true} indicating that the task is ready to start.
+     * If coordination is enabled, it checks whether the task manager is initialized. If not, it adds this object
+     * as an observer to the task manager and returns {@code false}, indicating that the task is not yet ready
+     * to start. If the task manager is initialized, it returns {@code true}, indicating that the task is ready to start.
+     * </p>
+     *
+     * @return {@code true} if the task is ready to start, {@code false} otherwise
+     */
     protected boolean readyToStart() {
         if (!coordination) {
             return true;
         }
         TaskManager taskManagerImpl = synapseEnvironment.getTaskManager().getTaskManagerImpl();
         if (!taskManagerImpl.isInitialized()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Inbound Endpoint [" + name + "] is not ready to start as the Task Manager implementation"
+                        + " is not initialized. Hence, subscribing to initialization completion event.");
+            }
             taskManagerImpl.addObserver(this);
             return false;
         }
@@ -120,6 +135,15 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
         return true;
     }
 
+    /**
+     * Starts a new thread to execute the given inbound task by creating a new {@link InboundRunner} instance
+     * and running it in a separate thread.
+     *
+     * @param task The inbound task to be executed by the thread.
+     * @param tenantDomain The tenant domain under which the task should be run.
+     * @param mgrOverride A flag indicating whether the manager override is enabled.
+     * @param startInPausedMode A flag indicating whether the task should start in paused mode.
+     */
     private void startInboundRunnerThread(InboundTask task, String tenantDomain, boolean mgrOverride,
                                           boolean startInPausedMode) {
         InboundRunner inboundRunner = new InboundRunner(task, interval, tenantDomain, mgrOverride, startInPausedMode);
@@ -147,6 +171,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
                 Map.Entry entry = (Map.Entry) itr.next();
                 Thread thread = (Thread) entry.getKey();
                 InboundRunner inboundRunner = (InboundRunner) entry.getValue();
+
                 inboundRunner.terminate();
                 thread.interrupt();
                 try {
@@ -160,15 +185,28 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
         }
     }
 
+    /**
+     * Activates the Inbound Endpoint by activating any associated startup controllers
+     * or resuming inbound runner threads if no startup controllers are present.
+     *
+     * <p>This method first checks if there are any startup controllers. If there are, it attempts to activate
+     * each controller and sets the success flag accordingly. If no startup controllers are present, it resumes
+     * any inbound runner threads that may be running. The method returns a boolean indicating whether
+     * the activation was successful.</p>
+     *
+     * @return {@code true} if at least one associated startup controller was successfully activated or inbound runner
+     *         threads were resumed; {@code false} if activation task failed for all the startup controllers or
+     *         if no startup controllers or inbound runner threads present.
+     */
     @Override
     public boolean activate() {
         log.info("Activating the Inbound Endpoint " + name + ".");
 
-        boolean isSuccessfullyActivated = true;
+        boolean isSuccessfullyActivated = false;
         if (!startUpControllersList.isEmpty()) {
             for (StartUpController sc : startUpControllersList) {
-                if (!sc.activateTask()) {
-                    isSuccessfullyActivated = false;
+                if (sc.activateTask()) {
+                    isSuccessfullyActivated = true;
                 }
             }
         } else if (!inboundRunnersThreadsMap.isEmpty()) {
@@ -176,10 +214,23 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
                 InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
                 inboundRunner.resume();
             }
+            isSuccessfullyActivated = true;
         }
         return isSuccessfullyActivated;
     }
 
+    /**
+     * Deactivates the Inbound Endpoint by deactivating any associated startup controllers
+     * or pausing inbound runner threads if no startup controllers are present.
+     *
+     * <p>This method first checks if there are any startup controllers. If there are, it attempts to deactivate
+     * each controller and sets the success flag accordingly. If no startup controllers are present, it pauses
+     * any inbound runner threads that may be running. The method returns a boolean indicating whether
+     * the deactivation was successful.</p>
+     *
+     * @return {@code true} if all associated startup controllers were successfully deactivated or inbound runner threads
+     *         were paused; {@code false} if any deactivation task failed.
+     */
     @Override
     public boolean deactivate() {
         log.info("Deactivating the Inbound Endpoint " + name + ".");
@@ -193,13 +244,21 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             }
         } else if (!inboundRunnersThreadsMap.isEmpty()) {
             for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
-                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
+                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry<?, ?>) threadInboundRunnerEntry).getValue();
                 inboundRunner.pause();
             }
         }
         return isSuccessfullyDeactivated;
     }
 
+    /**
+     * Checks if the Inbound Endpoint is deactivated. This method checks the status of any associated
+     * startup controllers or inbound runner threads. The endpoint is considered deactivated if all
+     * startup controllers are inactive and all inbound runner threads are paused.
+     *
+     * @return {@code true} if all startup controllers are inactive and all inbound runner threads are paused;
+     *         {@code false} if any startup controller is active or any inbound runner thread is not paused.
+     */
     @Override
     public boolean isDeactivated() {
         if (!startUpControllersList.isEmpty()) {
@@ -210,7 +269,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             }
         } else if (!inboundRunnersThreadsMap.isEmpty()) {
             for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
-                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry) threadInboundRunnerEntry).getValue();
+                InboundRunner inboundRunner = (InboundRunner) ((Map.Entry<?, ?>) threadInboundRunnerEntry).getValue();
                 if (!inboundRunner.isPaused()) {
                     return false;
                 }

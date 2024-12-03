@@ -51,8 +51,6 @@ public class TaskUtils {
 
     public static final String TASK_BELONGS_TO_INBOUND_ENDPOINT = "InboundEndpoint";
 
-    public static final String START_IN_PAUSED_MODE = "startInPausedMode";
-
     private static SecretResolver secretResolver;
 
     public static Document convertToDocument(File file) throws TaskException {
