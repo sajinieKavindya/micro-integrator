@@ -31,6 +31,10 @@ public class InboundHttpsSecureWebsocketListener extends InboundHttpWebsocketLis
     @Override
     public void init() {
 
-        HttpWebsocketEndpointManager.getInstance().startSSLEndpoint(port, name, processorParams);
+        if (startInPausedMode) {
+            LOGGER.info("Inbound endpoint [" + name + "] is currently suspended.");
+        } else {
+            HttpWebsocketEndpointManager.getInstance().startSSLEndpoint(port, name, processorParams);
+        }
     }
 }

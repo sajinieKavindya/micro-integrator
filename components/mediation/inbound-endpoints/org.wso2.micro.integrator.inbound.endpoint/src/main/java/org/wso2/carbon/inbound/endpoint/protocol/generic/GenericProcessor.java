@@ -76,9 +76,14 @@ public class GenericProcessor extends InboundRequestProcessorImpl implements Tas
         this.onErrorSeq = params.getOnErrorSeq();
         this.synapseEnvironment = params.getSynapseEnvironment();
         this.classImpl = params.getClassImpl();
+        this.startInPausedMode = params.startInPausedMode();
     }
 
     public void init() {
+        if (startInPausedMode) {
+            log.info("Inbound endpoint [" + name + "] is currently suspended.");
+            return;
+        }
         log.info("Inbound listener " + name + " for class " + classImpl + " starting ...");
         try {
             Class c = Class.forName(classImpl);
@@ -98,9 +103,7 @@ public class GenericProcessor extends InboundRequestProcessorImpl implements Tas
         } catch (Exception e) {
             handleException("Unable to create the consumer", e);
         }
-        if (readyToStart()) {
-            start();
-        }
+        start();
     }
 
     private void handleException(String msg, Exception ex) {
@@ -137,17 +140,7 @@ public class GenericProcessor extends InboundRequestProcessorImpl implements Tas
     }
 
     public void update() {
-        /*
-         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
-         * initially. Even though the Inbound Endpoint is explicitly deactivated
-         * initially, we need to have a Task to handle subsequent updates.
-         */
-        start();
-
-        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
-        if (this.startInPausedMode) {
-            deactivate();
-        }
+        // Not used by GenericProcessor
     }
 
 }

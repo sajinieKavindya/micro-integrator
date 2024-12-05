@@ -66,6 +66,10 @@ public class InboundHttpsListener extends InboundHttpListener {
 
     @Override
     public void init() {
+        if (startInPausedMode) {
+            log.info("Inbound endpoint [" + name + "] is currently suspended.");
+            return;
+        }
         if (isPortUsedByAnotherApplication(port)) {
             log.warn("Port " + port + "used by inbound endpoint " + name + " is already used by another application "
                              + "hence undeploying inbound endpoint");

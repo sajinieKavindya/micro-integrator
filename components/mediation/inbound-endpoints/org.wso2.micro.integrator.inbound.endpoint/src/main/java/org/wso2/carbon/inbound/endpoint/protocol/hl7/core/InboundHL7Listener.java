@@ -32,13 +32,18 @@ public class InboundHL7Listener implements InboundRequestProcessor {
 
     private int port;
     private InboundProcessorParams params;
+    private boolean startInPausedMode;
 
     public InboundHL7Listener(InboundProcessorParams params) {
         this.params = params;
+        startInPausedMode = params.startInPausedMode();
     }
 
     @Override
     public void init() {
+        if (startInPausedMode) {
+            return;
+        }
         if (!InboundHL7IOReactor.isStarted()) {
             log.info("Starting MLLP Transport Reactor");
             try {
@@ -82,6 +87,6 @@ public class InboundHL7Listener implements InboundRequestProcessor {
     @Override
     public boolean isDeactivated() {
 
-        return false;
+        return !InboundHL7IOReactor.isStarted();
     }
 }

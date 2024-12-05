@@ -31,10 +31,12 @@ import org.wso2.carbon.inbound.endpoint.protocol.grpc.util.EventServiceGrpc;
 import org.wso2.carbon.inbound.endpoint.protocol.grpc.util.Event;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class InboundGRPCListener implements InboundRequestProcessor {
     private int port;
+    private String name;
     private GRPCInjectHandler injectHandler;
     private static final Log log = LogFactory.getLog(InboundGRPCListener.class.getName());
     private Server server;
@@ -52,13 +54,18 @@ public class InboundGRPCListener implements InboundRequestProcessor {
                     " property. Setting the port as " + InboundGRPCConstants.DEFAULT_INBOUND_ENDPOINT_GRPC_PORT);
             port = InboundGRPCConstants.DEFAULT_INBOUND_ENDPOINT_GRPC_PORT;
         }
+        name = params.getName();
         injectHandler = new GRPCInjectHandler(injectingSeq, onErrorSeq, false, synapseEnvironment);
         startInPausedMode = params.startInPausedMode();
     }
 
     public void init() {
         try {
-            this.start();
+            if (startInPausedMode) {
+                log.info("Inbound endpoint [" + name + "] is currently suspended.");
+            } else {
+                this.start();
+            }
         } catch (IOException e) {
             throw new SynapseException("IOException when starting gRPC server: " + e.getMessage(), e);
         }
@@ -86,8 +93,10 @@ public class InboundGRPCListener implements InboundRequestProcessor {
 
     @Override
     public boolean isDeactivated() {
-
-        return false;
+        if (Objects.isNull(server)) {
+            return true;
+        }
+        return server.isTerminated();
     }
 
     public void start() throws IOException {

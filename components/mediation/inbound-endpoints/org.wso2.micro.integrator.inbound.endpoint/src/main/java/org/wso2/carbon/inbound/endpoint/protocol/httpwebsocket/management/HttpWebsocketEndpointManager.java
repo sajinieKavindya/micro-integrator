@@ -138,6 +138,14 @@ public class HttpWebsocketEndpointManager extends AbstractInboundEndpointManager
         }
     }
 
+    public boolean isEndpointRunning(String name, int port) {
+        String epName = dataStore.getListeningEndpointName(port, SUPER_TENANT_DOMAIN_NAME);
+        if (epName.equalsIgnoreCase(name)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Checks if the given port is available to use.
      *

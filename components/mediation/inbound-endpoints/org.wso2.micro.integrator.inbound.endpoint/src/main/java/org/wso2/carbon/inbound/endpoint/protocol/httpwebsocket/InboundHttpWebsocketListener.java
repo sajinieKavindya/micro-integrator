@@ -26,7 +26,7 @@ import org.wso2.carbon.inbound.endpoint.protocol.httpwebsocket.management.HttpWe
 
 public class InboundHttpWebsocketListener implements InboundRequestProcessor {
 
-    private static final Log LOGGER = LogFactory.getLog(InboundHttpWebsocketListener.class);
+    protected static final Log LOGGER = LogFactory.getLog(InboundHttpWebsocketListener.class);
 
     protected final String name;
     protected int port;
@@ -50,7 +50,11 @@ public class InboundHttpWebsocketListener implements InboundRequestProcessor {
     @Override
     public void init() {
 
-        HttpWebsocketEndpointManager.getInstance().startEndpoint(port, name, processorParams);
+        if (startInPausedMode) {
+            LOGGER.info("Inbound endpoint [" + name + "] is currently suspended.");
+        } else {
+            HttpWebsocketEndpointManager.getInstance().startEndpoint(port, name, processorParams);
+        }
     }
 
     @Override
@@ -74,7 +78,7 @@ public class InboundHttpWebsocketListener implements InboundRequestProcessor {
     @Override
     public boolean isDeactivated() {
 
-        return false;
+        return !HttpWebsocketEndpointManager.getInstance().isEndpointRunning(name, port);
     }
 
     protected void handleException(String msg, Exception e) {

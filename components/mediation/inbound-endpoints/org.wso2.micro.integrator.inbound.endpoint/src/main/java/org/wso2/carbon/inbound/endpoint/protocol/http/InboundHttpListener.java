@@ -44,7 +44,7 @@ public class InboundHttpListener implements InboundRequestProcessor {
     private String name;
     private int port;
     private InboundProcessorParams processorParams;
-    private boolean startInPausedMode;
+    protected boolean startInPausedMode;
 
     public InboundHttpListener(InboundProcessorParams params) {
         processorParams = params;
@@ -64,13 +64,18 @@ public class InboundHttpListener implements InboundRequestProcessor {
 
     @Override
     public void init() {
+        if (startInPausedMode) {
+            log.info("Inbound endpoint [" + name + "] is currently suspended.");
+            return;
+        }
         if (isPortUsedByAnotherApplication(port)) {
             log.warn("Port " + port + " used by inbound endpoint " + name + " is already used by another application "
                              + "hence undeploying inbound endpoint");
             throw new SynapseException("Port " + port + " used by inbound endpoint " + name + " is already used by "
                                                + "another application.");
+        } else {
+            HTTPEndpointManager.getInstance().startEndpoint(port, name, processorParams);
         }
-        HTTPEndpointManager.getInstance().startEndpoint(port, name, processorParams);
     }
 
     @Override
@@ -93,12 +98,16 @@ public class InboundHttpListener implements InboundRequestProcessor {
     @Override
     public boolean isDeactivated() {
 
-        return false;
+        return !isEndpointRunning(name, port);
     }
 
     protected void handleException(String msg, Exception e) {
         log.error(msg, e);
         throw new SynapseException(msg, e);
+    }
+
+    public boolean isEndpointRunning(String name, int port) {
+        return HTTPEndpointManager.getInstance().isEndpointRunning(name, port);
     }
 
     protected boolean isPortUsedByAnotherApplication(int port) {

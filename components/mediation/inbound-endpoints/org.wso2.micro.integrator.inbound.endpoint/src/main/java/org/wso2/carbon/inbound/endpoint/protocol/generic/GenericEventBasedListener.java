@@ -76,6 +76,10 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
     }
 
     public void init() {
+        if (startInPausedMode) {
+            log.info("Inbound endpoint [" + name + "] is currently suspended.");
+            return;
+        }
         log.info("Inbound event based listener " + name + " for class " + classImpl + " starting ...");
         try {
             Class c = Class.forName(classImpl);
