@@ -30,6 +30,8 @@ import org.wso2.carbon.inbound.endpoint.persistence.InboundEndpointsDataStore;
 import org.wso2.carbon.inbound.endpoint.protocol.rabbitmq.RabbitMQTask;
 import org.wso2.micro.integrator.mediation.ntask.NTaskTaskManager;
 
+import java.util.Objects;
+
 import static org.wso2.carbon.inbound.endpoint.common.Constants.SUPER_TENANT_DOMAIN_NAME;
 
 /**
@@ -44,6 +46,7 @@ public abstract class InboundOneTimeTriggerRequestProcessor implements InboundRe
     protected SynapseEnvironment synapseEnvironment;
     protected String name;
     protected boolean coordination;
+    protected boolean startInPausedMode;
 
     private OneTimeTriggerInboundRunner inboundRunner;
     private Thread runningThread;
@@ -150,6 +153,11 @@ public abstract class InboundOneTimeTriggerRequestProcessor implements InboundRe
     @Override
     public boolean isDeactivated() {
 
-        return false;
+        if (Objects.nonNull(startUpController)) {
+            return !startUpController.isTaskActive();
+        } else if (Objects.nonNull(runningThread)) {
+            return !runningThread.isAlive();
+        }
+        return true;
     }
 }

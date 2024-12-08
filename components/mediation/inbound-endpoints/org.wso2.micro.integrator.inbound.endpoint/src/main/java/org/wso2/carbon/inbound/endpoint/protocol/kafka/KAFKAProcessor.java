@@ -77,12 +77,26 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
         this.injectingSeq = params.getInjectingSeq();
         this.onErrorSeq = params.getOnErrorSeq();
         this.synapseEnvironment = params.getSynapseEnvironment();
+        this.startInPausedMode = params.startInPausedMode();
     }
 
     /**
      * This will be called at the time of synapse artifact deployment.
      */
     public void init() {
+        /*
+         * The activate/deactivate functionality for the Kafka Inbound Endpoint is not currently implemented.
+         *
+         * Therefore, the following check has been added to immediately return if the "suspend"
+         * attribute is set to true in the inbound endpoint configuration.
+         *
+         * Note: This implementation is temporary and should be revisited and improved once
+         * the activate/deactivate capability for Kafka listener is implemented.
+         */
+        if (startInPausedMode) {
+            log.info("Inbound endpoint [" + name + "] is currently suspended.");
+            return;
+        }
         log.info("Initializing inbound KAFKA listener for destination " + name);
         try {
             pollingConsumer = new KAFKAPollingConsumer(kafkaProperties, interval, name);
@@ -99,9 +113,7 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
             log.error("Error initializing message listener " + e.getMessage(), e);
             throw new SynapseException("Error initializing message listener", e);
         }
-        if (readyToStart()) {
-            start();
-        }
+        start();
     }
 
     /**
@@ -113,17 +125,7 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
     }
 
     public void update() {
-        /*
-         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
-         * initially. Even though the Inbound Endpoint is explicitly deactivated
-         * initially, we need to have a Task to handle subsequent updates.
-         */
-        start();
-
-        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
-        if (this.startInPausedMode) {
-            deactivate();
-        }
+        // This is not called for Kafka Inbound Endpoint
     }
 
     public String getName() {
@@ -146,9 +148,15 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
     }
 
     @Override
+    public boolean activate() {
+
+        return false;
+    }
+
+    @Override
     public boolean deactivate() {
-        pollingConsumer.destroy();
-        return super.deactivate();
+
+        return false;
     }
 
     /**

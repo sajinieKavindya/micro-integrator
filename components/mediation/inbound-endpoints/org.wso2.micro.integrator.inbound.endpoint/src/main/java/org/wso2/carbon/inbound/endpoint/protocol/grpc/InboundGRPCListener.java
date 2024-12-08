@@ -61,11 +61,22 @@ public class InboundGRPCListener implements InboundRequestProcessor {
 
     public void init() {
         try {
+            /*
+             * The activate/deactivate functionality for the GRPC protocol is not currently implemented
+             * for Inbound Endpoints.
+             *
+             * Therefore, the following check has been added to immediately return if the "suspend"
+             * attribute is set to true in the inbound endpoint configuration.
+             *
+             * Note: This implementation is temporary and should be revisited and improved once
+             * the activate/deactivate capability for GRPC listener is implemented.
+             */
             if (startInPausedMode) {
                 log.info("Inbound endpoint [" + name + "] is currently suspended.");
-            } else {
-                this.start();
+                return;
             }
+            this.start();
+
         } catch (IOException e) {
             throw new SynapseException("IOException when starting gRPC server: " + e.getMessage(), e);
         }

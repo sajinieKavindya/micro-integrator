@@ -46,6 +46,7 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
 
     public JMSProcessor(InboundProcessorParams params) {
         this.name = params.getName();
+        this.startInPausedMode = params.startInPausedMode();
         this.jmsProperties = params.getProperties();
 
         String inboundEndpointInterval = jmsProperties.getProperty(PollingConstants.INBOUND_ENDPOINT_INTERVAL);
@@ -84,10 +85,21 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
      * This will be called at the time of synapse artifact deployment.
      */
     public void init() {
-        log.info("Initializing inbound JMS listener for inbound endpoint " + name);
-        if (readyToStart()) {
-            start();
+        /*
+         * The activate/deactivate functionality for the JMS protocol is not currently implemented
+         * for Inbound Endpoints.
+         *
+         * Therefore, the following check has been added to immediately return if the "suspend"
+         * attribute is set to true in the inbound endpoint configuration.
+         *
+         * Note: This implementation is temporary and should be revisited and improved once
+         * the activate/deactivate capability for JMS listener is implemented.
+         */
+        if (startInPausedMode) {
+            return;
         }
+        log.info("Initializing inbound JMS listener for inbound endpoint " + name);
+        start();
     }
 
     private void start() {
@@ -140,16 +152,18 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
     }
 
     public void update() {
-        /*
-         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
-         * initially. Even though the Inbound Endpoint is explicitly deactivated
-         * initially, we need to have a Task to handle subsequent updates.
-         */
-        start();
+        // Not used by JMSProcessor
+    }
 
-        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
-        if (this.startInPausedMode) {
-            deactivate();
-        }
+    @Override
+    public boolean activate() {
+
+        return false;
+    }
+
+    @Override
+    public boolean deactivate() {
+
+        return false;
     }
 }

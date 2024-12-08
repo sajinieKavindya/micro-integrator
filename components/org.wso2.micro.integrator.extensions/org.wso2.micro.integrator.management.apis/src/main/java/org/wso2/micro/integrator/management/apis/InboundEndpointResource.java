@@ -122,7 +122,7 @@ public class InboundEndpointResource extends APIResource {
                     JSONObject info = new JSONObject();
                     info.put(INBOUND_ENDPOINT_NAME, inboundName);
                     if (payload.has(STATUS)) {
-                        response = handleStatusUpdate(performedBy, info, msgCtx, payload);
+                        response = handleStatusUpdate(inboundEndpoint, performedBy, info, msgCtx, payload);
                     } else {
                         response = Utils.handleTracing(performedBy, Constants.AUDIT_LOG_TYPE_INBOUND_ENDPOINT_TRACE,
                                 Constants.INBOUND_ENDPOINTS, info,
@@ -256,13 +256,11 @@ public class InboundEndpointResource extends APIResource {
      *         a confirmation message. If unsuccessful, contains an error message with appropriate
      *         HTTP error codes.
      */
-    private JSONObject handleStatusUpdate(String performedBy, JSONObject info, MessageContext messageContext,
-                                          JsonObject payload) {
-        SynapseConfiguration synapseConfiguration = messageContext.getConfiguration();
+    private JSONObject handleStatusUpdate(InboundEndpoint inboundEndpoint, String performedBy, JSONObject info,
+                                          MessageContext messageContext, JsonObject payload) {
         String name = payload.get(NAME).getAsString();
         String status = payload.get(STATUS).getAsString();
 
-        InboundEndpoint inboundEndpoint = synapseConfiguration.getInboundEndpoint(name);
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         JSONObject jsonResponse = new JSONObject();
