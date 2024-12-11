@@ -176,13 +176,13 @@ public class CoordinatedTaskScheduler implements Runnable {
      */
     private void addFailedTasks() throws TaskCoordinationException {
 
-        List<String> failedTasks = taskManager.getAdditionFailedTasks();
+        List<ScheduledTaskManager.TaskEntry> failedTasks = taskManager.getAdditionFailedTasks();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Following list of tasks were found in the failed list.");
             failedTasks.forEach(LOG::debug);
         }
-        for (String task : failedTasks) {
-            taskStore.addTaskIfNotExist(task);
+        for (ScheduledTaskManager.TaskEntry task : failedTasks) {
+            taskStore.addTaskIfNotExist(task.getName(), task.getState());
             taskManager.removeTaskFromAdditionFailedTaskList(task);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Successfully added the failed task [" + task + "]");

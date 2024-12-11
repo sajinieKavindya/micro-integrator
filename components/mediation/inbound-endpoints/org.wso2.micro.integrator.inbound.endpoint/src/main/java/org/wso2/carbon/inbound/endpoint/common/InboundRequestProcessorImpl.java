@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * This class provides the common implementation for polling protocol processors
  */
-public abstract class InboundRequestProcessorImpl implements InboundRequestProcessor, TaskManagerObserver {
+public abstract class InboundRequestProcessorImpl implements InboundRequestProcessor {
 
     protected SynapseEnvironment synapseEnvironment;
     protected long interval;
@@ -59,42 +59,15 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
     }
 
     /**
-     * Checks whether the task is ready to start based on coordination and initialization status of the task manager.
-     * <p>
-     * If coordination is not enabled, the method returns {@code true} indicating that the task is ready to start.
-     * If coordination is enabled, it checks whether the task manager is initialized. If not, it adds this object
-     * as an observer to the task manager and returns {@code false}, indicating that the task is not yet ready
-     * to start. If the task manager is initialized, it returns {@code true}, indicating that the task is ready to start.
-     * </p>
-     *
-     * @return {@code true} if the task is ready to start, {@code false} otherwise
-     */
-    protected boolean readyToStart() {
-        if (!coordination) {
-            return true;
-        }
-        TaskManager taskManagerImpl = synapseEnvironment.getTaskManager().getTaskManagerImpl();
-        if (!taskManagerImpl.isInitialized()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Inbound Endpoint [" + name + "] is not ready to start as the Task Manager implementation"
-                        + " is not initialized. Hence, subscribing to initialization completion event.");
-            }
-            taskManagerImpl.addObserver(this);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Based on the coordination option schedule the task with NTASK or run as a
      * background thread
      *
      * @param task
      * @param endpointPostfix
      */
-    protected boolean start(InboundTask task, String endpointPostfix) {
-        log.info("Starting the inbound endpoint " + name + ", with coordination " + coordination + ". Interval : "
-                + interval + ". Type : " + endpointPostfix);
+    protected void start(InboundTask task, String endpointPostfix) {
+        log.info("Starting the inbound endpoint [" + name + "] " + (startInPausedMode ? "in suspended mode" : "")
+                + ", with coordination " + coordination + ". Interval : " + interval + ". Type : " + endpointPostfix);
         if (coordination) {
             try {
                 TaskDescription taskDescription = new TaskDescription();
@@ -111,6 +84,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
                 taskDescription.setTaskImplClassName(task.getClass().getName());
                 taskDescription.addProperty(TaskUtils.TASK_OWNER_PROPERTY, TaskUtils.TASK_BELONGS_TO_INBOUND_ENDPOINT);
                 taskDescription.addProperty(TaskUtils.TASK_OWNER_NAME, name);
+                taskDescription.addProperty(TaskUtils.START_IN_PAUSED_MODE, String.valueOf(startInPausedMode));
                 StartUpController startUpController = new StartUpController();
                 startUpController.setTaskDescription(taskDescription);
                 startUpController.init(synapseEnvironment);
@@ -126,13 +100,11 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             } catch (Exception e) {
                 log.error("Error starting the inbound endpoint " + name + ". Unable to schedule the task. " + e
                         .getLocalizedMessage(), e);
-                return false;
             }
         } else {
 
             startInboundRunnerThread(task, Constants.SUPER_TENANT_DOMAIN_NAME, false, startInPausedMode);
         }
-        return true;
     }
 
     /**
@@ -200,13 +172,17 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
      */
     @Override
     public boolean activate() {
-        log.info("Activating the Inbound Endpoint " + name + ".");
+        log.info("Activating the Inbound Endpoint [" + name + "].");
 
         boolean isSuccessfullyActivated = false;
         if (!startUpControllersList.isEmpty()) {
             for (StartUpController sc : startUpControllersList) {
                 if (sc.activateTask()) {
                     isSuccessfullyActivated = true;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed to activate the consumer: " + sc.getTaskDescription().getName());
+                    }
                 }
             }
         } else if (!inboundRunnersThreadsMap.isEmpty()) {
@@ -233,12 +209,15 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
      */
     @Override
     public boolean deactivate() {
-        log.info("Deactivating the Inbound Endpoint " + name + ".");
+        log.info("Deactivating the Inbound Endpoint [" + name + "].");
 
         boolean isSuccessfullyDeactivated = true;
         if (!startUpControllersList.isEmpty()) {
             for (StartUpController sc : startUpControllersList) {
                 if (!sc.deactivateTask()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed to deactivate the consumer: " + sc.getTaskDescription().getName());
+                    }
                     isSuccessfullyDeactivated = false;
                 }
             }
@@ -264,7 +243,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
         if (!startUpControllersList.isEmpty()) {
             for (StartUpController sc : startUpControllersList) {
                 if (sc.isTaskActive()) {
-                    // TODO:lets put a log here
+                    // Inbound Endpoint is considered active if at least one consumer is alive.
                     return false;
                 }
             }
@@ -272,6 +251,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
             for (Map.Entry<Thread, InboundRunner> threadInboundRunnerEntry : inboundRunnersThreadsMap.entrySet()) {
                 InboundRunner inboundRunner = (InboundRunner) ((Map.Entry<?, ?>) threadInboundRunnerEntry).getValue();
                 if (!inboundRunner.isPaused()) {
+                    // Inbound Endpoint is considered active if at least one consumer is alive.
                     return false;
                 }
             }

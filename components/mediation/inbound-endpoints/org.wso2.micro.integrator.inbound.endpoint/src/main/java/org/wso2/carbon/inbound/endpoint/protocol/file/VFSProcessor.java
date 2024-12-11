@@ -69,13 +69,12 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
      * This will be called at the time of synapse artifact deployment.
      */
     public void init() {
-        log.info("Initializing Inbound file listener " + name + ".");
+        log.info("Inbound file listener [" + name + "] is initializing"
+                + (this.startInPausedMode ? " but will remain in suspended mode..." : "..."));
         fileScanner = new FilePollingConsumer(vfsProperties, name, synapseEnvironment, interval);
         fileScanner.registerHandler(
                 new FileInjectHandler(injectingSeq, onErrorSeq, sequential, synapseEnvironment, vfsProperties));
-        if (readyToStart()) {
-            start();
-        }
+        start();
     }
 
     /**
@@ -95,17 +94,7 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     }
 
     public void update() {
-        /*
-         * Schedule the task despite if it is ACTIVATED OR DEACTIVATED
-         * initially. Even though the Inbound Endpoint is explicitly deactivated
-         * initially, we need to have a Task to handle subsequent updates.
-         */
-        start();
-
-        // If the Inbound Endpoint should be deactivated on start, then we deactivate the task immediately.
-        if (this.startInPausedMode) {
-            deactivate();
-        }
+        // This will not be called for inbound endpoints
     }
 
     @Override

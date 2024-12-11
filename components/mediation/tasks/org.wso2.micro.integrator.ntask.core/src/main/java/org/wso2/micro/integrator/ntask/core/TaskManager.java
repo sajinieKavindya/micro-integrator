@@ -61,6 +61,8 @@ public interface TaskManager {
      */
     void handleTask(String taskName) throws TaskException;
 
+    void handleTask(String taskName, boolean scheduledInPausedMode) throws TaskException;
+
     /**
      * Get all the coordinated tasks ( the tasks which need db interaction ) deployed in this node.
      *

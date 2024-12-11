@@ -55,7 +55,7 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
     /**
      * The list of tasks for which the addition failed.
      */
-    private List<String> additionFailedTasks = new ArrayList<>();
+    private List<TaskEntry> additionFailedTasks = new ArrayList<>();
 
     private List<String> locallyRunningCoordinatedTasks = new ArrayList<>();
 
@@ -87,27 +87,41 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
      */
     public void handleTask(String taskName) throws TaskException {
 
+        handleTask(taskName, false);
+    }
+
+    public void handleTask(String taskName, boolean scheduledInPausedMode) throws TaskException {
         if (isCoordinatedTask(taskName)) {
             if (log.isDebugEnabled()) {
                 log.debug("Adding task [" + taskName + "] to the data base since this is a coordinated task.");
             }
             deployedCoordinatedTasks.add(taskName);
+            CoordinatedTask.States state;
+            if (scheduledInPausedMode) {
+                state = CoordinatedTask.States.PAUSED;
+            } else {
+                state = CoordinatedTask.States.NONE;
+            }
             try {
-                taskStore.addTaskIfNotExist(taskName);
+                taskStore.addTaskIfNotExist(taskName, state);
             } catch (TaskCoordinationException ex) {
-                additionFailedTasks.add(taskName);
+                additionFailedTasks.add(new TaskEntry(taskName, state));
                 throw new TaskException("Error adding task : " + taskName, TaskException.Code.DATABASE_ERROR, ex);
             }
             return;
         }
-        scheduleTask(taskName);
+        if (scheduledInPausedMode) {
+            scheduleTaskInPausedMode(taskName);
+        } else {
+            scheduleTask(taskName);
+        }
     }
 
-    public List<String> getAdditionFailedTasks() {
+    public List<TaskEntry> getAdditionFailedTasks() {
         return new ArrayList<>(additionFailedTasks);
     }
 
-    public void removeTaskFromAdditionFailedTaskList(String taskName) {
+    public void removeTaskFromAdditionFailedTaskList(TaskEntry taskName) {
         additionFailedTasks.remove(taskName);
     }
 
@@ -166,7 +180,6 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         try {
             if (taskStore.updateTaskState(taskName, CoordinatedTask.States.RUNNING, localNodeId)) {
                 if (!isPreviouslyScheduled(taskName, getTenantTaskGroup())) {
-                    TaskUtils.setTaskPaused(getTaskRepository(), taskName, false);
                     scheduleTask(taskName);
                 } else {
                     resumeLocalTask(taskName);
@@ -254,6 +267,16 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
     private void scheduleTask(String taskName) throws TaskException {
         if (this.isMyTaskTypeRegistered()) {
             this.scheduleLocalTask(taskName);
+        } else {
+            throw new TaskException(
+                    "Task type: '" + this.getTaskType() + "' is not registered in the current task node",
+                    TaskException.Code.TASK_NODE_NOT_AVAILABLE);
+        }
+    }
+
+    private void scheduleTaskInPausedMode(String taskName) throws TaskException {
+        if (this.isMyTaskTypeRegistered()) {
+            this.scheduleLocalTask(taskName, true);
         } else {
             throw new TaskException(
                     "Task type: '" + this.getTaskType() + "' is not registered in the current task node",
@@ -401,6 +424,26 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
     private void resumeTask(String taskName) throws TaskException {
         this.resumeLocalTask(taskName);
         TaskUtils.setTaskPaused(this.getTaskRepository(), taskName, false);
+    }
+
+    public static class TaskEntry {
+        private String name;
+        private CoordinatedTask.States state;
+
+        public TaskEntry(String name, CoordinatedTask.States state) {
+            this.name = name;
+            this.state = state;
+        }
+
+        public String getName() {
+
+            return name;
+        }
+
+        public CoordinatedTask.States getState() {
+
+            return state;
+        }
     }
 
 }
