@@ -24,7 +24,6 @@ import org.apache.synapse.inbound.InboundRequestProcessor;
 import org.apache.synapse.startup.quartz.StartUpController;
 import org.apache.synapse.task.TaskDescription;
 import org.apache.synapse.task.TaskManager;
-import org.apache.synapse.task.TaskManagerObserver;
 import org.wso2.carbon.inbound.endpoint.persistence.InboundEndpointsDataStore;
 import org.wso2.carbon.inbound.endpoint.protocol.jms.JMSTask;
 import org.wso2.micro.integrator.mediation.ntask.NTaskTaskManager;

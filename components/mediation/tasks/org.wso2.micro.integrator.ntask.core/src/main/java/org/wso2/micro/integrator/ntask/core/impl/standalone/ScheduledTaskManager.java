@@ -180,6 +180,7 @@ public class ScheduledTaskManager extends AbstractQuartzTaskManager {
         try {
             if (taskStore.updateTaskState(taskName, CoordinatedTask.States.RUNNING, localNodeId)) {
                 if (!isPreviouslyScheduled(taskName, getTenantTaskGroup())) {
+                    // update the task repo to remove pause
                     scheduleTask(taskName);
                 } else {
                     resumeLocalTask(taskName);
