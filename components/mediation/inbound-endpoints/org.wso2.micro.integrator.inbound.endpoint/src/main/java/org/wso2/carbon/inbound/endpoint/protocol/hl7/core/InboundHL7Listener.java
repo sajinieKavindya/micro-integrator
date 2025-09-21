@@ -84,6 +84,11 @@ public class InboundHL7Listener implements InboundRequestProcessor {
     }
 
     @Override
+    public void stop() {
+        destroy();
+    }
+
+    @Override
     public boolean activate() {
 
         return false;

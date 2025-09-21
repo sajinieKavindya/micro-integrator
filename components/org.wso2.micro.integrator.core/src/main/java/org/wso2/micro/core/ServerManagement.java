@@ -17,10 +17,14 @@ package org.wso2.micro.core;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.inbound.InboundEndpoint;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.micro.integrator.core.internal.CarbonCoreDataHolder;
@@ -28,6 +32,7 @@ import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
 
 import java.lang.management.ManagementPermission;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +86,7 @@ public class ServerManagement {
         log.info("Starting to switch to maintenance mode...");
         stopTransportListeners();
         destroyTransportListeners();
+        suspendInboundEndpoints();
         waitForRequestCompletion();
     }
 
@@ -106,6 +112,24 @@ public class ServerManagement {
         }
         transportListenerShutdownPool.shutdown();
         log.info("Stopped all transport listeners");
+    }
+
+    private void suspendInboundEndpoints() {
+        MicroIntegratorBaseUtils.checkSecurity();
+        log.info("Pausing all Inbound Endpoints...");
+        Parameter synCfgParam =
+                serverConfigContext.getAxisConfiguration().getParameter(SynapseConstants.SYNAPSE_CONFIG);
+        if (synCfgParam == null) {
+            log.error("Error while pausing Inbound Endpoints. Synapse configuration not found.");
+        }
+        SynapseConfiguration synapseConfiguration = (SynapseConfiguration) synCfgParam.getValue();
+        Collection<InboundEndpoint> inboundEndpoints =  synapseConfiguration.getInboundEndpoints();
+        for (InboundEndpoint inboundEndpoint : inboundEndpoints) {
+            System.out.println(inboundEndpoint.getName()); // example usage
+            inboundEndpoint.stop();
+        }
+
+        log.info("Paused all Inbound Endpoints");
     }
 
     /**

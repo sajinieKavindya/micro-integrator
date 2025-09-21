@@ -176,4 +176,12 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
 
         return false;
     }
+
+    @Override
+    public void stop() {
+
+        for (JMSPollingConsumer pollingConsumer : pollingConsumers) {
+            pollingConsumer.stopPolling();
+        }
+    }
 }
