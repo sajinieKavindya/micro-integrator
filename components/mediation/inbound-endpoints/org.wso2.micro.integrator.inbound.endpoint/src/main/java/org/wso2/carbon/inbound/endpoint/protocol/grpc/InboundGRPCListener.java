@@ -47,6 +47,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
     private static final Log log = LogFactory.getLog(InboundGRPCListener.class.getName());
     private Server server;
     private boolean startInPausedMode;
+    PausingInterceptor interceptor;
 
     public InboundGRPCListener(InboundProcessorParams params) {
         String injectingSeq = params.getInjectingSeq();
@@ -97,7 +98,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
 
     @Override
     public void stop() {
-
+        interceptor.pause();
     }
 
     @Override
@@ -124,7 +125,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
         if (server != null) {
             throw new IllegalStateException("gRPC Listener Server already started");
         }
-        PausingInterceptor interceptor = new PausingInterceptor();
+        interceptor = new PausingInterceptor();
         server = ServerBuilder.forPort(port).addService(new EventServiceGrpc.EventServiceImplBase() {
             @Override
             public void process(Event request, StreamObserver<Event> responseObserver) {
