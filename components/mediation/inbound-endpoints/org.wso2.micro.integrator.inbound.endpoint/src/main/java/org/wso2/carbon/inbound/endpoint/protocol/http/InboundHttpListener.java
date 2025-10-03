@@ -85,7 +85,7 @@ public class InboundHttpListener implements InboundRequestProcessor {
     }
 
     @Override
-    public void stop() {
+    public void suspend() {
         destroy();
     }
 

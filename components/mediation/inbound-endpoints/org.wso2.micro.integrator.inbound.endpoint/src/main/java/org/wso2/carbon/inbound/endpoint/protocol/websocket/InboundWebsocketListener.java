@@ -70,7 +70,7 @@ public class InboundWebsocketListener implements InboundRequestProcessor {
     }
 
     @Override
-    public void stop() {
+    public void suspend() {
         destroy();
     }
 

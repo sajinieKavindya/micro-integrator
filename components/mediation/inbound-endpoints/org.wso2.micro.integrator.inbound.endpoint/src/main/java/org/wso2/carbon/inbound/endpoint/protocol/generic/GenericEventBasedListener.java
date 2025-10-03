@@ -178,7 +178,7 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
     }
 
     @Override
-    public void stop() {
+    public void suspend() {
 
         eventConsumer.stop();
     }

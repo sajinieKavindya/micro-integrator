@@ -66,7 +66,7 @@ public class InboundHttpWebsocketListener implements InboundRequestProcessor {
     }
 
     @Override
-    public void stop() {
+    public void suspend() {
         destroy();
     }
 

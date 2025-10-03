@@ -97,7 +97,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
     }
 
     @Override
-    public void stop() {
+    public void suspend() {
         interceptor.pause();
     }
 

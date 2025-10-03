@@ -123,7 +123,7 @@ public class VFSProcessor extends InboundRequestProcessorImpl implements TaskSta
     }
 
     @Override
-    public void stop() {
+    public void suspend() {
 
         fileScanner.close();
     }

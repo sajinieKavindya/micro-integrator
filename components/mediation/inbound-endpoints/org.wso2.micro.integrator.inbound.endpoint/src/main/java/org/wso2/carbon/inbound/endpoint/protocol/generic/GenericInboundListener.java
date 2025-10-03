@@ -143,5 +143,5 @@ public abstract class GenericInboundListener implements InboundRequestProcessor 
     }
 
     @Override
-    public abstract void stop();
+    public abstract void suspend();
 }
