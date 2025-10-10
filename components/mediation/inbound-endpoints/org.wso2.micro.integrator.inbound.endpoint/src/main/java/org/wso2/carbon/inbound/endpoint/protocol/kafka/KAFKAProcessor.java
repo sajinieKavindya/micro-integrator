@@ -152,7 +152,7 @@ public class KAFKAProcessor extends InboundRequestProcessorImpl implements TaskS
 
     @Override
     public void pause() {
-
+        // need to implement
     }
 
     @Override

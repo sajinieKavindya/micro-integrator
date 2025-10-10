@@ -26,11 +26,13 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.Recoverable;
 import com.rabbitmq.client.ShutdownSignalException;
 import org.apache.axis2.transport.rabbitmq.RabbitMQUtils;
+import org.apache.axis2.util.GracefulShutdownTimer;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.inbound.endpoint.protocol.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.wso2.carbon.inbound.endpoint.common.Constants.DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS;
 
 /**
  * The actual tasks that perform message consuming
@@ -58,6 +62,7 @@ public class RabbitMQConsumer implements Consumer {
     private boolean autoAck;
     private String inboundName;
     private String consumerTag;
+    private long unDeploymentWaitTimeout;
 
     private volatile boolean isShuttingDown;
     private final AtomicInteger inFlightMessages = new AtomicInteger(0);
@@ -70,6 +75,8 @@ public class RabbitMQConsumer implements Consumer {
         this.rabbitMQConnectionFactory = rabbitMQConnectionFactory;
         this.injectHandler = injectHandler;
         properties.forEach((key, value) -> rabbitMQProperties.put(key.toString(), value.toString()));
+        this.unDeploymentWaitTimeout = NumberUtils.toLong(rabbitMQProperties.get(
+                RabbitMQConstants.UNDEPLOYMENT_GRACE_TIMEOUT), 0);
     }
 
     /**
@@ -335,6 +342,31 @@ public class RabbitMQConsumer implements Consumer {
      * Return connection back to the pool when undeploying the listener proxy
      */
     public void close() {
+        writeLock.lock();
+        try {
+            if (!isShuttingDown) {
+                isShuttingDown = true;
+            }
+        } finally {
+            writeLock.unlock();
+        }
+
+        GracefulShutdownTimer gracefulShutdownTimer = GracefulShutdownTimer.getInstance();
+        if (gracefulShutdownTimer.isStarted()) {
+            // Wait for in-flight messages to be processed before shutting down the file polling consumer
+            Utils.waitForGracefulTaskCompletion(gracefulShutdownTimer, inFlightMessages, inboundName,
+                    DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS);
+        } else {
+            log.info("Awaiting completion of in-flight messages for RabbitMQ Inbound Endpoint: "
+                    + inboundName + " before shutdown.");
+            long waitUntil = System.currentTimeMillis() + unDeploymentWaitTimeout;
+            while (inFlightMessages.get() > 0 && System.currentTimeMillis() < waitUntil) {
+                try {
+                    Thread.sleep(DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS); // wait until all in-flight messages are done
+                } catch (InterruptedException e) {}
+            }
+        }
+
         if (connection != null) {
             try {
                 connection.abort();
@@ -344,6 +376,13 @@ public class RabbitMQConsumer implements Consumer {
             connection = null;
         }
         channel = null;
+
+        if (inFlightMessages.get() > 0) {
+            log.warn("Rabbitmq Inbound Endpoint: " + inboundName + " stopped with "
+                    + inFlightMessages.get() + " in-flight messages still being processed");
+        } else {
+            log.info("Successfully stopped the Rabbitmq Inbound Endpoint: " + inboundName);
+        }
     }
 
     public void stopDeliver() {

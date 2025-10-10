@@ -80,7 +80,8 @@ public class RabbitMQListener extends InboundOneTimeTriggerRequestProcessor {
         super.destroy(removeTask);
     }
 
-    public void stop() {
+    @Override
+    public void pause() {
         if (Objects.nonNull(rabbitMQConsumer)) {
             rabbitMQConsumer.stopDeliver();
         }

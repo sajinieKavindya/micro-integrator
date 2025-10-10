@@ -180,6 +180,6 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
     @Override
     public void pause() {
 
-        eventConsumer.stop();
+        eventConsumer.pause();
     }
 }

@@ -104,24 +104,13 @@ public class HL7EndpointManager extends AbstractInboundEndpointManager {
 
         dataStore.unregisterListeningEndpoint(port, Constants.SUPER_TENANT_DOMAIN_NAME);
 
-        if (dataStore.isEndpointRegistryEmpty(port)) {
+        if (!InboundHL7IOReactor.isEndpointRunning(port)) {
+            log.info("Listener Endpoint is not started");
+            return;
+        } else if (dataStore.isEndpointRegistryEmpty(port)) {
             // if no other endpoint is working on this port. close the listening endpoint
             InboundHL7IOReactor.unbind(port);
         }
-    }
-
-    /**
-     * Pauses all HL7 inbound endpoints in the server.
-     * <p>
-     * This operation triggers a pause on the shared HL7 IO Reactor.
-     * It should typically be invoked during server shutdown or maintenance
-     * procedures to ensure that no new HL7 connections or messages are accepted
-     * once paused.
-     * </p>
-     */
-    public void pauseAllEndpoints() {
-        log.info("Pausing HL7 IO Reactor.");
-        InboundHL7IOReactor.pause();
     }
 
     public void pauseEndpoint(int port) {

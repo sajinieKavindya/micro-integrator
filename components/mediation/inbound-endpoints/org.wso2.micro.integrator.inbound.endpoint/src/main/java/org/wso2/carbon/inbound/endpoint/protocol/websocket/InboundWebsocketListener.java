@@ -71,7 +71,7 @@ public class InboundWebsocketListener implements InboundRequestProcessor {
 
     @Override
     public void pause() {
-        destroy();
+        // need to implement
     }
 
     @Override

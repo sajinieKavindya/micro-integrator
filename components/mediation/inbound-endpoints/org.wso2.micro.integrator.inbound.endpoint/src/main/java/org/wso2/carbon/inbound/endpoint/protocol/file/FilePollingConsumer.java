@@ -50,6 +50,8 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static org.wso2.carbon.inbound.endpoint.common.Constants.DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS;
+
 /**
  * This class implement the processing logic related to inbound file protocol.
  * Common functinalities (with synapse vfs transport) are include in synapse
@@ -69,7 +71,6 @@ public class FilePollingConsumer {
     private FileInjectHandler injectHandler;
     private Long waitTimeBeforeRead;
     private double fileSizeLimit = VFSConstants.DEFAULT_TRANSPORT_FILE_SIZE_LIMIT;
-    public static final long DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS = 100;
     public static final String UNDEPLOYMENT_GRACE_TIMEOUT = "undeployment.grace.timeout";
 
     private FileObject fileObject;
@@ -1059,12 +1060,14 @@ public class FilePollingConsumer {
             writeLock.unlock();
         }
 
-        log.info("Waiting for file processing to finish for inbound endpoint: " + name + " before shutdown.");
         GracefulShutdownTimer gracefulShutdownTimer = GracefulShutdownTimer.getInstance();
         if (gracefulShutdownTimer.isStarted()) {
             // Wait for in-flight messages to be processed before shutting down the file polling consumer
-            Utils.waitForGracefulTaskCompletion(gracefulShutdownTimer, inFlightMessages, name);
+            Utils.waitForGracefulTaskCompletion(gracefulShutdownTimer, inFlightMessages, name,
+                    DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS);
         } else {
+            log.info("Waiting for file processing to finish for inbound endpoint: " + name
+                    + " before shutdown.");
             long waitUntil = System.currentTimeMillis() + unDeploymentWaitTimeout;
             while (inFlightMessages.get() > 0 && System.currentTimeMillis() < waitUntil) {
                 try {
@@ -1073,9 +1076,14 @@ public class FilePollingConsumer {
             }
         }
 
-
-
         fsManager.close();
+
+        if (inFlightMessages.get() > 0) {
+            log.warn("File Polling Consumer: " + name + " stopped with "
+                    + inFlightMessages.get() + " in-flight messages still being processed");
+        } else {
+            log.info("Successfully stopped the File Polling Consumer: " + name);
+        }
     }
 
     void close() {

@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.wso2.carbon.inbound.endpoint.common.Constants.DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS;
 import static org.wso2.carbon.inbound.endpoint.protocol.grpc.InboundGRPCConstants.UNDEPLOYMENT_GRACE_TIMEOUT;
 
 public class InboundGRPCListener implements InboundRequestProcessor {
@@ -108,13 +109,14 @@ public class InboundGRPCListener implements InboundRequestProcessor {
                 if (gracefulShutdownTimer.isStarted()) {
                     log.info("Waiting for " + inFlightMessages.get() + " in-flight messages to be processed before " +
                             "shutting down gRPC listener for inbound endpoint: " + name);
-                    Utils.waitForGracefulTaskCompletion(gracefulShutdownTimer, inFlightMessages, name);
+                    Utils.waitForGracefulTaskCompletion(gracefulShutdownTimer, inFlightMessages, name,
+                            DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS);
                 }
             } else {
                 long waitUntil = System.currentTimeMillis() + unDeploymentWaitTimeout;
                 while (inFlightMessages.get() > 0 && System.currentTimeMillis() < waitUntil) {
                     try {
-                        Thread.sleep(100); // wait until all in-flight messages are done
+                        Thread.sleep(DEFAULT_GRACEFUL_SHUTDOWN_POLL_INTERVAL_MS); // wait until all in-flight messages are done
                     } catch (InterruptedException e) {}
                 }
             }
@@ -192,7 +194,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
             }
         }).intercept(interceptor).build();
         server.start();
-        log.debug("gRPC Listener Server started");
+        log.info("gRPC Listener Server started on port: " + port);
     }
 
     public void stopServer() throws InterruptedException {
