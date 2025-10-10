@@ -232,7 +232,7 @@ public class MqttListener extends InboundOneTimeTriggerRequestProcessor {
     }
 
     @Override
-    public void suspend() {
+    public void pause() {
 
         try {
             if (mqttAsyncClient != null && mqttAsyncClient.isConnected()) {

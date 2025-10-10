@@ -104,10 +104,7 @@ public class HL7EndpointManager extends AbstractInboundEndpointManager {
 
         dataStore.unregisterListeningEndpoint(port, Constants.SUPER_TENANT_DOMAIN_NAME);
 
-        if (!InboundHL7IOReactor.isEndpointRunning(port)) {
-            log.info("Listener Endpoint is not started");
-            return;
-        } else if (dataStore.isEndpointRegistryEmpty(port)) {
+        if (dataStore.isEndpointRegistryEmpty(port)) {
             // if no other endpoint is working on this port. close the listening endpoint
             InboundHL7IOReactor.unbind(port);
         }
@@ -125,6 +122,10 @@ public class HL7EndpointManager extends AbstractInboundEndpointManager {
     public void pauseAllEndpoints() {
         log.info("Pausing HL7 IO Reactor.");
         InboundHL7IOReactor.pause();
+    }
+
+    public void pauseEndpoint(int port) {
+        InboundHL7IOReactor.pauseEndpoint(port);
     }
 
     private void validateParameters(InboundProcessorParams params, Map<String, Object> parameters) {

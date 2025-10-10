@@ -105,7 +105,7 @@ public abstract class InboundOneTimeTriggerRequestProcessor implements InboundRe
     }
 
     @Override
-    public void suspend() {
+    public void pause() {
 
     }
 

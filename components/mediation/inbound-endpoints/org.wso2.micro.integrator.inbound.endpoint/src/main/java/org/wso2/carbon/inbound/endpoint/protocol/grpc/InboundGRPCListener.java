@@ -26,19 +26,26 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import org.apache.axis2.util.GracefulShutdownTimer;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.inbound.InboundProcessorParams;
 import org.apache.synapse.inbound.InboundRequestProcessor;
+import org.wso2.carbon.inbound.endpoint.protocol.Utils;
 import org.wso2.carbon.inbound.endpoint.protocol.grpc.util.EventServiceGrpc;
 import org.wso2.carbon.inbound.endpoint.protocol.grpc.util.Event;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.wso2.carbon.inbound.endpoint.protocol.grpc.InboundGRPCConstants.UNDEPLOYMENT_GRACE_TIMEOUT;
 
 public class InboundGRPCListener implements InboundRequestProcessor {
     private int port;
@@ -47,7 +54,9 @@ public class InboundGRPCListener implements InboundRequestProcessor {
     private static final Log log = LogFactory.getLog(InboundGRPCListener.class.getName());
     private Server server;
     private boolean startInPausedMode;
-    PausingInterceptor interceptor;
+    private final AtomicInteger inFlightMessages = new AtomicInteger(0);
+    private PausingInterceptor interceptor;
+    private long unDeploymentWaitTimeout = 0;
 
     public InboundGRPCListener(InboundProcessorParams params) {
         String injectingSeq = params.getInjectingSeq();
@@ -64,6 +73,10 @@ public class InboundGRPCListener implements InboundRequestProcessor {
         name = params.getName();
         injectHandler = new GRPCInjectHandler(injectingSeq, onErrorSeq, false, synapseEnvironment);
         startInPausedMode = params.startInPausedMode();
+        Properties grpcProperties = params.getProperties();
+        if (grpcProperties != null) {
+            unDeploymentWaitTimeout = NumberUtils.toLong(grpcProperties.getProperty(UNDEPLOYMENT_GRACE_TIMEOUT), 0);
+        }
     }
 
     public void init() {
@@ -90,14 +103,35 @@ public class InboundGRPCListener implements InboundRequestProcessor {
 
     public void destroy() {
         try {
+            GracefulShutdownTimer gracefulShutdownTimer = GracefulShutdownTimer.getInstance();
+            if (gracefulShutdownTimer.isStarted()) {
+                if (gracefulShutdownTimer.isStarted()) {
+                    log.info("Waiting for " + inFlightMessages.get() + " in-flight messages to be processed before " +
+                            "shutting down gRPC listener for inbound endpoint: " + name);
+                    Utils.waitForGracefulTaskCompletion(gracefulShutdownTimer, inFlightMessages, name);
+                }
+            } else {
+                long waitUntil = System.currentTimeMillis() + unDeploymentWaitTimeout;
+                while (inFlightMessages.get() > 0 && System.currentTimeMillis() < waitUntil) {
+                    try {
+                        Thread.sleep(100); // wait until all in-flight messages are done
+                    } catch (InterruptedException e) {}
+                }
+            }
             this.stopServer();
+            if (inFlightMessages.get() > 0) {
+                log.warn("gRPC Inbound Endpoint: " + name + " stopped with "
+                        + inFlightMessages.get() + " in-flight messages still being processed");
+            } else {
+                log.info("Successfully stopped the gRPC Inbound Endpoint: " + name);
+            }
         } catch (InterruptedException e) {
             throw new SynapseException("Failed to stop gRPC server: " +e.getMessage());
         }
     }
 
     @Override
-    public void suspend() {
+    public void pause() {
         interceptor.pause();
     }
 
@@ -129,20 +163,32 @@ public class InboundGRPCListener implements InboundRequestProcessor {
         server = ServerBuilder.forPort(port).addService(new EventServiceGrpc.EventServiceImplBase() {
             @Override
             public void process(Event request, StreamObserver<Event> responseObserver) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Event received for gRPC Listener process method");
+                inFlightMessages.incrementAndGet();
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Event received for gRPC Listener process method");
+                    }
+                    injectHandler.invokeProcess(request, responseObserver);
+                } finally {
+                    inFlightMessages.decrementAndGet();
                 }
-                injectHandler.invokeProcess(request, responseObserver);
+
             }
 
             @Override
             public void consume(Event request, StreamObserver<Empty> responseObserver) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Event received for gRPC Listener consume method");
+                inFlightMessages.incrementAndGet();
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Event received for gRPC Listener consume method");
+                    }
+                    injectHandler.invokeConsume(request, responseObserver);
+                    responseObserver.onNext(Empty.getDefaultInstance());
+                    responseObserver.onCompleted();
+                } finally {
+                    inFlightMessages.decrementAndGet();
                 }
-                injectHandler.invokeConsume(request, responseObserver);
-                responseObserver.onNext(Empty.getDefaultInstance());
-                responseObserver.onCompleted();
+
             }
         }).intercept(interceptor).build();
         server.start();
@@ -167,7 +213,7 @@ public class InboundGRPCListener implements InboundRequestProcessor {
         throw new RuntimeException("Unable to shutdown gRPC Listener Server");
     }
 
-    public class PausingInterceptor implements ServerInterceptor {
+    public static class PausingInterceptor implements ServerInterceptor {
         private final AtomicBoolean paused = new AtomicBoolean(false);
 
         public void pause() { paused.set(true); }

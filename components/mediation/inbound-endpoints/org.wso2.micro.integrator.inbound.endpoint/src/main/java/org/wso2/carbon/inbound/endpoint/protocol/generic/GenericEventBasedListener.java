@@ -166,7 +166,7 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
 
         if (isTaskDeactivated) {
             try {
-                eventConsumer.pause();
+                eventConsumer.destroy();
             } catch (AbstractMethodError e) {
                 throw new UnsupportedOperationException("Unsupported operation 'pause()' for Inbound Endpoint: " + getName() +
                         "If using a WSO2-released inbound, please upgrade to the latest version. " +
@@ -178,7 +178,7 @@ public class GenericEventBasedListener extends InboundOneTimeTriggerEventBasedPr
     }
 
     @Override
-    public void suspend() {
+    public void pause() {
 
         eventConsumer.stop();
     }

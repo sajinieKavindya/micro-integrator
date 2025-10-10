@@ -25,11 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.inbound.InboundEndpoint;
-import org.apache.synapse.transport.passthru.api.PassThroughInboundEndpointHandler;
-import org.apache.synapse.transport.passthru.core.PassThroughListeningIOReactorManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.wso2.carbon.inbound.endpoint.protocol.hl7.management.HL7EndpointManager;
 import org.wso2.micro.integrator.core.internal.CarbonCoreDataHolder;
 import org.wso2.micro.integrator.core.util.MicroIntegratorBaseUtils;
 
@@ -88,7 +85,7 @@ public class ServerManagement {
         }
         log.info("Starting to switch to maintenance mode...");
         stopTransportListeners();
-        suspendInboundEndpoints();
+        pauseInboundEndpoints();
         destroyTransportListeners();
         waitForRequestCompletion();
     }
@@ -118,33 +115,26 @@ public class ServerManagement {
     }
 
     /**
-     * Suspends all inbound endpoints in the server to stop accepting new requests.
+     * Pauses all inbound endpoints in the server to stop accepting new requests.
      * <p>
-     * This method explicitly suspends HTTP/S and HL7 endpoints that rely on shared I/O reactors.
-     * After pausing the shared I/O reactors, it also suspends all other inbound endpoints defined
-     * in the Synapse configuration. Each endpoint is suspended in a separate task using a thread pool,
-     * and this method waits until all endpoints are fully suspended before returning.
+     * This method pauses all the inbound endpoints defined in the Synapse configuration.
+     * Each endpoint is paused in a separate task using a thread pool,
+     * and this method waits until all endpoints are fully paused before returning.
      * <p>
      * This ensures that no new requests are accepted in inbound endpoints during server shutdown
      * or maintenance activities.
      * <p>
-     * Any errors encountered while suspending individual endpoints are logged but do not halt the suspension
+     * Any errors encountered while pausing individual endpoints are logged but do not halt the suspension
      * process for other endpoints.
      */
-    private void suspendInboundEndpoints() {
+    private void pauseInboundEndpoints() {
         MicroIntegratorBaseUtils.checkSecurity();
-        log.info("Suspending all Inbound Endpoints...");
-
-        // Suspend HTTP/S Inbound endpoints to stop accepting new requests.
-        PassThroughListeningIOReactorManager.getInstance().pauseSharedIOReactor();
-
-        // Suspend HL7 Inbound endpoints to stop accepting new requests.
-        HL7EndpointManager.getInstance().pauseAllEndpoints();
+        log.info("Pausing all Inbound Endpoints...");
 
         Parameter synCfgParam =
                 serverConfigContext.getAxisConfiguration().getParameter(SynapseConstants.SYNAPSE_CONFIG);
         if (synCfgParam == null) {
-            log.error("Unable to suspend Inbound Endpoints. Synapse configuration not found.");
+            log.error("Unable to pause Inbound Endpoints. Synapse configuration not found!");
         } else {
             SynapseConfiguration synapseConfiguration = (SynapseConfiguration) synCfgParam.getValue();
             Collection<InboundEndpoint> inboundEndpoints =  synapseConfiguration.getInboundEndpoints();
@@ -162,13 +152,13 @@ public class ServerManagement {
                 try {
                     future.get();
                 } catch (Exception e) {
-                    log.error("Error occurred while waiting for all inbound endpoints to suspend during shutdown", e);
+                    log.error("An error occurred while pausing an inbound endpoint during graceful shutdown.", e);
                 }
             }
             inboundEndpointShutdownPool.shutdown();
         }
 
-        log.info("Suspended all Inbound Endpoints");
+        log.info("Completed pausing of all inbound endpoints during graceful shutdown.");
     }
 
     /**
@@ -339,7 +329,7 @@ public class ServerManagement {
 
         public Void call() throws Exception {
             try {
-                inboundEndpoint.suspend();
+                inboundEndpoint.pause();
             } catch (Exception e) {
                 log.error("Error while stopping Inbound Endpoint: " + inboundEndpoint.getName(), e);
             }

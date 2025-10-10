@@ -85,8 +85,8 @@ public class InboundHttpListener implements InboundRequestProcessor {
     }
 
     @Override
-    public void suspend() {
-        destroy();
+    public void pause() {
+        HTTPEndpointManager.getInstance().closeEndpoint(port);
     }
 
     @Override

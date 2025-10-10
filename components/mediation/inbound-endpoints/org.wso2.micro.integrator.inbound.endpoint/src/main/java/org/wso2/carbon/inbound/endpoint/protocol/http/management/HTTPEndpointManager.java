@@ -299,6 +299,14 @@ public class HTTPEndpointManager extends AbstractInboundEndpointManager {
 
     }
 
+    public void pauseEndpoint(int port) {
+        if (PassThroughInboundEndpointHandler.isEndpointRunning(port)) {
+            PassThroughInboundEndpointHandler.pauseEndpoint(port);
+        } else {
+            log.info("Listener Endpoint is not started");
+        }
+    }
+
     public InboundHttpConfiguration buildConfiguration(int port, String name, InboundProcessorParams params) {
         return new InboundHttpConfiguration.InboundHttpConfigurationBuilder(port, name).workerPoolCoreSize(
                 params.getProperties().getProperty(InboundHttpConstants.INBOUND_WORKER_POOL_SIZE_CORE))

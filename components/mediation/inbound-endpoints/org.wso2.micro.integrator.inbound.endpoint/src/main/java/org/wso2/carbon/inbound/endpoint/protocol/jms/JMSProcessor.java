@@ -129,7 +129,7 @@ public class JMSProcessor extends InboundRequestProcessorImpl implements TaskSta
     }
 
     @Override
-    public void suspend() {
+    public void pause() {
         for (JMSPollingConsumer pollingConsumer : pollingConsumers) {
             pollingConsumer.stopPolling();
         }

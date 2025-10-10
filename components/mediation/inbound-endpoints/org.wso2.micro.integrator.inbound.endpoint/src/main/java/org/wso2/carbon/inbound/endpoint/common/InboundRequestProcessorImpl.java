@@ -230,7 +230,7 @@ public abstract class InboundRequestProcessorImpl implements InboundRequestProce
     }
 
     @Override
-    public void suspend() {
+    public void pause() {
 
     }
 }
